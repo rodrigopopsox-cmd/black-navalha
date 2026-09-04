@@ -2543,3 +2543,479 @@ Versionar somente esta atualização de CONTEXTO-PROJETO.md.
 Depois executar git status.
 
 Somente depois iniciar outra funcionalidade administrativa, uma etapa por vez.
+
+---
+
+# CHECKPOINT FINAL DA SESSÃO — 2026-09-04
+
+Este é o checkpoint mais recente e deve ter prioridade sobre blocos antigos deste documento caso exista alguma divergência.
+
+## GIT ATUAL
+
+Branch:
+
+main
+
+Último commit funcional criado nesta sessão:
+
+e234442 Cria listagem administrativa de servicos
+
+Commits recentes relevantes:
+
+e234442 Cria listagem administrativa de servicos
+af80cc3 Registra conclusao da listagem de clientes
+3994cc6 Cria listagem administrativa de clientes
+d989be2 Registra conclusao da Agenda administrativa
+8eaed25 Cria pagina da Agenda administrativa de hoje
+f75190f Registra conclusao do dashboard administrativo
+61e026c Implementa dashboard administrativo com dados reais
+
+Após o push de e234442:
+
+main foi enviado com sucesso para origin/main.
+
+CODIGO-COMPLETO.txt continua untracked e NÃO deve ser versionado.
+
+Depois de salvar este checkpoint, criar também um commit documental e fazer push.
+
+---
+
+# ESTADO FUNCIONAL CONSOLIDADO
+
+## Assinaturas + agendamento
+
+CONCLUÍDO anteriormente.
+
+NÃO reconstruir.
+
+A integração existente entre:
+- clientes;
+- assinaturas;
+- serviços PLANO;
+- preço R$ 0,00 para benefício válido;
+- serviços comuns;
+- agendamento;
+
+continua considerada funcional.
+
+Backend/Supabase continua sendo autoridade sobre concessão do benefício.
+
+Nenhuma alteração dessa integração foi feita nesta sessão.
+
+---
+
+# DASHBOARD ADMINISTRATIVO
+
+Rota:
+
+/admin
+
+Status:
+
+CONCLUÍDO.
+
+Commit funcional:
+
+61e026c Implementa dashboard administrativo com dados reais
+
+Implementado:
+
+- dados reais do Supabase;
+- agendamentos de hoje;
+- faturamento de hoje;
+- quantidade de clientes;
+- barbeiros ativos;
+- Agenda de hoje;
+- timezone America/Sao_Paulo;
+- somente appointments.status = scheduled considerado nos indicadores do dia.
+
+Erro TS2352 dos relacionamentos customers/barbers foi resolvido.
+
+Build aprovado.
+
+Teste visual aprovado para o estado existente no dia, quando não havia agendamentos hoje.
+
+---
+
+# AGENDA ADMINISTRATIVA
+
+Rota:
+
+/admin/agenda
+
+Arquivo:
+
+app/admin/agenda/page.tsx
+
+Status:
+
+CONCLUÍDA a primeira versão somente leitura.
+
+Commit funcional:
+
+8eaed25 Cria pagina da Agenda administrativa de hoje
+
+Commit documental:
+
+d989be2 Registra conclusao da Agenda administrativa
+
+Implementado:
+
+- Server Component;
+- agendamentos do dia;
+- timezone America/Sao_Paulo;
+- horário inicial/final;
+- cliente;
+- telefone;
+- barbeiro;
+- serviços;
+- valor;
+- status;
+- estado vazio.
+
+Build aprovado.
+
+Teste visual aprovado para o estado sem agendamentos no dia.
+
+Não foram criados dados artificiais apenas para testar a lista preenchida.
+
+Nenhuma edição/cancelamento foi implementada nessa etapa.
+
+---
+
+# CLIENTES ADMINISTRATIVO
+
+Rota:
+
+/admin/clientes
+
+Arquivo:
+
+app/admin/clientes/page.tsx
+
+Status:
+
+CONCLUÍDA a primeira versão somente leitura.
+
+Commit funcional:
+
+3994cc6 Cria listagem administrativa de clientes
+
+Commit documental:
+
+af80cc3 Registra conclusao da listagem de clientes
+
+Implementado:
+
+- leitura de customers;
+- quantidade total;
+- nome;
+- WhatsApp;
+- formatação visual do telefone;
+- e-mail;
+- observações;
+- data de cadastro;
+- ordenação por nome;
+- layout responsivo em cards;
+- estado vazio.
+
+Schema de public.customers confirmado em consulta somente leitura:
+
+- id uuid NOT NULL
+- name text NOT NULL
+- phone text NOT NULL
+- email text NULL
+- notes text NULL
+- created_at timestamptz NOT NULL
+
+NÃO repetir essa consulta sem nova necessidade.
+
+Durante o teste a primeira tabela ficou larga e cortava campos.
+
+Isso foi corrigido ANTES do commit substituindo a apresentação por cards responsivos.
+
+Build final aprovado.
+
+Teste visual final aprovado com 4 clientes reais.
+
+Não foram implementados:
+- criação administrativa de cliente;
+- edição;
+- exclusão;
+- filtros/busca.
+
+Nenhuma alteração de banco.
+
+---
+
+# SERVIÇOS ADMINISTRATIVO
+
+Rota:
+
+/admin/servicos
+
+Arquivo:
+
+app/admin/servicos/page.tsx
+
+Status:
+
+CONCLUÍDA a primeira versão somente leitura.
+
+Commit funcional:
+
+e234442 Cria listagem administrativa de servicos
+
+Implementado:
+
+- Server Component;
+- leitura de services;
+- ordenação por nome;
+- card com quantidade de serviços cadastrados;
+- card com quantidade de serviços ativos;
+- card com quantidade de serviços de plano;
+- nome;
+- categoria;
+- preço;
+- duração;
+- descrição;
+- status ATIVO/INATIVO;
+- identificação visual PLANO quando subscriber_service = true;
+- layout responsivo em cards;
+- estado vazio.
+
+Schema de public.services confirmado em consulta somente leitura:
+
+- id uuid NOT NULL
+- name text NOT NULL
+- description text NULL
+- category text NOT NULL
+- price numeric NOT NULL
+- duration_minutes integer NOT NULL
+- subscriber_service boolean NOT NULL
+- active boolean NOT NULL
+- created_at timestamptz NOT NULL
+
+NÃO repetir essa consulta sem nova necessidade.
+
+Teste visual realizado com dados reais.
+
+Resultado observado:
+
+- 24 serviços cadastrados;
+- 24 serviços ativos;
+- 4 serviços de plano;
+- cards de resumo visíveis;
+- serviços comuns com preço/duração;
+- serviços subscriber_service identificados com selo PLANO;
+- exemplo observado: Barba Assinante Mensal com PLANO e R$ 0,00;
+- layout visual aprovado.
+
+Executado:
+
+npm run build
+
+Resultado:
+
+APROVADO.
+
+- compilação concluída;
+- TypeScript sem erros;
+- /admin/servicos reconhecida como rota dinâmica.
+
+Nenhuma alteração de banco foi feita.
+
+---
+
+# DOCUMENTAÇÃO NEXT.JS 16 CONSULTADA
+
+AGENTS.md foi respeitado antes da criação das novas rotas.
+
+Foi consultado:
+
+node_modules/next/dist/docs/01-app/01-getting-started/03-layouts-and-pages.md
+
+Foi confirmado o uso de:
+
+app/<segmento>/page.tsx
+
+para criação de rotas aninhadas no App Router.
+
+Não é necessário repetir essa mesma leitura para criar outra rota simples equivalente, salvo nova necessidade relacionada a outra API/convenção do Next.js 16.
+
+---
+
+# SUPABASE / BANCO NESTA SESSÃO
+
+Nenhuma alteração permanente de banco foi realizada.
+
+Foram feitas somente consultas de leitura necessárias para conhecer schemas.
+
+Schema de customers já registrado acima.
+
+Schema de services já registrado acima.
+
+As consultas antigas de:
+- status de appointments;
+- foreign keys de appointments;
+- foreign keys de appointment_services;
+
+já estavam realizadas e NÃO foram repetidas.
+
+Nenhuma RPC foi alterada.
+
+Nenhuma tabela foi alterada.
+
+Nenhuma coluna foi alterada.
+
+Nenhuma policy foi alterada.
+
+Nenhuma constraint foi alterada.
+
+supabase/sql/ continua sem necessidade de criação porque não houve alteração real de banco.
+
+Na próxima alteração REAL de banco, versionar obrigatoriamente o SQL em:
+
+supabase/sql/
+
+---
+
+# ROTAS ADMIN ATUALMENTE CONCLUÍDAS/EXISTENTES
+
+/admin
+Dashboard real — concluído.
+
+/admin/agenda
+Agenda do dia somente leitura — concluída.
+
+/admin/barbeiros
+Funcionalidade existente anteriormente.
+
+/admin/barbeiros/novo
+Existente anteriormente.
+
+/admin/barbeiros/[id]/servicos
+Existente anteriormente.
+
+/admin/barbeiros/[id]/horarios
+Existente anteriormente.
+
+/admin/assinantes
+Existente anteriormente.
+
+/admin/assinantes/novo
+Existente anteriormente.
+
+/admin/assinantes/[id]
+Existente anteriormente.
+
+/admin/clientes
+Listagem somente leitura — concluída nesta sessão.
+
+/admin/servicos
+Listagem somente leitura — concluída nesta sessão.
+
+---
+
+# ITENS DO MENU AINDA NÃO IMPLEMENTADOS/CONFIRMADOS
+
+No menu administrativo existem links para:
+
+/admin/bloqueios
+/admin/configuracoes
+
+Essas rotas ainda não foram trabalhadas nesta sequência.
+
+Antes de implementá-las:
+- testar a URL;
+- se for 404, confirmar que não existe;
+- verificar somente o schema/arquivo específico necessário;
+- não fazer auditoria geral.
+
+---
+
+# TESTES FINAIS DESTA SESSÃO
+
+Build aprovado após Agenda.
+
+Build aprovado após Clientes.
+
+Build aprovado após ajuste responsivo de Clientes.
+
+Build aprovado após Serviços.
+
+Páginas testadas visualmente:
+
+/admin
+/admin/agenda
+/admin/clientes
+/admin/servicos
+
+Nenhuma funcionalidade foi commitada com erro conhecido.
+
+---
+
+# REGRAS PARA O PRÓXIMO CHAT
+
+Usar este CONTEXTO-PROJETO.md como fonte principal.
+
+NÃO reiniciar análise do zero.
+
+NÃO reconstruir assinaturas + agendamento.
+
+NÃO refazer:
+- dashboard;
+- Agenda administrativa;
+- Clientes administrativo;
+- Serviços administrativo.
+
+NÃO repetir consultas de schema de customers/services.
+
+NÃO repetir consultas já registradas de status/FKs.
+
+CODIGO-COMPLETO.txt deve continuar ignorado.
+
+Trabalhar UMA ETAPA POR VEZ.
+
+Antes de nova API/convenção específica do Next.js 16, respeitar AGENTS.md e consultar a documentação local relevante.
+
+Git representa o estado oficial.
+
+---
+
+# PRÓXIMO PASSO EXATO PARA O NOVO CHAT
+
+Primeiro confirmar que este checkpoint documental está no Git e que:
+
+git status
+
+mostra somente:
+
+CODIGO-COMPLETO.txt
+
+como untracked.
+
+Depois iniciar a próxima funcionalidade:
+
+BLOQUEIOS ADMINISTRATIVOS
+
+Primeiro abrir/testar:
+
+http://localhost:3000/admin/bloqueios
+
+Se retornar 404, considerar a rota ainda não criada.
+
+Depois, antes de implementar, verificar somente o schema necessário de:
+
+public.blocked_times
+
+Não alterar banco.
+
+Criar inicialmente uma página de visualização/gestão compatível com o schema real existente.
+
+Trabalhar uma etapa por vez.
+
+Depois:
+implementação → npm run build → teste visual → Git checkpoint → atualizar CONTEXTO-PROJETO.md.
+
+Não avançar automaticamente para Configurações antes de concluir Bloqueios.

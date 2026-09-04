@@ -2277,3 +2277,133 @@ Não incluir CODIGO-COMPLETO.txt.
 Depois do checkpoint documental, verificar que o Git ficou limpo, exceto por CODIGO-COMPLETO.txt como untracked.
 
 Somente depois iniciar uma nova etapa funcional do projeto.
+
+---
+
+# CHECKPOINT — AGENDA ADMINISTRATIVA
+
+Data: 2026-09-04
+
+Status:
+
+CONCLUÍDA a primeira versão da página:
+
+app/admin/agenda/page.tsx
+
+Rota:
+
+/admin/agenda
+
+Objetivo desta versão:
+
+Visualização somente leitura dos agendamentos do dia atual.
+
+Implementado:
+
+- nova rota /admin/agenda;
+- Server Component;
+- integração com Supabase usando createClient();
+- filtro dos agendamentos do dia;
+- timezone America/Sao_Paulo;
+- ordenação por start_at;
+- quantidade de agendamentos do dia;
+- horário inicial e final;
+- cliente;
+- telefone do cliente;
+- profissional;
+- serviços via appointment_services;
+- valor;
+- status;
+- estado vazio quando não existem agendamentos.
+
+Nenhuma funcionalidade de edição ou cancelamento foi adicionada nesta etapa.
+
+Documentação local do Next.js 16 consultada conforme AGENTS.md:
+
+node_modules/next/dist/docs/01-app/01-getting-started/03-layouts-and-pages.md
+
+Foi confirmado que a rota aninhada deve ser criada com:
+
+app/admin/agenda/page.tsx
+
+e utiliza automaticamente o layout de:
+
+app/admin/layout.tsx
+
+## TESTES
+
+Executado:
+
+npm run build
+
+Resultado:
+
+APROVADO.
+
+- Compiled successfully;
+- TypeScript concluído sem erros;
+- rota /admin/agenda reconhecida pelo build como dinâmica.
+
+Teste visual realizado em:
+
+http://localhost:3000/admin/agenda
+
+Resultado observado em 2026-09-04:
+
+- página carregou corretamente;
+- data apresentada: sexta-feira, 04 de setembro de 2026;
+- quantidade: 0 agendamentos;
+- estado vazio apresentado corretamente;
+- layout/sidebar administrativo preservado.
+
+Não havia agendamento na data do teste.
+
+Por isso, a renderização com dados de horário, cliente, profissional, serviços e valor ainda não foi validada visualmente com um registro real.
+
+Não foram criados dados artificiais no banco apenas para esse teste.
+
+## BANCO / SUPABASE
+
+Nenhuma alteração permanente.
+
+Nenhuma tabela, coluna, RPC, policy, constraint ou função foi modificada.
+
+supabase/sql/ continua sem necessidade de criação nesta etapa.
+
+As consultas de schema/status já documentadas anteriormente NÃO foram repetidas.
+
+## GIT
+
+Commit da funcionalidade:
+
+8eaed25 Cria pagina da Agenda administrativa de hoje
+
+Push realizado com sucesso para:
+
+origin/main
+
+CODIGO-COMPLETO.txt continua untracked e não deve ser versionado.
+
+## ESTADO ATUAL
+
+Integração assinaturas + agendamento:
+
+CONCLUÍDA.
+
+Dashboard administrativo:
+
+CONCLUÍDO.
+
+Agenda administrativa — visualização do dia:
+
+CONCLUÍDA.
+
+Nenhuma tarefa funcional está atualmente em implementação.
+
+## PRÓXIMO PASSO EXATO
+
+Versionar somente esta atualização de CONTEXTO-PROJETO.md.
+
+Depois verificar git status.
+
+Somente após o checkpoint documental iniciar a próxima funcionalidade administrativa, uma etapa por vez.

@@ -1203,6 +1203,900 @@ app/admin/page.tsx contém a implementação iniciada e deve ser corrigido a par
 
 ---
 
+# CONCLUÍDO NESTE CHAT — INÍCIO DO DASHBOARD REAL
+
+Foi iniciada uma nova funcionalidade após a conclusão da integração de assinaturas/agendamento.
+
+Objetivo escolhido:
+
+Transformar o dashboard administrativo atualmente estático em um dashboard com dados reais do Supabase, começando pela:
+
+Agenda de hoje
+
+Arquivo principal:
+
+app/admin/page.tsx
+
+Antes da alteração foi inspecionado o conteúdo atual de:
+
+app/admin/page.tsx
+
+Estado encontrado:
+
+- página "Visão Geral" já existe;
+- card "Agendamentos hoje" estava fixo em 0;
+- card "Faturamento hoje" estava fixo em R$ 0,00;
+- card "Clientes" estava fixo em 0;
+- card "Barbeiros ativos" estava fixo em 0;
+- seção "Agenda de hoje" mostrava estado vazio fixo;
+- nenhum dado real do Supabase era carregado nessa página.
+
+Também foi inspecionado:
+
+lib/supabase/server.ts
+
+Confirmado que existe:
+
+createClient()
+
+assíncrono usando:
+
+createServerClient
+cookies()
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+
+Esse client pode ser utilizado em Server Components.
+
+---
+
+# VERIFICAÇÕES SUPABASE REALIZADAS
+
+Foi executada consulta somente de leitura para conhecer os status atualmente utilizados em:
+
+public.appointments
+
+Consulta:
+
+select
+  status,
+  count(*) as quantidade
+from public.appointments
+group by status
+order by status;
+
+Resultado observado:
+
+status:
+scheduled
+
+quantidade:
+7
+
+Neste momento, o único status encontrado nos registros existentes é:
+
+scheduled
+
+Não criar novos status ou regras de status com base somente nisso sem necessidade funcional.
+
+Também foi consultada a existência das foreign keys de:
+
+appointments
+appointment_services
+
+Resultado confirmado:
+
+appointment_services.appointment_id
+→ appointments.id
+
+appointment_services.service_id
+→ services.id
+
+appointment_services.subscription_id
+→ subscriptions.id
+
+appointments.barber_id
+→ barbers.id
+
+appointments.customer_id
+→ customers.id
+
+appointments.service_id
+→ services.id
+
+Essas consultas foram somente leitura.
+
+Nenhuma alteração foi feita no Supabase.
+
+---
+
+# IMPLEMENTAÇÃO INICIADA
+
+Foi preparada uma alteração em:
+
+app/admin/page.tsx
+
+Objetivo dessa alteração:
+
+- transformar AdminPage em async Server Component;
+- utilizar createClient() de lib/supabase/server.ts;
+- carregar os agendamentos do dia;
+- considerar timezone America/Sao_Paulo;
+- filtrar agendamentos com status scheduled;
+- mostrar quantidade real de agendamentos do dia;
+- calcular faturamento do dia usando appointments.price;
+- contar clientes;
+- contar barbeiros ativos;
+- listar a Agenda de hoje;
+- mostrar horário;
+- cliente;
+- profissional;
+- serviços de appointment_services;
+- valor do agendamento.
+
+A alteração foi salva no arquivo, porém AINDA NÃO ESTÁ CONCLUÍDA.
+
+NÃO fazer commit dessa implementação antes de corrigir e testar.
+
+---
+
+# ERRO ATUAL
+
+Após substituir app/admin/page.tsx pela primeira implementação do dashboard real, o VS Code apresentou erro TypeScript TS2352.
+
+O erro ocorre aproximadamente na conversão:
+
+(appointmentsResult.data ?? []) as TodayAppointment[]
+
+O tipo manual atualmente declarou:
+
+customers: {
+  name: string;
+  phone: string | null;
+} | null;
+
+barbers: {
+  name: string;
+} | null;
+
+Porém o tipo inferido pela consulta atual do Supabase está retornando os relacionamentos como arrays:
+
+customers: {
+  name: any;
+  phone: any;
+}[]
+
+barbers: {
+  name: any;
+}[]
+
+Mensagem principal observada:
+
+Conversion of type ... to type 'TodayAppointment[]' may be a mistake...
+
+e:
+
+Types of property 'customers' are incompatible.
+
+O tipo:
+
+{ name: any; phone: any; }[]
+
+não é compatível com:
+
+{ name: string; phone: string | null; } | null
+
+Portanto o problema imediato é de tipagem/formato dos relacionamentos retornados pela query.
+
+NÃO reiniciar a implementação.
+
+NÃO refazer as consultas de status ou foreign keys.
+
+NÃO alterar banco para corrigir esse erro.
+
+Corrigir somente a consulta/tipagem/consumo dos relacionamentos em app/admin/page.tsx.
+
+---
+
+# TESTES REALIZADOS NESTA ETAPA
+
+Ainda NÃO existe teste final bem-sucedido dessa funcionalidade.
+
+O erro TypeScript foi detectado antes da conclusão.
+
+O build ainda precisa ser executado com sucesso após a correção.
+
+Depois do build, o dashboard deverá ser validado visualmente em:
+
+/admin
+
+Verificar:
+- agendamentos de hoje;
+- faturamento de hoje;
+- quantidade de clientes;
+- barbeiros ativos;
+- lista Agenda de hoje;
+- horário;
+- cliente;
+- profissional;
+- serviços;
+- valor.
+
+---
+
+# ARQUIVOS ALTERADOS NESTA ETAPA
+
+Alterado e ainda NÃO concluído:
+
+app/admin/page.tsx
+
+CONTEXTO-PROJETO.md será alterado agora somente para registrar este checkpoint intermediário.
+
+Nenhum outro arquivo de código precisa ser alterado neste momento.
+
+CODIGO-COMPLETO.txt continua untracked e não deve ser incluído.
+
+---
+
+# ALTERAÇÕES SUPABASE/SQL NESTA ETAPA
+
+Nenhuma.
+
+Foram realizadas somente consultas de leitura.
+
+Nenhuma tabela foi alterada.
+
+Nenhuma coluna foi alterada.
+
+Nenhuma RPC foi alterada/criada.
+
+Nenhuma policy foi alterada.
+
+supabase/sql/ continua inexistente.
+
+Não criar supabase/sql/ apenas por causa das consultas de leitura.
+
+---
+
+# COMMITS
+
+Último checkpoint estável enviado anteriormente:
+
+6c8aa76 Corrige proximo passo do contexto
+
+A implementação atual de:
+
+app/admin/page.tsx
+
+NÃO deve ser commitada enquanto estiver com erro.
+
+Se for feito um commit agora, deve incluir SOMENTE a atualização de CONTEXTO-PROJETO.md, preservando app/admin/page.tsx como modificação local não commitada.
+
+---
+
+# ESTADO ATUAL
+
+Integração de assinaturas + agendamento:
+
+CONCLUÍDA.
+NÃO mexer.
+
+Nova funcionalidade:
+
+Dashboard administrativo com dados reais.
+
+Status:
+
+EM IMPLEMENTAÇÃO.
+
+Banco:
+
+Nenhuma alteração permanente nesta etapa.
+
+Problema atual:
+
+Erro TypeScript TS2352 causado pela incompatibilidade entre o tipo manual TodayAppointment e os relacionamentos customers/barbers inferidos como arrays pelo Supabase.
+
+app/admin/page.tsx contém a implementação iniciada e deve ser corrigido a partir do estado atual, não refeito do zero.
+
+---
+
+# CONCLUÍDO NESTE CHAT — INÍCIO DO DASHBOARD REAL
+
+Foi iniciada uma nova funcionalidade após a conclusão da integração de assinaturas/agendamento.
+
+Objetivo escolhido:
+
+Transformar o dashboard administrativo atualmente estático em um dashboard com dados reais do Supabase, começando pela:
+
+Agenda de hoje
+
+Arquivo principal:
+
+app/admin/page.tsx
+
+Antes da alteração foi inspecionado o conteúdo atual de:
+
+app/admin/page.tsx
+
+Estado encontrado:
+
+- página "Visão Geral" já existe;
+- card "Agendamentos hoje" estava fixo em 0;
+- card "Faturamento hoje" estava fixo em R$ 0,00;
+- card "Clientes" estava fixo em 0;
+- card "Barbeiros ativos" estava fixo em 0;
+- seção "Agenda de hoje" mostrava estado vazio fixo;
+- nenhum dado real do Supabase era carregado nessa página.
+
+Também foi inspecionado:
+
+lib/supabase/server.ts
+
+Confirmado que existe:
+
+createClient()
+
+assíncrono usando:
+
+createServerClient
+cookies()
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+
+Esse client pode ser utilizado em Server Components.
+
+---
+
+# VERIFICAÇÕES SUPABASE REALIZADAS
+
+Foi executada consulta somente de leitura para conhecer os status atualmente utilizados em:
+
+public.appointments
+
+Consulta:
+
+select
+  status,
+  count(*) as quantidade
+from public.appointments
+group by status
+order by status;
+
+Resultado observado:
+
+status:
+scheduled
+
+quantidade:
+7
+
+Neste momento, o único status encontrado nos registros existentes é:
+
+scheduled
+
+Não criar novos status ou regras de status com base somente nisso sem necessidade funcional.
+
+Também foi consultada a existência das foreign keys de:
+
+appointments
+appointment_services
+
+Resultado confirmado:
+
+appointment_services.appointment_id
+→ appointments.id
+
+appointment_services.service_id
+→ services.id
+
+appointment_services.subscription_id
+→ subscriptions.id
+
+appointments.barber_id
+→ barbers.id
+
+appointments.customer_id
+→ customers.id
+
+appointments.service_id
+→ services.id
+
+Essas consultas foram somente leitura.
+
+Nenhuma alteração foi feita no Supabase.
+
+---
+
+# IMPLEMENTAÇÃO INICIADA
+
+Foi preparada uma alteração em:
+
+app/admin/page.tsx
+
+Objetivo dessa alteração:
+
+- transformar AdminPage em async Server Component;
+- utilizar createClient() de lib/supabase/server.ts;
+- carregar os agendamentos do dia;
+- considerar timezone America/Sao_Paulo;
+- filtrar agendamentos com status scheduled;
+- mostrar quantidade real de agendamentos do dia;
+- calcular faturamento do dia usando appointments.price;
+- contar clientes;
+- contar barbeiros ativos;
+- listar a Agenda de hoje;
+- mostrar horário;
+- cliente;
+- profissional;
+- serviços de appointment_services;
+- valor do agendamento.
+
+A alteração foi salva no arquivo, porém AINDA NÃO ESTÁ CONCLUÍDA.
+
+NÃO fazer commit dessa implementação antes de corrigir e testar.
+
+---
+
+# ERRO ATUAL
+
+Após substituir app/admin/page.tsx pela primeira implementação do dashboard real, o VS Code apresentou erro TypeScript TS2352.
+
+O erro ocorre aproximadamente na conversão:
+
+(appointmentsResult.data ?? []) as TodayAppointment[]
+
+O tipo manual atualmente declarou:
+
+customers: {
+  name: string;
+  phone: string | null;
+} | null;
+
+barbers: {
+  name: string;
+} | null;
+
+Porém o tipo inferido pela consulta atual do Supabase está retornando os relacionamentos como arrays:
+
+customers: {
+  name: any;
+  phone: any;
+}[]
+
+barbers: {
+  name: any;
+}[]
+
+Mensagem principal observada:
+
+Conversion of type ... to type 'TodayAppointment[]' may be a mistake...
+
+e:
+
+Types of property 'customers' are incompatible.
+
+O tipo:
+
+{ name: any; phone: any; }[]
+
+não é compatível com:
+
+{ name: string; phone: string | null; } | null
+
+Portanto o problema imediato é de tipagem/formato dos relacionamentos retornados pela query.
+
+NÃO reiniciar a implementação.
+
+NÃO refazer as consultas de status ou foreign keys.
+
+NÃO alterar banco para corrigir esse erro.
+
+Corrigir somente a consulta/tipagem/consumo dos relacionamentos em app/admin/page.tsx.
+
+---
+
+# TESTES REALIZADOS NESTA ETAPA
+
+Ainda NÃO existe teste final bem-sucedido dessa funcionalidade.
+
+O erro TypeScript foi detectado antes da conclusão.
+
+O build ainda precisa ser executado com sucesso após a correção.
+
+Depois do build, o dashboard deverá ser validado visualmente em:
+
+/admin
+
+Verificar:
+- agendamentos de hoje;
+- faturamento de hoje;
+- quantidade de clientes;
+- barbeiros ativos;
+- lista Agenda de hoje;
+- horário;
+- cliente;
+- profissional;
+- serviços;
+- valor.
+
+---
+
+# ARQUIVOS ALTERADOS NESTA ETAPA
+
+Alterado e ainda NÃO concluído:
+
+app/admin/page.tsx
+
+CONTEXTO-PROJETO.md será alterado agora somente para registrar este checkpoint intermediário.
+
+Nenhum outro arquivo de código precisa ser alterado neste momento.
+
+CODIGO-COMPLETO.txt continua untracked e não deve ser incluído.
+
+---
+
+# ALTERAÇÕES SUPABASE/SQL NESTA ETAPA
+
+Nenhuma.
+
+Foram realizadas somente consultas de leitura.
+
+Nenhuma tabela foi alterada.
+
+Nenhuma coluna foi alterada.
+
+Nenhuma RPC foi alterada/criada.
+
+Nenhuma policy foi alterada.
+
+supabase/sql/ continua inexistente.
+
+Não criar supabase/sql/ apenas por causa das consultas de leitura.
+
+---
+
+# COMMITS
+
+Último checkpoint estável enviado anteriormente:
+
+6c8aa76 Corrige proximo passo do contexto
+
+A implementação atual de:
+
+app/admin/page.tsx
+
+NÃO deve ser commitada enquanto estiver com erro.
+
+Se for feito um commit agora, deve incluir SOMENTE a atualização de CONTEXTO-PROJETO.md, preservando app/admin/page.tsx como modificação local não commitada.
+
+---
+
+# ESTADO ATUAL
+
+Integração de assinaturas + agendamento:
+
+CONCLUÍDA.
+NÃO mexer.
+
+Nova funcionalidade:
+
+Dashboard administrativo com dados reais.
+
+Status:
+
+EM IMPLEMENTAÇÃO.
+
+Banco:
+
+Nenhuma alteração permanente nesta etapa.
+
+Problema atual:
+
+Erro TypeScript TS2352 causado pela incompatibilidade entre o tipo manual TodayAppointment e os relacionamentos customers/barbers inferidos como arrays pelo Supabase.
+
+app/admin/page.tsx contém a implementação iniciada e deve ser corrigido a partir do estado atual, não refeito do zero.
+
+---
+
+# CONCLUÍDO NESTE CHAT — INÍCIO DO DASHBOARD REAL
+
+Foi iniciada uma nova funcionalidade após a conclusão da integração de assinaturas/agendamento.
+
+Objetivo escolhido:
+
+Transformar o dashboard administrativo atualmente estático em um dashboard com dados reais do Supabase, começando pela:
+
+Agenda de hoje
+
+Arquivo principal:
+
+app/admin/page.tsx
+
+Antes da alteração foi inspecionado o conteúdo atual de:
+
+app/admin/page.tsx
+
+Estado encontrado:
+
+- página "Visão Geral" já existe;
+- card "Agendamentos hoje" estava fixo em 0;
+- card "Faturamento hoje" estava fixo em R$ 0,00;
+- card "Clientes" estava fixo em 0;
+- card "Barbeiros ativos" estava fixo em 0;
+- seção "Agenda de hoje" mostrava estado vazio fixo;
+- nenhum dado real do Supabase era carregado nessa página.
+
+Também foi inspecionado:
+
+lib/supabase/server.ts
+
+Confirmado que existe:
+
+createClient()
+
+assíncrono usando:
+
+createServerClient
+cookies()
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+
+Esse client pode ser utilizado em Server Components.
+
+---
+
+# VERIFICAÇÕES SUPABASE REALIZADAS
+
+Foi executada consulta somente de leitura para conhecer os status atualmente utilizados em:
+
+public.appointments
+
+Consulta:
+
+select
+  status,
+  count(*) as quantidade
+from public.appointments
+group by status
+order by status;
+
+Resultado observado:
+
+status:
+scheduled
+
+quantidade:
+7
+
+Neste momento, o único status encontrado nos registros existentes é:
+
+scheduled
+
+Não criar novos status ou regras de status com base somente nisso sem necessidade funcional.
+
+Também foi consultada a existência das foreign keys de:
+
+appointments
+appointment_services
+
+Resultado confirmado:
+
+appointment_services.appointment_id
+→ appointments.id
+
+appointment_services.service_id
+→ services.id
+
+appointment_services.subscription_id
+→ subscriptions.id
+
+appointments.barber_id
+→ barbers.id
+
+appointments.customer_id
+→ customers.id
+
+appointments.service_id
+→ services.id
+
+Essas consultas foram somente leitura.
+
+Nenhuma alteração foi feita no Supabase.
+
+---
+
+# IMPLEMENTAÇÃO INICIADA
+
+Foi preparada uma alteração em:
+
+app/admin/page.tsx
+
+Objetivo dessa alteração:
+
+- transformar AdminPage em async Server Component;
+- utilizar createClient() de lib/supabase/server.ts;
+- carregar os agendamentos do dia;
+- considerar timezone America/Sao_Paulo;
+- filtrar agendamentos com status scheduled;
+- mostrar quantidade real de agendamentos do dia;
+- calcular faturamento do dia usando appointments.price;
+- contar clientes;
+- contar barbeiros ativos;
+- listar a Agenda de hoje;
+- mostrar horário;
+- cliente;
+- profissional;
+- serviços de appointment_services;
+- valor do agendamento.
+
+A alteração foi salva no arquivo, porém AINDA NÃO ESTÁ CONCLUÍDA.
+
+NÃO fazer commit dessa implementação antes de corrigir e testar.
+
+---
+
+# ERRO ATUAL
+
+Após substituir app/admin/page.tsx pela primeira implementação do dashboard real, o VS Code apresentou erro TypeScript TS2352.
+
+O erro ocorre aproximadamente na conversão:
+
+(appointmentsResult.data ?? []) as TodayAppointment[]
+
+O tipo manual atualmente declarou:
+
+customers: {
+  name: string;
+  phone: string | null;
+} | null;
+
+barbers: {
+  name: string;
+} | null;
+
+Porém o tipo inferido pela consulta atual do Supabase está retornando os relacionamentos como arrays:
+
+customers: {
+  name: any;
+  phone: any;
+}[]
+
+barbers: {
+  name: any;
+}[]
+
+Mensagem principal observada:
+
+Conversion of type ... to type 'TodayAppointment[]' may be a mistake...
+
+e:
+
+Types of property 'customers' are incompatible.
+
+O tipo:
+
+{ name: any; phone: any; }[]
+
+não é compatível com:
+
+{ name: string; phone: string | null; } | null
+
+Portanto o problema imediato é de tipagem/formato dos relacionamentos retornados pela query.
+
+NÃO reiniciar a implementação.
+
+NÃO refazer as consultas de status ou foreign keys.
+
+NÃO alterar banco para corrigir esse erro.
+
+Corrigir somente a consulta/tipagem/consumo dos relacionamentos em app/admin/page.tsx.
+
+---
+
+# TESTES REALIZADOS NESTA ETAPA
+
+Ainda NÃO existe teste final bem-sucedido dessa funcionalidade.
+
+O erro TypeScript foi detectado antes da conclusão.
+
+O build ainda precisa ser executado com sucesso após a correção.
+
+Depois do build, o dashboard deverá ser validado visualmente em:
+
+/admin
+
+Verificar:
+- agendamentos de hoje;
+- faturamento de hoje;
+- quantidade de clientes;
+- barbeiros ativos;
+- lista Agenda de hoje;
+- horário;
+- cliente;
+- profissional;
+- serviços;
+- valor.
+
+---
+
+# ARQUIVOS ALTERADOS NESTA ETAPA
+
+Alterado e ainda NÃO concluído:
+
+app/admin/page.tsx
+
+CONTEXTO-PROJETO.md será alterado agora somente para registrar este checkpoint intermediário.
+
+Nenhum outro arquivo de código precisa ser alterado neste momento.
+
+CODIGO-COMPLETO.txt continua untracked e não deve ser incluído.
+
+---
+
+# ALTERAÇÕES SUPABASE/SQL NESTA ETAPA
+
+Nenhuma.
+
+Foram realizadas somente consultas de leitura.
+
+Nenhuma tabela foi alterada.
+
+Nenhuma coluna foi alterada.
+
+Nenhuma RPC foi alterada/criada.
+
+Nenhuma policy foi alterada.
+
+supabase/sql/ continua inexistente.
+
+Não criar supabase/sql/ apenas por causa das consultas de leitura.
+
+---
+
+# COMMITS
+
+Último checkpoint estável enviado anteriormente:
+
+6c8aa76 Corrige proximo passo do contexto
+
+A implementação atual de:
+
+app/admin/page.tsx
+
+NÃO deve ser commitada enquanto estiver com erro.
+
+Se for feito um commit agora, deve incluir SOMENTE a atualização de CONTEXTO-PROJETO.md, preservando app/admin/page.tsx como modificação local não commitada.
+
+---
+
+# ESTADO ATUAL
+
+Integração de assinaturas + agendamento:
+
+CONCLUÍDA.
+NÃO mexer.
+
+Nova funcionalidade:
+
+Dashboard administrativo com dados reais.
+
+Status:
+
+EM IMPLEMENTAÇÃO.
+
+Banco:
+
+Nenhuma alteração permanente nesta etapa.
+
+Problema atual:
+
+Erro TypeScript TS2352 causado pela incompatibilidade entre o tipo manual TodayAppointment e os relacionamentos customers/barbers inferidos como arrays pelo Supabase.
+
+app/admin/page.tsx contém a implementação iniciada e deve ser corrigido a partir do estado atual, não refeito do zero.
+
+---
+
 # PRÓXIMO PASSO EXATO
 
 Abrir o estado atual de:
@@ -1237,3 +2131,149 @@ Depois da correção:
 4. conferir a Agenda de hoje;
 5. somente depois fazer Git checkpoint da funcionalidade;
 6. atualizar CONTEXTO-PROJETO.md com o resultado final.
+
+---
+
+# ATUALIZAÇÃO FINAL — DASHBOARD ADMINISTRATIVO COM DADOS REAIS
+
+Data: 2026-09-04
+
+Este bloco mais recente substitui os registros anteriores que indicavam que o dashboard estava EM IMPLEMENTAÇÃO ou com erro TS2352.
+
+## FUNCIONALIDADE CONCLUÍDA
+
+Foi concluída a primeira etapa do dashboard administrativo com dados reais do Supabase.
+
+Arquivo alterado:
+
+- app/admin/page.tsx
+
+Implementação concluída:
+
+- AdminPage transformada em async Server Component;
+- utilização de createClient() de lib/supabase/server.ts;
+- carregamento dos agendamentos do dia;
+- intervalo do dia considerando America/Sao_Paulo;
+- filtro dos agendamentos com status scheduled;
+- quantidade real de agendamentos de hoje;
+- faturamento de hoje calculado com appointments.price;
+- contagem real de clientes;
+- contagem real de barbeiros ativos;
+- seção Agenda de hoje;
+- preparação da listagem com horário, cliente, profissional, serviços e valor;
+- estado vazio quando não existem agendamentos no dia.
+
+## CORREÇÃO TYPESCRIPT
+
+O erro TS2352 relacionado aos relacionamentos customers e barbers foi corrigido.
+
+O retorno inferido pelo Supabase para esses relacionamentos é um array.
+
+O tipo TodayAppointment foi ajustado para:
+
+- customers como array;
+- barbers como array.
+
+O consumo no JSX foi ajustado para acessar com segurança o primeiro relacionamento:
+
+- appointment.customers[0]?.name;
+- appointment.barbers[0]?.name.
+
+Nenhuma alteração de banco foi necessária.
+
+## BUILD REALIZADO
+
+Executado:
+
+npm run build
+
+Resultado:
+
+- compilação concluída com sucesso;
+- TypeScript concluído sem erros;
+- geração das páginas concluída;
+- rota /admin reconhecida como dinâmica;
+- nenhum erro de build.
+
+## TESTE VISUAL REALIZADO
+
+Rota testada:
+
+/admin
+
+Endereço local utilizado:
+
+http://localhost:3000/admin
+
+Resultado observado:
+
+- página Visão Geral carregada corretamente;
+- Agendamentos hoje: 0;
+- Faturamento hoje: R$ 0,00;
+- Clientes: 4;
+- Barbeiros ativos: 1;
+- Agenda de hoje exibiu corretamente o estado vazio;
+- mensagem exibida: Nenhum agendamento hoje.
+
+Não havia agendamento no dia durante o teste. Por isso, as linhas com horário, cliente, profissional, serviços e valor não foram exercitadas visualmente, e nenhum dado artificial foi criado no banco apenas para o teste.
+
+## ALTERAÇÕES SUPABASE/SQL
+
+Nenhuma.
+
+- nenhuma tabela alterada;
+- nenhuma coluna alterada;
+- nenhuma RPC alterada ou criada;
+- nenhuma policy alterada;
+- nenhum SQL executado;
+- supabase/sql/ continua inexistente.
+
+As consultas anteriores de status e foreign keys não foram repetidas.
+
+## GIT CHECKPOINT
+
+Commit da funcionalidade:
+
+61e026c Implementa dashboard administrativo com dados reais
+
+Push realizado com sucesso:
+
+main → origin/main
+
+O arquivo CODIGO-COMPLETO.txt continua untracked e não foi incluído no commit.
+
+## ESTADO ATUAL
+
+Dashboard administrativo com dados reais:
+
+CONCLUÍDO E TESTADO.
+
+Erro TypeScript TS2352:
+
+RESOLVIDO.
+
+Build:
+
+APROVADO.
+
+Teste visual de /admin:
+
+APROVADO para o estado atual sem agendamentos no dia.
+
+Integração de assinaturas + agendamento:
+
+CONTINUA CONCLUÍDA E NÃO FOI ALTERADA.
+
+Banco de dados:
+
+NENHUMA ALTERAÇÃO PERMANENTE.
+
+## PRÓXIMO PASSO EXATO
+
+Versionar somente esta atualização de CONTEXTO-PROJETO.md.
+
+Não incluir CODIGO-COMPLETO.txt.
+
+Depois do checkpoint documental, verificar que o Git ficou limpo, exceto por CODIGO-COMPLETO.txt como untracked.
+
+Somente depois iniciar uma nova etapa funcional do projeto.

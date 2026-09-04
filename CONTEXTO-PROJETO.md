@@ -2407,3 +2407,139 @@ Versionar somente esta atualização de CONTEXTO-PROJETO.md.
 Depois verificar git status.
 
 Somente após o checkpoint documental iniciar a próxima funcionalidade administrativa, uma etapa por vez.
+
+---
+
+# CHECKPOINT — CLIENTES ADMINISTRATIVO
+
+Data: 2026-09-04
+
+Status:
+
+CONCLUÍDA a primeira versão da página administrativa de clientes.
+
+Arquivo:
+
+app/admin/clientes/page.tsx
+
+Rota:
+
+/admin/clientes
+
+Implementado:
+
+- Server Component;
+- leitura de clientes reais do Supabase;
+- ordenação por nome;
+- quantidade total exibida;
+- nome;
+- WhatsApp com formatação visual;
+- e-mail;
+- observações;
+- data de cadastro;
+- layout responsivo em cards;
+- estado vazio quando não existirem clientes.
+
+Esta etapa é somente leitura.
+
+Não foram implementados:
+- cadastro administrativo de cliente;
+- edição;
+- exclusão;
+- busca/filtros.
+
+Schema de public.customers confirmado por consulta somente leitura:
+
+- id uuid NOT NULL
+- name text NOT NULL
+- phone text NOT NULL
+- email text NULL
+- notes text NULL
+- created_at timestamptz NOT NULL
+
+Não repetir essa consulta sem nova necessidade.
+
+## TESTES
+
+Executado:
+
+npm run build
+
+Resultado:
+
+APROVADO.
+
+- compilação concluída;
+- TypeScript sem erros;
+- /admin/clientes reconhecida como rota dinâmica.
+
+Teste visual realizado em:
+
+http://localhost:3000/admin/clientes
+
+Resultado:
+
+APROVADO.
+
+Foram exibidos 4 clientes reais.
+
+Foi identificada inicialmente largura excessiva da tabela. Antes do checkpoint, a página foi ajustada para cards responsivos.
+
+Após o ajuste:
+- nenhum campo ficou cortado;
+- nomes exibidos;
+- WhatsApp formatado;
+- e-mail exibido;
+- cadastro exibido;
+- observações exibidas;
+- quatro clientes visíveis.
+
+Novo npm run build após o ajuste:
+
+APROVADO.
+
+## BANCO / SUPABASE
+
+Nenhuma alteração permanente.
+
+Foi executada somente consulta de leitura ao schema de customers.
+
+Nenhuma tabela, coluna, RPC, policy, função ou constraint foi modificada.
+
+supabase/sql/ não precisou ser criado.
+
+## GIT
+
+Commit da funcionalidade:
+
+3994cc6 Cria listagem administrativa de clientes
+
+Push realizado com sucesso para origin/main.
+
+CODIGO-COMPLETO.txt continua untracked e não deve ser versionado.
+
+## ESTADO ATUAL
+
+Integração assinaturas + agendamento:
+
+CONCLUÍDA.
+
+Dashboard administrativo:
+
+CONCLUÍDO.
+
+Agenda administrativa do dia:
+
+CONCLUÍDA.
+
+Listagem administrativa de clientes:
+
+CONCLUÍDA.
+
+## PRÓXIMO PASSO EXATO
+
+Versionar somente esta atualização de CONTEXTO-PROJETO.md.
+
+Depois executar git status.
+
+Somente depois iniciar outra funcionalidade administrativa, uma etapa por vez.

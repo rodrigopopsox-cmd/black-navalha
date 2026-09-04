@@ -907,13 +907,13 @@ supabase/sql/ ainda não existe.
 
 # PRÓXIMO PASSO EXATO
 
-Primeiro salvar esta versão atualizada de:
+A atualização de CONTEXTO-PROJETO.md foi salva, versionada e enviada ao GitHub no checkpoint:
 
-CONTEXTO-PROJETO.md
+f4f192c Atualiza contexto tecnico do projeto
 
-Depois, no próximo passo do projeto, NÃO voltar à implementação de preço/assinatura já concluída.
+Não existe tarefa técnica obrigatória pendente neste momento.
 
-Como nenhuma nova funcionalidade de negócio foi especificada ainda após a sincronização da memória, aguardar o responsável indicar qual funcionalidade deseja desenvolver em seguida.
+Aguardar o responsável indicar a próxima funcionalidade de negócio a ser desenvolvida.
 
 Quando a próxima funcionalidade for informada:
 

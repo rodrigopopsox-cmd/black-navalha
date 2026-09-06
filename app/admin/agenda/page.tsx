@@ -1,5 +1,8 @@
+﻿import Link from "next/link";
 import {
   CalendarDays,
+  ChevronLeft,
+  ChevronRight,
   Clock3,
   DollarSign,
   Scissors,
@@ -27,10 +30,29 @@ type Appointment = {
   }[];
 };
 
-export default async function AgendaPage() {
-  const supabase = await createClient();
+type AgendaPageProps = {
+  searchParams: Promise<{
+    data?: string | string[];
+  }>;
+};
 
-  const { start, end } = getTodayRange();
+const TIME_ZONE = "America/Sao_Paulo";
+
+export default async function AgendaPage({
+  searchParams,
+}: AgendaPageProps) {
+  const params = await searchParams;
+  const requestedDate = Array.isArray(params.data)
+    ? params.data[0]
+    : params.data;
+
+  const selectedDate = isValidDateParam(requestedDate)
+    ? requestedDate
+    : getTodayDateParam();
+
+  const { start, end } = getDateRange(selectedDate);
+
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("appointments")
@@ -58,29 +80,25 @@ export default async function AgendaPage() {
     });
 
   if (error) {
-    console.error(
-      "Erro ao carregar agenda:",
-      error
-    );
+    console.error("Erro ao carregar agenda:", error);
   }
 
-  const appointments =
-    (data ?? []) as Appointment[];
+  const appointments = (data ?? []) as Appointment[];
+  const today = getTodayDateParam();
+  const isToday = selectedDate === today;
+  const previousDate = shiftDate(selectedDate, -1);
+  const nextDate = shiftDate(selectedDate, 1);
 
   return (
     <main className="admin-page">
       <div className="admin-header">
         <div>
-          <div className="admin-eyebrow">
-            BLACK NAVALHA
-          </div>
+          <div className="admin-eyebrow">BLACK NAVALHA</div>
 
-          <h1 className="admin-title">
-            Agenda
-          </h1>
+          <h1 className="admin-title">Agenda</h1>
 
           <p className="admin-subtitle">
-            Acompanhe os atendimentos de hoje.
+            Acompanhe os atendimentos por dia.
           </p>
         </div>
       </div>
@@ -90,6 +108,7 @@ export default async function AgendaPage() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          flexWrap: "wrap",
           gap: "16px",
           marginBottom: "18px",
           padding: "18px 20px",
@@ -105,14 +124,9 @@ export default async function AgendaPage() {
             gap: "10px",
           }}
         >
-          <CalendarDays
-            size={20}
-            color="#d29d4f"
-          />
+          <CalendarDays size={20} color="#d29d4f" />
 
-          <strong>
-            {formatToday()}
-          </strong>
+          <strong>{formatSelectedDate(selectedDate)}</strong>
         </div>
 
         <span
@@ -128,6 +142,43 @@ export default async function AgendaPage() {
         </span>
       </div>
 
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: "8px",
+          marginBottom: "18px",
+        }}
+      >
+        <Link
+          href={`/admin/agenda?data=${previousDate}`}
+          style={navigationButtonStyle}
+        >
+          <ChevronLeft size={16} />
+          Dia anterior
+        </Link>
+
+        <Link
+          href={`/admin/agenda?data=${today}`}
+          style={{
+            ...navigationButtonStyle,
+            borderColor: isToday ? "#d29d4f" : "#333",
+            color: isToday ? "#d29d4f" : "#ddd",
+          }}
+        >
+          Hoje
+        </Link>
+
+        <Link
+          href={`/admin/agenda?data=${nextDate}`}
+          style={navigationButtonStyle}
+        >
+          Próximo dia
+          <ChevronRight size={16} />
+        </Link>
+      </div>
+
       {appointments.length === 0 ? (
         <div
           className="admin-empty"
@@ -141,12 +192,13 @@ export default async function AgendaPage() {
           <CalendarDays size={32} />
 
           <strong>
-            Nenhum agendamento hoje
+            {isToday
+              ? "Nenhum agendamento hoje"
+              : "Nenhum agendamento nesta data"}
           </strong>
 
           <span>
-            Os atendimentos do dia aparecerão
-            aqui.
+            Os atendimentos da data selecionada aparecerão aqui.
           </span>
         </div>
       ) : (
@@ -156,184 +208,145 @@ export default async function AgendaPage() {
             gap: "12px",
           }}
         >
-          {appointments.map(
-            (appointment) => {
-              const customer =
-                appointment.customers[0];
-              const barber =
-                appointment.barbers[0];
+          {appointments.map((appointment) => {
+            const customer = appointment.customers[0];
+            const barber = appointment.barbers[0];
 
-              return (
-                <div
-                  key={appointment.id}
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns:
-                      "120px minmax(170px, 1fr) minmax(170px, 1fr) minmax(200px, 1.5fr) 120px",
-                    alignItems: "center",
-                    gap: "20px",
-                    padding: "20px",
-                    background: "#0e0e0e",
-                    border: "1px solid #222",
-                    borderRadius: "8px",
-                  }}
-                >
-                  <div>
-                    <small
-                      style={labelStyle}
-                    >
-                      HORÁRIO
-                    </small>
+            return (
+              <div
+                key={appointment.id}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns:
+                    "120px minmax(170px, 1fr) minmax(170px, 1fr) minmax(200px, 1.5fr) 120px",
+                  alignItems: "center",
+                  gap: "20px",
+                  padding: "20px",
+                  background: "#0e0e0e",
+                  border: "1px solid #222",
+                  borderRadius: "8px",
+                }}
+              >
+                <div>
+                  <small style={labelStyle}>HORÁRIO</small>
 
-                    <strong
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "7px",
-                        color: "#d29d4f",
-                      }}
-                    >
-                      <Clock3 size={15} />
-
-                      {formatTime(
-                        appointment.start_at
-                      )}
-                      {" - "}
-                      {formatTime(
-                        appointment.end_at
-                      )}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <small
-                      style={labelStyle}
-                    >
-                      CLIENTE
-                    </small>
-
-                    <strong
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "7px",
-                      }}
-                    >
-                      <Users size={15} />
-                      {customer?.name ??
-                        "Cliente"}
-                    </strong>
-
-                    {customer?.phone && (
-                      <div
-                        style={{
-                          color: "#777",
-                          fontSize: "12px",
-                          marginTop: "4px",
-                        }}
-                      >
-                        {customer.phone}
-                      </div>
-                    )}
-                  </div>
-
-                  <div>
-                    <small
-                      style={labelStyle}
-                    >
-                      PROFISSIONAL
-                    </small>
-
-                    <strong
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "7px",
-                      }}
-                    >
-                      <UserRound size={15} />
-                      {barber?.name ?? "-"}
-                    </strong>
-                  </div>
-
-                  <div>
-                    <small
-                      style={labelStyle}
-                    >
-                      SERVIÇOS
-                    </small>
-
-                    <strong
-                      style={{
-                        display: "flex",
-                        alignItems: "flex-start",
-                        gap: "7px",
-                      }}
-                    >
-                      <Scissors
-                        size={15}
-                        style={{
-                          flexShrink: 0,
-                          marginTop: "2px",
-                        }}
-                      />
-
-                      {appointment
-                        .appointment_services
-                        .map(
-                          (service) =>
-                            service.service_name
-                        )
-                        .join(", ") || "-"}
-                    </strong>
-                  </div>
-
-                  <div
+                  <strong
                     style={{
-                      textAlign: "right",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "7px",
+                      color: "#d29d4f",
                     }}
                   >
-                    <small
-                      style={labelStyle}
-                    >
-                      VALOR
-                    </small>
+                    <Clock3 size={15} />
 
-                    <strong
-                      style={{
-                        display: "flex",
-                        justifyContent:
-                          "flex-end",
-                        alignItems: "center",
-                        gap: "5px",
-                        color: "#d29d4f",
-                      }}
-                    >
-                      <DollarSign
-                        size={14}
-                      />
+                    {formatTime(appointment.start_at)}
+                    {" - "}
+                    {formatTime(appointment.end_at)}
+                  </strong>
+                </div>
 
-                      {formatPrice(
-                        appointment.price
-                      )}
-                    </strong>
+                <div>
+                  <small style={labelStyle}>CLIENTE</small>
 
+                  <strong
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "7px",
+                    }}
+                  >
+                    <Users size={15} />
+                    {customer?.name ?? "Cliente"}
+                  </strong>
+
+                  {customer?.phone && (
                     <div
                       style={{
                         color: "#777",
-                        fontSize: "11px",
-                        marginTop: "5px",
-                        textTransform:
-                          "uppercase",
+                        fontSize: "12px",
+                        marginTop: "4px",
                       }}
                     >
-                      {appointment.status}
+                      {customer.phone}
                     </div>
+                  )}
+                </div>
+
+                <div>
+                  <small style={labelStyle}>PROFISSIONAL</small>
+
+                  <strong
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "7px",
+                    }}
+                  >
+                    <UserRound size={15} />
+                    {barber?.name ?? "-"}
+                  </strong>
+                </div>
+
+                <div>
+                  <small style={labelStyle}>SERVIÇOS</small>
+
+                  <strong
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: "7px",
+                    }}
+                  >
+                    <Scissors
+                      size={15}
+                      style={{
+                        flexShrink: 0,
+                        marginTop: "2px",
+                      }}
+                    />
+
+                    {appointment.appointment_services
+                      .map((service) => service.service_name)
+                      .join(", ") || "-"}
+                  </strong>
+                </div>
+
+                <div
+                  style={{
+                    textAlign: "right",
+                  }}
+                >
+                  <small style={labelStyle}>VALOR</small>
+
+                  <strong
+                    style={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      alignItems: "center",
+                      gap: "5px",
+                      color: "#d29d4f",
+                    }}
+                  >
+                    <DollarSign size={14} />
+
+                    {formatPrice(appointment.price)}
+                  </strong>
+
+                  <div
+                    style={{
+                      color: "#777",
+                      fontSize: "11px",
+                      marginTop: "5px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {appointment.status}
                   </div>
                 </div>
-              );
-            }
-          )}
+              </div>
+            );
+          })}
         </div>
       )}
     </main>
@@ -347,80 +360,100 @@ const labelStyle = {
   fontSize: "10px",
 } as const;
 
-function getTodayRange() {
-  const now = new Date();
+const navigationButtonStyle = {
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "7px",
+  minHeight: "38px",
+  padding: "0 13px",
+  color: "#ddd",
+  background: "#0e0e0e",
+  border: "1px solid #333",
+  borderRadius: "6px",
+  fontSize: "12px",
+  fontWeight: 700,
+  textDecoration: "none",
+} as const;
 
-  const formatter =
-    new Intl.DateTimeFormat(
-      "en-CA",
-      {
-        timeZone:
-          "America/Sao_Paulo",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      }
-    );
+function getTodayDateParam() {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
 
-  const [year, month, day] = formatter
-    .format(now)
-    .split("-")
-    .map(Number);
+function isValidDateParam(
+  value: string | undefined
+): value is string {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return false;
+  }
+
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+
+  return (
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month - 1 &&
+    date.getUTCDate() === day
+  );
+}
+
+function getDateRange(dateParam: string) {
+  const [year, month, day] = dateParam.split("-").map(Number);
 
   const start = new Date(
-    Date.UTC(
-      year,
-      month - 1,
-      day,
-      3,
-      0,
-      0
-    )
+    Date.UTC(year, month - 1, day, 3, 0, 0)
   );
 
-  const end = new Date(
-    start.getTime() +
-      24 * 60 * 60 * 1000
-  );
+  const end = new Date(start.getTime() + 24 * 60 * 60 * 1000);
 
   return { start, end };
 }
 
-function formatToday() {
-  return new Intl.DateTimeFormat(
-    "pt-BR",
-    {
-      timeZone:
-        "America/Sao_Paulo",
-      weekday: "long",
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    }
-  ).format(new Date());
+function shiftDate(dateParam: string, amount: number) {
+  const [year, month, day] = dateParam.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+
+  date.setUTCDate(date.getUTCDate() + amount);
+
+  const shiftedYear = date.getUTCFullYear();
+  const shiftedMonth = String(date.getUTCMonth() + 1).padStart(
+    2,
+    "0"
+  );
+  const shiftedDay = String(date.getUTCDate()).padStart(2, "0");
+
+  return `${shiftedYear}-${shiftedMonth}-${shiftedDay}`;
+}
+
+function formatSelectedDate(dateParam: string) {
+  const [year, month, day] = dateParam.split("-").map(Number);
+
+  return new Intl.DateTimeFormat("pt-BR", {
+    timeZone: TIME_ZONE,
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(Date.UTC(year, month - 1, day, 12)));
 }
 
 function formatTime(value: string) {
-  return new Intl.DateTimeFormat(
-    "pt-BR",
-    {
-      timeZone:
-        "America/Sao_Paulo",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    }
-  ).format(new Date(value));
+  return new Intl.DateTimeFormat("pt-BR", {
+    timeZone: TIME_ZONE,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(new Date(value));
 }
 
-function formatPrice(
-  value: number | string
-) {
-  return Number(value).toLocaleString(
-    "pt-BR",
-    {
-      style: "currency",
-      currency: "BRL",
-    }
-  );
+function formatPrice(value: number | string) {
+  return Number(value).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
 }

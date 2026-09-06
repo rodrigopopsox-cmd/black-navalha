@@ -1,7 +1,10 @@
-﻿import {
+﻿import Link from "next/link";
+
+import {
   CalendarDays,
   FileText,
   Mail,
+  Pencil,
   Phone,
   Search,
   Users,
@@ -286,34 +289,66 @@ export default async function ClientesPage({
                 style={{
                   display: "flex",
                   alignItems: "flex-start",
-                  gap: "10px",
+                  justifyContent: "space-between",
+                  gap: "12px",
                   marginBottom: "18px",
                 }}
               >
-                <Users
-                  size={18}
-                  color="#d29d4f"
+                <div
                   style={{
-                    flexShrink: 0,
-                    marginTop: "2px",
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: "10px",
+                    minWidth: 0,
                   }}
-                />
-
-                <div>
-                  <small style={labelStyle}>
-                    CLIENTE
-                  </small>
-
-                  <strong
+                >
+                  <Users
+                    size={18}
+                    color="#d29d4f"
                     style={{
-                      display: "block",
-                      fontSize: "16px",
-                      lineHeight: 1.35,
+                      flexShrink: 0,
+                      marginTop: "2px",
                     }}
-                  >
-                    {customer.name}
-                  </strong>
+                  />
+
+                  <div>
+                    <small style={labelStyle}>
+                      CLIENTE
+                    </small>
+
+                    <strong
+                      style={{
+                        display: "block",
+                        fontSize: "16px",
+                        lineHeight: 1.35,
+                      }}
+                    >
+                      {customer.name}
+                    </strong>
+                  </div>
                 </div>
+
+                <Link
+                  href={`/admin/clientes/${customer.id}`}
+                  aria-label={`Editar ${customer.name}`}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    flexShrink: 0,
+                    minHeight: "32px",
+                    padding: "0 10px",
+                    color: "#d29d4f",
+                    border: "1px solid #3a3020",
+                    borderRadius: "5px",
+                    textDecoration: "none",
+                    fontSize: "10px",
+                    fontWeight: 700,
+                  }}
+                >
+                  <Pencil size={13} />
+                  EDITAR
+                </Link>
               </div>
 
               <div

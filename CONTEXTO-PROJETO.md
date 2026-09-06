@@ -3899,3 +3899,183 @@ No próximo chat:
 - trabalhar uma etapa por vez.
 
 '@ | Add-Content -Encoding utf8 "CONTEXTO-PROJETO.md"
+
+@'
+
+---
+
+# CHECKPOINT FINAL — NAVEGAÇÃO POR DATA NA AGENDA ADMINISTRATIVA
+
+Data: 2026-09-06
+
+Este é o checkpoint mais recente e deve ter prioridade sobre checkpoints anteriores quando houver divergência.
+
+## STATUS
+
+Agenda administrativa com navegação por data:
+
+CONCLUÍDA, TESTADA E VERSIONADA.
+
+Rota:
+
+/admin/agenda
+
+Commit funcional:
+
+5067509 Adiciona navegacao por data na agenda administrativa
+
+Push realizado com sucesso:
+
+main → origin/main
+
+## IMPLEMENTAÇÃO
+
+Arquivo alterado:
+
+- app/admin/agenda/page.tsx
+
+A Agenda administrativa deixou de ficar limitada exclusivamente ao dia atual.
+
+Implementado:
+
+- hoje continua sendo a data padrão;
+- navegação para o dia anterior;
+- navegação para o próximo dia;
+- botão para retornar a Hoje;
+- data selecionada mantida na URL através de:
+  ?data=AAAA-MM-DD
+- carregamento dos agendamentos correspondente à data selecionada;
+- validação do parâmetro de data;
+- fallback seguro para hoje quando a data recebida não é válida;
+- timezone America/Sao_Paulo preservado;
+- estado vazio específico para datas sem agendamentos;
+- funcionamento mantido como Server Component;
+- nenhuma alteração de banco.
+
+## NEXT.JS 16
+
+AGENTS.md foi respeitado antes da alteração.
+
+Foi consultada a documentação local:
+
+node_modules/next/dist/docs/01-app/01-getting-started/03-layouts-and-pages.md
+
+A documentação confirmou que, em uma page Server Component no Next.js 16:
+
+searchParams
+
+é recebido como Promise e deve ser aguardado.
+
+Também confirmou que searchParams é apropriado quando parâmetros da URL são usados para carregar ou filtrar dados da página.
+
+Implementação utilizada:
+
+searchParams: Promise<...>
+
+com await antes da leitura do parâmetro data.
+
+## TESTES
+
+Executado:
+
+npm.cmd run build
+
+Resultado:
+
+APROVADO.
+
+- compilação concluída com sucesso;
+- TypeScript sem erros;
+- /admin/agenda reconhecida como rota dinâmica.
+
+Teste funcional/visual realizado em:
+
+http://localhost:3000/admin/agenda
+
+e com navegação por query string.
+
+Exemplo confirmado:
+
+http://localhost:3000/admin/agenda?data=2026-09-07
+
+Resultado visual confirmado:
+
+- segunda-feira, 07 de setembro de 2026;
+- botões Dia anterior, Hoje e Próximo dia visíveis;
+- navegação por data funcionando;
+- estado vazio correto quando não existem agendamentos;
+- acentuação correta;
+- layout administrativo preservado.
+
+Os três controles de navegação foram testados e funcionaram corretamente.
+
+## BANCO / SUPABASE
+
+Nenhuma alteração.
+
+- nenhuma tabela alterada;
+- nenhuma coluna alterada;
+- nenhuma RPC alterada;
+- nenhuma policy alterada;
+- nenhum SQL executado.
+
+Os arquivos SQL existentes permanecem:
+
+- supabase/sql/001-admin-blocked-times-policies.sql
+- supabase/sql/002-business-settings.sql
+
+## ESTADO FUNCIONAL CONSOLIDADO
+
+Integração assinaturas + agendamento:
+
+CONCLUÍDA.
+
+/admin:
+
+CONCLUÍDO.
+
+/admin/agenda:
+
+CONCLUÍDO, agora com navegação por data.
+
+/admin/clientes:
+
+CONCLUÍDO.
+
+/admin/servicos:
+
+CONCLUÍDO.
+
+/admin/bloqueios:
+
+CONCLUÍDO.
+
+/admin/configuracoes:
+
+CONCLUÍDA a primeira versão.
+
+Funcionalidades anteriores de barbeiros e assinantes permanecem concluídas.
+
+## GIT
+
+Commit funcional atual:
+
+5067509 Adiciona navegacao por data na agenda administrativa
+
+CODIGO-COMPLETO.txt deve continuar untracked e NÃO deve ser versionado.
+
+## PRÓXIMO PASSO
+
+Versionar somente esta atualização de CONTEXTO-PROJETO.md.
+
+Não incluir CODIGO-COMPLETO.txt.
+
+Depois fazer push e confirmar que git status --short apresenta somente:
+
+?? CODIGO-COMPLETO.txt
+
+Somente depois escolher a próxima evolução funcional do projeto.
+
+Continuar trabalhando UMA ETAPA POR VEZ.
+
+'@ | Add-Content -Encoding utf8 "CONTEXTO-PROJETO.md"

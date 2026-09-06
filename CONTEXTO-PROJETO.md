@@ -4079,3 +4079,179 @@ Somente depois escolher a próxima evolução funcional do projeto.
 Continuar trabalhando UMA ETAPA POR VEZ.
 
 '@ | Add-Content -Encoding utf8 "CONTEXTO-PROJETO.md"
+
+@'
+
+---
+
+@'
+
+---
+
+# CHECKPOINT FINAL — BUSCA ADMINISTRATIVA DE CLIENTES
+
+Data: 2026-09-06
+
+Este é o checkpoint mais recente e deve ter prioridade sobre checkpoints anteriores quando houver divergência.
+
+## STATUS
+
+Busca na listagem administrativa de clientes:
+
+CONCLUÍDA, TESTADA E VERSIONADA.
+
+Rota:
+
+/admin/clientes
+
+Commit funcional:
+
+73514f7 Adiciona busca na listagem de clientes
+
+Push realizado com sucesso:
+
+main → origin/main
+
+## IMPLEMENTAÇÃO
+
+Arquivo alterado:
+
+- app/admin/clientes/page.tsx
+
+Implementado:
+
+- campo de busca;
+- busca por nome;
+- busca por WhatsApp;
+- busca por e-mail;
+- parâmetro de URL ?busca=...;
+- botão Buscar;
+- botão Limpar;
+- quantidade de resultados;
+- estado vazio quando nenhum cliente corresponde à busca;
+- lista completa preservada quando não existe busca;
+- funcionamento mantido como Server Component;
+- nenhuma alteração de banco.
+
+A implementação utiliza searchParams conforme a documentação local do Next.js 16 consultada anteriormente nesta sessão.
+
+## TESTES
+
+Executado:
+
+npm.cmd run build
+
+Resultado:
+
+APROVADO.
+
+- compilação concluída;
+- TypeScript sem erros;
+- /admin/clientes reconhecida como rota dinâmica.
+
+Teste funcional/visual:
+
+APROVADO.
+
+Confirmado:
+
+- lista completa com 4 clientes;
+- busca por nome funcionando;
+- busca parcial por telefone funcionando;
+- busca por 9888 retornou exatamente 1 cliente;
+- botão Limpar funcionando;
+- busca inexistente retornou 0 resultados;
+- estado "Nenhum cliente encontrado" correto;
+- layout e acentuação corretos.
+
+## VERIFICAÇÃO DOS QUATRO CLIENTES EXISTENTES
+
+Durante o teste foi observado que os quatro registros possuem o mesmo nome:
+
+Rodrigo Alves Correa
+
+Consulta somente de leitura confirmou que são quatro registros reais distintos em public.customers, com telefones diferentes:
+
+- (41) 98888-1149 — 1 agendamento, 0 assinaturas;
+- (55) 41998-4669 — 4 agendamentos, 0 assinaturas;
+- (41) 99999-9990 — 1 agendamento, 1 assinatura;
+- (41) 99825-4529 — 1 agendamento, 0 assinaturas.
+
+Não se trata de duplicação visual causada pela busca.
+
+Não excluir ou mesclar esses clientes automaticamente, pois todos possuem vínculos existentes.
+
+O comportamento é compatível com a identificação atual baseada principalmente no WhatsApp normalizado.
+
+O telefone (55) 41998-4669 possui formato que poderá ser investigado futuramente somente se houver tarefa específica de saneamento/normalização.
+
+NÃO repetir essas consultas sem nova necessidade concreta.
+
+## BANCO / SUPABASE
+
+Nenhuma alteração permanente.
+
+Foram realizadas somente consultas de leitura.
+
+Nenhuma tabela, coluna, RPC, policy, função ou constraint foi alterada.
+
+Arquivos SQL existentes permanecem:
+
+- supabase/sql/001-admin-blocked-times-policies.sql
+- supabase/sql/002-business-settings.sql
+
+## ESTADO CONSOLIDADO
+
+Integração assinaturas + agendamento:
+
+CONCLUÍDA.
+
+/admin:
+
+CONCLUÍDO.
+
+/admin/agenda:
+
+CONCLUÍDO, com navegação por data.
+
+/admin/clientes:
+
+CONCLUÍDO, agora com busca por nome, WhatsApp e e-mail.
+
+/admin/servicos:
+
+CONCLUÍDO.
+
+/admin/bloqueios:
+
+CONCLUÍDO.
+
+/admin/configuracoes:
+
+CONCLUÍDA a primeira versão.
+
+Funcionalidades anteriores de barbeiros e assinantes permanecem concluídas.
+
+## GIT
+
+Commit funcional atual:
+
+73514f7 Adiciona busca na listagem de clientes
+
+CODIGO-COMPLETO.txt continua untracked e NÃO deve ser versionado.
+
+## PRÓXIMO PASSO
+
+Versionar somente esta atualização de CONTEXTO-PROJETO.md.
+
+Não incluir CODIGO-COMPLETO.txt.
+
+Depois confirmar que git status --short apresenta somente:
+
+?? CODIGO-COMPLETO.txt
+
+Somente depois escolher a próxima evolução funcional.
+
+Continuar UMA ETAPA POR VEZ.
+
+'@ | Add-Content -Encoding utf8 "CONTEXTO-PROJETO.md"

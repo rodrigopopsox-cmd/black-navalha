@@ -1,8 +1,9 @@
-import {
+﻿import {
   CalendarDays,
   FileText,
   Mail,
   Phone,
+  Search,
   Users,
 } from "lucide-react";
 
@@ -17,7 +18,22 @@ type Customer = {
   created_at: string;
 };
 
-export default async function ClientesPage() {
+type ClientesPageProps = {
+  searchParams: Promise<{
+    busca?: string | string[];
+  }>;
+};
+
+export default async function ClientesPage({
+  searchParams,
+}: ClientesPageProps) {
+  const params = await searchParams;
+  const rawSearch = Array.isArray(params.busca)
+    ? params.busca[0]
+    : params.busca;
+
+  const search = rawSearch?.trim() ?? "";
+
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -35,13 +51,25 @@ export default async function ClientesPage() {
     });
 
   if (error) {
-    console.error(
-      "Erro ao carregar clientes:",
-      error
-    );
+    console.error("Erro ao carregar clientes:", error);
   }
 
   const customers = (data ?? []) as Customer[];
+  const normalizedSearch = normalizeSearch(search);
+
+  const filteredCustomers = normalizedSearch
+    ? customers.filter((customer) => {
+        const name = normalizeSearch(customer.name);
+        const phone = normalizeSearch(customer.phone);
+        const email = normalizeSearch(customer.email ?? "");
+
+        return (
+          name.includes(normalizedSearch) ||
+          phone.includes(normalizedSearch) ||
+          email.includes(normalizedSearch)
+        );
+      })
+    : customers;
 
   return (
     <main className="admin-page">
@@ -56,8 +84,7 @@ export default async function ClientesPage() {
           </h1>
 
           <p className="admin-subtitle">
-            Consulte os clientes cadastrados na
-            barbearia.
+            Consulte os clientes cadastrados na barbearia.
           </p>
         </div>
       </div>
@@ -67,6 +94,7 @@ export default async function ClientesPage() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          flexWrap: "wrap",
           gap: "16px",
           marginBottom: "18px",
           padding: "18px 20px",
@@ -105,15 +133,110 @@ export default async function ClientesPage() {
         </span>
       </div>
 
+      <form
+        action="/admin/clientes"
+        method="get"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: "8px",
+          marginBottom: "18px",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "9px",
+            flex: "1 1 300px",
+            minHeight: "42px",
+            padding: "0 13px",
+            background: "#0e0e0e",
+            border: "1px solid #333",
+            borderRadius: "6px",
+          }}
+        >
+          <Search
+            size={17}
+            color="#777"
+            style={{
+              flexShrink: 0,
+            }}
+          />
+
+          <input
+            type="search"
+            name="busca"
+            defaultValue={search}
+            placeholder="Buscar por nome, WhatsApp ou e-mail"
+            aria-label="Buscar clientes"
+            style={{
+              width: "100%",
+              minWidth: 0,
+              padding: "10px 0",
+              color: "#eee",
+              background: "transparent",
+              border: 0,
+              outline: "none",
+              font: "inherit",
+              fontSize: "13px",
+            }}
+          />
+        </div>
+
+        <button
+          type="submit"
+          style={buttonStyle}
+        >
+          Buscar
+        </button>
+
+        {search && (
+          <a
+            href="/admin/clientes"
+            style={{
+              ...buttonStyle,
+              display: "inline-flex",
+              alignItems: "center",
+              textDecoration: "none",
+              color: "#bbb",
+              background: "#0e0e0e",
+              borderColor: "#333",
+            }}
+          >
+            Limpar
+          </a>
+        )}
+      </form>
+
+      {search && (
+        <div
+          style={{
+            marginBottom: "14px",
+            color: "#777",
+            fontSize: "13px",
+          }}
+        >
+          {filteredCustomers.length}{" "}
+          {filteredCustomers.length === 1
+            ? "resultado"
+            : "resultados"}{" "}
+          para{" "}
+          <strong
+            style={{
+              color: "#bbb",
+            }}
+          >
+            “{search}”
+          </strong>
+        </div>
+      )}
+
       {customers.length === 0 ? (
         <div
           className="admin-empty"
-          style={{
-            minHeight: "360px",
-            border: "1px solid #222",
-            borderRadius: "8px",
-            background: "#0e0e0e",
-          }}
+          style={emptyStyle}
         >
           <Users size={32} />
 
@@ -125,6 +248,21 @@ export default async function ClientesPage() {
             Os clientes aparecerão aqui.
           </span>
         </div>
+      ) : filteredCustomers.length === 0 ? (
+        <div
+          className="admin-empty"
+          style={emptyStyle}
+        >
+          <Search size={32} />
+
+          <strong>
+            Nenhum cliente encontrado
+          </strong>
+
+          <span>
+            Tente buscar por outro nome, WhatsApp ou e-mail.
+          </span>
+        </div>
       ) : (
         <div
           style={{
@@ -134,7 +272,7 @@ export default async function ClientesPage() {
             gap: "14px",
           }}
         >
-          {customers.map((customer) => (
+          {filteredCustomers.map((customer) => (
             <article
               key={customer.id}
               style={{
@@ -162,9 +300,7 @@ export default async function ClientesPage() {
                 />
 
                 <div>
-                  <small
-                    style={labelStyle}
-                  >
+                  <small style={labelStyle}>
                     CLIENTE
                   </small>
 
@@ -189,9 +325,7 @@ export default async function ClientesPage() {
                 <InfoLine
                   icon={<Phone size={14} />}
                   label="WHATSAPP"
-                  value={formatPhone(
-                    customer.phone
-                  )}
+                  value={formatPhone(customer.phone)}
                 />
 
                 <InfoLine
@@ -202,19 +336,13 @@ export default async function ClientesPage() {
                 />
 
                 <InfoLine
-                  icon={
-                    <CalendarDays size={14} />
-                  }
+                  icon={<CalendarDays size={14} />}
                   label="CADASTRO"
-                  value={formatDate(
-                    customer.created_at
-                  )}
+                  value={formatDate(customer.created_at)}
                 />
 
                 <div>
-                  <small
-                    style={labelStyle}
-                  >
+                  <small style={labelStyle}>
                     OBSERVAÇÕES
                   </small>
 
@@ -295,6 +423,36 @@ const labelStyle = {
   fontWeight: 700,
   letterSpacing: "0.08em",
 } as const;
+
+const buttonStyle = {
+  minHeight: "42px",
+  padding: "0 16px",
+  color: "#111",
+  background: "#d29d4f",
+  border: "1px solid #d29d4f",
+  borderRadius: "6px",
+  fontSize: "12px",
+  fontWeight: 700,
+  cursor: "pointer",
+} as const;
+
+const emptyStyle = {
+  minHeight: "360px",
+  border: "1px solid #222",
+  borderRadius: "8px",
+  background: "#0e0e0e",
+} as const;
+
+function normalizeSearch(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("pt-BR")
+    .replace(/\D/g, (character) =>
+      character === " " ? " " : character
+    )
+    .trim();
+}
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat(

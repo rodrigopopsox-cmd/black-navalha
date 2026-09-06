@@ -4255,3 +4255,283 @@ Somente depois escolher a próxima evolução funcional.
 Continuar UMA ETAPA POR VEZ.
 
 '@ | Add-Content -Encoding utf8 "CONTEXTO-PROJETO.md"
+---
+
+# CHECKPOINT FINAL — EDIÇÃO ADMINISTRATIVA DE CLIENTES
+
+Data: 2026-09-06
+
+Este é o checkpoint mais recente e deve ter prioridade sobre checkpoints anteriores quando houver divergência.
+
+## STATUS
+
+Edição administrativa de clientes:
+
+CONCLUÍDA, TESTADA E VERSIONADA.
+
+Rota de listagem:
+
+/admin/clientes
+
+Nova rota de edição:
+
+/admin/clientes/[id]
+
+Commit funcional:
+
+97a75e5 Adiciona edicao administrativa de clientes
+
+Push realizado com sucesso:
+
+main → origin/main
+
+## IMPLEMENTAÇÃO
+
+Arquivos alterados/criados:
+
+- app/admin/clientes/page.tsx
+- app/admin/clientes/[id]/page.tsx
+- app/admin/clientes/[id]/customer-edit-form.tsx
+
+A busca administrativa de Clientes existente foi preservada.
+
+Foi adicionado botão EDITAR individual em cada card de cliente.
+
+A nova página dinâmica carrega o cliente pelo próprio id.
+
+Padrão do Next.js 16 utilizado:
+
+params: Promise<{ id: string }>
+
+com await antes da leitura do id.
+
+Cliente inexistente utiliza notFound().
+
+O formulário permite editar:
+
+- nome;
+- WhatsApp;
+- e-mail;
+- observações.
+
+Validações implementadas:
+
+- nome obrigatório;
+- nome com pelo menos 2 caracteres;
+- WhatsApp com 10 ou 11 dígitos;
+- validação básica de e-mail quando preenchido.
+
+O formulário possui:
+
+- estado de salvamento;
+- feedback de erro;
+- feedback de sucesso;
+- formatação de WhatsApp;
+- botão SALVAR ALTERAÇÕES;
+- botão CANCELAR;
+- link VOLTAR PARA CLIENTES.
+
+Mensagem de sucesso confirmada:
+
+Cliente atualizado com sucesso.
+
+## PRESERVAÇÃO DOS VÍNCULOS
+
+A edição atualiza diretamente o registro existente em:
+
+public.customers
+
+utilizando:
+
+update(...).eq("id", customer.id)
+
+Não existe:
+
+- delete do cliente;
+- insert de novo cliente;
+- merge automático;
+- troca do id.
+
+Portanto o mesmo customers.id é preservado e, consequentemente, os vínculos existentes por customer_id com agendamentos e assinaturas permanecem associados ao mesmo cliente.
+
+Os quatro clientes chamados Rodrigo Alves Correa continuam sendo registros distintos e NÃO foram mesclados nem excluídos.
+
+## TESTE FUNCIONAL
+
+Cliente utilizado para validação:
+
+Rodrigo Alves Correa
+
+WhatsApp:
+
+(41) 98888-1149
+
+Foi confirmado que o botão EDITAR abriu o registro correto pelo id.
+
+A tela apresentou corretamente:
+
+- nome;
+- WhatsApp;
+- e-mail;
+- observações;
+- SALVAR ALTERAÇÕES;
+- CANCELAR;
+- VOLTAR PARA CLIENTES.
+
+Para testar persistência sem alterar a identificação do cliente, foi utilizado temporariamente em OBSERVAÇÕES:
+
+Teste edição administrativa
+
+O salvamento foi realizado com sucesso.
+
+Após F5, o conteúdo permaneceu, confirmando persistência real no Supabase.
+
+Em seguida o texto de teste foi removido pela própria interface.
+
+Novo salvamento foi realizado com sucesso.
+
+Após a limpeza, OBSERVAÇÕES voltou a ficar vazio.
+
+Portanto nenhum dado temporário desse teste permaneceu no cliente.
+
+Nome e WhatsApp não foram alterados durante esse teste.
+
+## TESTE DA LISTAGEM
+
+Após a inclusão dos controles de edição foi confirmado visualmente:
+
+- 4 clientes continuam aparecendo;
+- busca permanece disponível;
+- cada card possui botão EDITAR;
+- os registros continuam individualizados pelos respectivos dados.
+
+A busca existente NÃO foi refeita.
+
+## BUILD
+
+Executado após a implementação e teste funcional:
+
+npm.cmd run build
+
+Resultado:
+
+APROVADO.
+
+- Compiled successfully;
+- TypeScript concluído sem erros;
+- geração das páginas concluída;
+- /admin/clientes reconhecida;
+- /admin/clientes/[id] reconhecida como rota dinâmica.
+
+## NEXT.JS 16 / AGENTS.md
+
+AGENTS.md foi respeitado.
+
+Foi consultada a documentação local:
+
+node_modules/next/dist/docs/01-app/01-getting-started/04-linking-and-navigating.md
+
+Foi confirmado o padrão de rota dinâmica e o uso de:
+
+params: Promise<{ id: string }>
+
+com:
+
+const { id } = await params
+
+Não é necessário repetir essa consulta sem nova necessidade relacionada à convenção.
+
+## BANCO / SUPABASE
+
+Nenhuma alteração estrutural ou permanente de banco foi necessária.
+
+Nenhuma:
+
+- tabela;
+- coluna;
+- RPC;
+- policy;
+- constraint;
+- função
+
+foi criada ou alterada.
+
+Nenhum novo arquivo SQL foi necessário.
+
+Permanecem os SQLs existentes:
+
+- supabase/sql/001-admin-blocked-times-policies.sql
+- supabase/sql/002-business-settings.sql
+
+Não alterar banco para esta funcionalidade.
+
+## GIT
+
+Commit funcional:
+
+97a75e5 Adiciona edicao administrativa de clientes
+
+Push realizado com sucesso para origin/main.
+
+Após o push foi executado:
+
+git status --short
+
+Resultado:
+
+?? CODIGO-COMPLETO.txt
+
+Portanto não existe alteração rastreada pendente neste momento antes desta atualização documental.
+
+CODIGO-COMPLETO.txt continua untracked e NÃO deve ser versionado.
+
+## ESTADO FUNCIONAL CONSOLIDADO
+
+Integração assinaturas + agendamento:
+
+CONCLUÍDA.
+
+/admin:
+
+CONCLUÍDO.
+
+/admin/agenda:
+
+CONCLUÍDO, com navegação por data.
+
+/admin/clientes:
+
+CONCLUÍDO, com listagem, busca e edição.
+
+/admin/servicos:
+
+CONCLUÍDO.
+
+/admin/bloqueios:
+
+CONCLUÍDO.
+
+/admin/configuracoes:
+
+CONCLUÍDA a primeira versão.
+
+Funcionalidades anteriores de barbeiros e assinantes permanecem concluídas.
+
+## PRÓXIMO PASSO
+
+Versionar somente esta atualização de CONTEXTO-PROJETO.md.
+
+Não incluir CODIGO-COMPLETO.txt.
+
+Depois fazer push e confirmar que:
+
+git status --short
+
+apresenta somente:
+
+?? CODIGO-COMPLETO.txt
+
+Depois encerrar esta etapa.
+
+Não iniciar uma nova funcionalidade antes de concluir o checkpoint documental.
+

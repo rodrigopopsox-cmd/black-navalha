@@ -3638,3 +3638,264 @@ Depois executar git status e confirmar que permanece somente CODIGO-COMPLETO.txt
 Somente depois desse checkpoint documental poderá ser iniciada a próxima funcionalidade administrativa.
 
 Não iniciar /admin/configuracoes antes de concluir esse checkpoint documental.
+
+@'
+
+---
+
+# CHECKPOINT FINAL — CONFIGURAÇÕES ADMINISTRATIVAS
+
+Data: 2026-09-06
+
+Este é o checkpoint mais recente e deve ter prioridade sobre checkpoints anteriores quando houver divergência.
+
+## GIT
+
+Commit funcional:
+
+87d5007 Implementa configuracoes administrativas
+
+Push realizado com sucesso:
+
+main → origin/main
+
+CODIGO-COMPLETO.txt continua untracked e NÃO deve ser versionado.
+
+## CONFIGURAÇÕES ADMINISTRATIVAS
+
+Rota:
+
+/admin/configuracoes
+
+Status:
+
+CONCLUÍDA E TESTADA a primeira versão.
+
+Arquivos:
+
+- app/admin/configuracoes/page.tsx
+- app/admin/configuracoes/settings-form.tsx
+- supabase/sql/002-business-settings.sql
+
+Implementado:
+
+- rota administrativa /admin/configuracoes;
+- proteção administrativa herdada de app/admin/layout.tsx;
+- Server Component para leitura das configurações;
+- formulário Client Component;
+- nome da barbearia;
+- WhatsApp comercial;
+- endereço;
+- Instagram;
+- criação do primeiro registro;
+- edição do registro existente;
+- persistência real no Supabase;
+- validação do nome obrigatório;
+- feedback de erro;
+- feedback visual de sucesso;
+- router.refresh() após salvamento.
+
+Mensagem de sucesso confirmada visualmente:
+
+Configurações salvas com sucesso.
+
+## BUSINESS_SETTINGS
+
+Foi criada a tabela:
+
+public.business_settings
+
+Schema confirmado:
+
+- id uuid NOT NULL default gen_random_uuid()
+- name text NOT NULL
+- whatsapp text NULL
+- address text NULL
+- instagram text NULL
+- created_at timestamptz NOT NULL default now()
+- updated_at timestamptz NOT NULL default now()
+
+Alteração real de banco versionada em:
+
+supabase/sql/002-business-settings.sql
+
+RLS habilitado.
+
+Policies confirmadas:
+
+- Publico visualiza configuracoes — SELECT
+- Admin pode cadastrar configuracoes — INSERT
+- Admin pode alterar configuracoes — UPDATE
+- Admin pode excluir configuracoes — DELETE
+
+Leitura pública foi concedida para permitir utilização futura das informações institucionais no site público.
+
+Escrita permanece protegida para usuários authenticated com:
+
+profiles.id = auth.uid()
+AND profiles.role = 'admin'
+
+NÃO repetir consultas de schema, policies ou privilégios de business_settings sem nova necessidade concreta.
+
+## OBSERVAÇÃO SOBRE EXECUÇÃO DO SQL
+
+O SQL de 002-business-settings.sql foi executado inicialmente no Supabase antes de o arquivo local ser criado.
+
+Uma segunda tentativa produziu:
+
+ERROR: 42P07: relation "business_settings" already exists
+
+Isso ocorreu porque a primeira execução já havia criado a estrutura.
+
+O estado real foi posteriormente verificado por consultas somente leitura.
+
+Foi confirmado que:
+- tabela existe;
+- todas as colunas esperadas existem;
+- policies esperadas existem;
+- privilégios necessários existem.
+
+NÃO executar novamente 002-business-settings.sql no banco atual.
+
+O arquivo passou a existir corretamente em:
+
+supabase/sql/002-business-settings.sql
+
+para manter a alteração permanente versionada.
+
+## DADOS REAIS SALVOS
+
+Foi criado o primeiro registro de configurações pela própria interface administrativa.
+
+O teste confirmou persistência de:
+
+- nome;
+- WhatsApp comercial;
+- endereço;
+- Instagram.
+
+A captura visual confirmou que os dados continuam preenchidos após salvamento/refresh.
+
+Esses dados são agora dados institucionais reais da configuração e NÃO devem ser apagados como dado de teste sem solicitação específica.
+
+## TESTES
+
+Executado:
+
+npm.cmd run build
+
+Resultado final:
+
+APROVADO.
+
+- compilação concluída;
+- TypeScript sem erros;
+- /admin/configuracoes reconhecida como rota dinâmica.
+
+Teste visual:
+
+APROVADO.
+
+Teste funcional de criação:
+
+APROVADO.
+
+Teste funcional de novo salvamento/edição:
+
+APROVADO.
+
+Feedback visual de sucesso:
+
+APROVADO.
+
+Proteção administrativa:
+
+CONFIRMADA.
+
+Quando a sessão administrativa não estava ativa, /admin/configuracoes redirecionou para /login conforme o mecanismo existente.
+
+## ESTADO FUNCIONAL CONSOLIDADO
+
+Integração assinaturas + agendamento:
+
+CONCLUÍDA.
+
+/admin:
+
+CONCLUÍDO.
+
+/admin/agenda:
+
+CONCLUÍDO.
+
+/admin/clientes:
+
+CONCLUÍDO.
+
+/admin/servicos:
+
+CONCLUÍDO.
+
+/admin/bloqueios:
+
+CONCLUÍDO.
+
+/admin/configuracoes:
+
+CONCLUÍDA a primeira versão.
+
+## REGRA DE TRABALHO — ARQUIVOS COMPLETOS
+
+Preferência explícita do responsável pelo projeto:
+
+Quando for necessário alterar um arquivo de código, fornecer preferencialmente o ARQUIVO COMPLETO pronto para substituir/copiar e colar.
+
+Evitar instruções baseadas em:
+- procurar um pequeno trecho;
+- substituir partes isoladas;
+- múltiplas alterações manuais espalhadas no mesmo arquivo.
+
+Quando conveniente no Windows, fornecer também comando PowerShell completo usando Set-Content para gravar o arquivo inteiro.
+
+Essa regra deve ser respeitada nos próximos chats para reduzir erros manuais e acelerar o trabalho.
+
+Continuar trabalhando UMA ETAPA POR VEZ.
+
+## BANCO / SQL VERSIONADO ATUAL
+
+Arquivos conhecidos:
+
+- supabase/sql/001-admin-blocked-times-policies.sql
+- supabase/sql/002-business-settings.sql
+
+Toda nova alteração REAL de banco deve continuar sendo versionada em supabase/sql/.
+
+Não alterar banco sem necessidade.
+
+## PRÓXIMO PASSO EXATO
+
+Primeiro versionar somente esta atualização de CONTEXTO-PROJETO.md.
+
+Não incluir CODIGO-COMPLETO.txt.
+
+Depois fazer push e confirmar:
+
+git status --short
+
+Resultado esperado:
+
+?? CODIGO-COMPLETO.txt
+
+Depois encerrar esta sessão.
+
+No próximo chat:
+- usar CONTEXTO-PROJETO.md como fonte principal;
+- ler prioritariamente este checkpoint;
+- não refazer Configurações;
+- não refazer Bloqueios;
+- não reconstruir assinaturas + agendamento;
+- não repetir consultas de business_settings já registradas;
+- escolher a próxima evolução funcional somente depois de confirmar o estado do Git;
+- trabalhar uma etapa por vez.
+
+'@ | Add-Content -Encoding utf8 "CONTEXTO-PROJETO.md"

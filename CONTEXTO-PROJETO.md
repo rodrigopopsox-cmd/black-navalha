@@ -3019,3 +3019,622 @@ Depois:
 implementação → npm run build → teste visual → Git checkpoint → atualizar CONTEXTO-PROJETO.md.
 
 Não avançar automaticamente para Configurações antes de concluir Bloqueios.
+---
+
+# CHECKPOINT INTERMEDIÁRIO — BLOQUEIOS ADMINISTRATIVOS
+
+Data: 2026-09-06
+
+Este é o checkpoint mais recente e deve ter prioridade sobre blocos anteriores quando houver divergência.
+
+## GIT OFICIAL NO INÍCIO DESTA ETAPA
+
+Branch:
+
+main
+
+Checkpoint confirmado:
+
+3f29108 Registra checkpoint final da sessao
+
+main estava sincronizada com origin/main.
+
+Antes do início de Bloqueios, o único arquivo untracked era:
+
+CODIGO-COMPLETO.txt
+
+CODIGO-COMPLETO.txt deve continuar ignorado e NÃO ser versionado.
+
+## FUNCIONALIDADE ATUAL
+
+BLOQUEIOS ADMINISTRATIVOS
+
+Rota:
+
+/admin/bloqueios
+
+Status:
+
+EM IMPLEMENTAÇÃO.
+
+NÃO considerar concluída ainda.
+
+NÃO avançar para Configurações.
+
+## VERIFICAÇÃO DA ROTA
+
+Foi iniciado o servidor com:
+
+npm.cmd run dev
+
+Foi necessário usar npm.cmd porque o PowerShell local bloqueia npm.ps1 pela ExecutionPolicy.
+
+A URL:
+
+http://localhost:3000/admin/bloqueios
+
+retornava inicialmente 404.
+
+Portanto a rota não existia antes desta implementação.
+
+## SCHEMA CONFIRMADO — public.blocked_times
+
+Consulta somente leitura realizada.
+
+Colunas confirmadas:
+
+- id uuid NOT NULL
+- barber_id uuid NOT NULL
+- start_at timestamptz NOT NULL
+- end_at timestamptz NOT NULL
+- reason text NULL
+- created_at timestamptz NOT NULL
+
+Foreign key confirmada:
+
+blocked_times.barber_id
+→ barbers.id
+
+NÃO repetir essas consultas sem nova necessidade.
+
+## SEGURANÇA / RLS DE blocked_times
+
+Foi identificado durante o primeiro teste que /admin/bloqueios apresentava:
+
+permission denied for table blocked_times
+
+Estado encontrado antes da correção:
+
+- RLS habilitado;
+- RLS forced = false;
+- authenticated sem SELECT;
+- authenticated sem INSERT;
+- authenticated sem DELETE;
+- nenhuma policy em blocked_times.
+
+Foi consultado o padrão existente de policies de public.barbers.
+
+Padrão administrativo confirmado:
+
+profiles.id = auth.uid()
+AND profiles.role = 'admin'
+
+Também foi confirmado:
+
+authenticated possui SELECT em profiles.
+
+anon não possuía SELECT em blocked_times.
+
+Não foi concedido acesso público/anon a blocked_times.
+
+## ALTERAÇÃO REAL DE BANCO
+
+Esta foi a primeira nova alteração permanente de banco registrada após a regra de versionamento.
+
+Foi criado:
+
+supabase/sql/001-admin-blocked-times-policies.sql
+
+Conteúdo versionado localmente:
+
+grant select, insert, update, delete
+on table public.blocked_times
+to authenticated;
+
+create policy "Admin pode visualizar bloqueios"
+on public.blocked_times
+for select
+to authenticated
+using (
+  exists (
+    select 1
+    from public.profiles
+    where profiles.id = auth.uid()
+      and profiles.role = 'admin'
+  )
+);
+
+create policy "Admin pode cadastrar bloqueios"
+on public.blocked_times
+for insert
+to authenticated
+with check (
+  exists (
+    select 1
+    from public.profiles
+    where profiles.id = auth.uid()
+      and profiles.role = 'admin'
+  )
+);
+
+create policy "Admin pode alterar bloqueios"
+on public.blocked_times
+for update
+to authenticated
+using (
+  exists (
+    select 1
+    from public.profiles
+    where profiles.id = auth.uid()
+      and profiles.role = 'admin'
+  )
+)
+with check (
+  exists (
+    select 1
+    from public.profiles
+    where profiles.id = auth.uid()
+      and profiles.role = 'admin'
+  )
+);
+
+create policy "Admin pode excluir bloqueios"
+on public.blocked_times
+for delete
+to authenticated
+using (
+  exists (
+    select 1
+    from public.profiles
+    where profiles.id = auth.uid()
+      and profiles.role = 'admin'
+  )
+);
+
+## OBSERVAÇÃO SOBRE A EXECUÇÃO DO SQL
+
+Ao executar o SQL no Supabase foi exibido erro:
+
+policy "Admin pode visualizar bloqueios" for table "blocked_times" already exists
+
+Não executar o arquivo novamente automaticamente.
+
+Foi verificado imediatamente depois o estado REAL do banco.
+
+Policies atualmente existentes:
+
+- Admin pode alterar bloqueios — UPDATE
+- Admin pode cadastrar bloqueios — INSERT
+- Admin pode excluir bloqueios — DELETE
+- Admin pode visualizar bloqueios — SELECT
+
+Privilégios atuais de authenticated confirmados:
+
+- SELECT = true
+- INSERT = true
+- UPDATE = true
+- DELETE = true
+
+Portanto o banco ficou no estado necessário.
+
+NÃO recriar nem apagar essas policies sem nova necessidade.
+
+## PRIMEIRA VERSÃO DE /admin/bloqueios
+
+Criado:
+
+app/admin/bloqueios/page.tsx
+
+Implementado inicialmente:
+
+- Server Component;
+- leitura de blocked_times;
+- título Bloqueios;
+- estado vazio;
+- listagem de bloqueios;
+- profissional;
+- período;
+- motivo;
+- timezone America/Sao_Paulo.
+
+Depois da correção das permissões, teste visual apresentou corretamente:
+
+Nenhum bloqueio cadastrado
+
+sem erro de permissão.
+
+## CADASTRO DE BLOQUEIO
+
+Criado:
+
+app/admin/bloqueios/block-form.tsx
+
+Implementado:
+
+- Client Component;
+- createClient de @/lib/supabase/client;
+- seleção de barbeiro ativo;
+- início com datetime-local;
+- fim com datetime-local;
+- motivo opcional;
+- validação de profissional;
+- validação de início/fim;
+- validação de fim posterior ao início;
+- insert em blocked_times;
+- router.refresh();
+- estados de loading/erro.
+
+app/admin/bloqueios/page.tsx foi conectado ao BlockForm.
+
+A página carrega somente barbeiros ativos para o formulário.
+
+## TESTE REAL DE CADASTRO
+
+Foi criado um registro real para validação com:
+
+Motivo:
+
+Teste administrativo
+
+Registro:
+
+id:
+b4777e2b-c19e-4463-b318-0b365357a5f4
+
+barber_id:
+bb5130bb-62f3-47f1-93ef-9cc58df132b0
+
+barber:
+Rodrigo Alves Correa
+
+start_at:
+2026-09-08 01:31:00+00
+
+end_at:
+2026-09-09 01:32:00+00
+
+reason:
+Teste administrativo
+
+Esse registro É DADO DE TESTE e deve ser removido pela própria funcionalidade administrativa antes do checkpoint final.
+
+Não deixar esse bloqueio de teste no banco.
+
+## CORREÇÃO DA EXIBIÇÃO DO PROFISSIONAL
+
+Na primeira listagem após o cadastro, PROFISSIONAL apareceu como:
+
+-
+
+O banco foi consultado somente para confirmar o registro.
+
+Foi confirmado que barber_id estava corretamente gravado e correspondia a:
+
+Rodrigo Alves Correa
+
+Portanto o defeito era somente da leitura/renderização do relacionamento.
+
+A solução aplicada foi:
+
+- incluir barber_id na leitura de blocked_times;
+- deixar de depender do relacionamento aninhado barbers na listagem;
+- usar a lista de barbeiros já carregada pela página;
+- localizar o profissional por barber.id === blockedTime.barber_id.
+
+Depois da correção, teste visual confirmou:
+
+Rodrigo Alves Correa
+
+na listagem do bloqueio.
+
+## BUILDS REALIZADOS
+
+Primeiro build após criação da rota:
+
+npm.cmd run build
+
+APROVADO.
+
+Build após integração do formulário:
+
+npm.cmd run build
+
+APROVADO.
+
+Build depois da correção da exibição do profissional:
+
+npm.cmd run build
+
+APROVADO.
+
+Último build registrado:
+
+- Compiled successfully;
+- TypeScript sem erros;
+- /admin/bloqueios reconhecida como rota dinâmica.
+
+## TESTE VISUAL ATUAL
+
+A página /admin/bloqueios apresenta:
+
+- layout administrativo correto;
+- proteção administrativa confirmada;
+- formulário Novo bloqueio;
+- seletor de profissional;
+- início;
+- fim;
+- motivo;
+- botão CRIAR BLOQUEIO;
+- cadastro real funcionando;
+- listagem real funcionando;
+- profissional exibido corretamente;
+- período;
+- motivo.
+
+A rota administrativa não fica disponível ao cliente comum.
+
+Ao acessar sem sessão administrativa válida, houve redirecionamento para /login pelo mecanismo administrativo existente.
+
+## ARQUIVOS ATUAIS DA FUNCIONALIDADE
+
+Novos e ainda não commitados:
+
+app/admin/bloqueios/page.tsx
+app/admin/bloqueios/block-form.tsx
+supabase/sql/001-admin-blocked-times-policies.sql
+
+CODIGO-COMPLETO.txt continua untracked e deve permanecer ignorado.
+
+## GIT STATUS MAIS RECENTE REGISTRADO
+
+Antes da criação de block-form.tsx, git status --short mostrou:
+
+?? CODIGO-COMPLETO.txt
+?? app/admin/bloqueios/
+?? supabase/
+
+Não houve commit funcional de Bloqueios até este checkpoint.
+
+## IMPORTANTE — ENCODING
+
+Ao visualizar block-form.tsx pelo PowerShell, alguns acentos apareceram corrompidos, por exemplo:
+
+inÃcio
+perÃodo
+NÃ£o
+
+Pode ser apenas interpretação/encoding da saída, mas antes do checkpoint final deve ser verificado visualmente no navegador e, se necessário, corrigido no arquivo para UTF-8.
+
+Não ignorar esse ponto.
+
+## O QUE AINDA FALTA
+
+Bloqueios NÃO está concluído.
+
+Falta:
+
+- implementar exclusão de bloqueio pela interface administrativa;
+- usar a exclusão para remover o registro "Teste administrativo";
+- confirmar que a listagem volta ao estado esperado;
+- verificar textos/accentuação;
+- executar npm.cmd run build depois da última alteração;
+- realizar teste funcional/visual final;
+- verificar git status;
+- fazer commit somente dos arquivos corretos;
+- NÃO incluir CODIGO-COMPLETO.txt;
+- push para origin/main;
+- atualizar CONTEXTO-PROJETO.md com checkpoint final.
+
+Não avançar para /admin/configuracoes antes disso.
+
+## PRÓXIMO PASSO EXATO
+
+Continuar a partir do estado atual de Bloqueios.
+
+Primeiro implementar a EXCLUSÃO de bloqueios na interface administrativa.
+
+Para isso, verificar somente os arquivos atuais necessários:
+
+app/admin/bloqueios/page.tsx
+app/admin/bloqueios/block-form.tsx
+
+Não repetir consultas de schema, FK, RLS, policies ou privilégios já registradas acima.
+
+Usar a policy DELETE administrativa que já está criada.
+
+Depois:
+
+1. testar exclusão pela interface;
+2. excluir especificamente o registro de teste "Teste administrativo";
+3. confirmar visualmente a remoção;
+4. verificar accentuação;
+5. npm.cmd run build;
+6. teste visual final de /admin/bloqueios;
+7. git status;
+8. commit sem CODIGO-COMPLETO.txt;
+9. push;
+10. atualizar contexto final.
+
+Não iniciar Configurações.
+---
+
+# CHECKPOINT FINAL — BLOQUEIOS ADMINISTRATIVOS
+
+Data: 2026-09-06
+
+Este é o checkpoint mais recente e substitui os checkpoints anteriores de Bloqueios que indicavam a funcionalidade como EM IMPLEMENTAÇÃO.
+
+## STATUS
+
+BLOQUEIOS ADMINISTRATIVOS:
+
+CONCLUÍDO, TESTADO E VERSIONADO.
+
+Rota:
+
+/admin/bloqueios
+
+## IMPLEMENTADO
+
+Arquivos:
+
+- app/admin/bloqueios/page.tsx
+- app/admin/bloqueios/block-form.tsx
+- app/admin/bloqueios/delete-block-button.tsx
+- supabase/sql/001-admin-blocked-times-policies.sql
+
+Funcionalidades concluídas:
+
+- rota administrativa;
+- proteção administrativa pelo layout existente;
+- leitura de blocked_times;
+- formulário de criação;
+- seleção de barbeiros ativos;
+- criação real de bloqueio;
+- validação de início e fim;
+- motivo opcional;
+- listagem de bloqueios;
+- profissional;
+- período;
+- motivo;
+- exclusão pela interface;
+- confirmação antes da exclusão;
+- atualização da listagem após criação/exclusão;
+- estado vazio;
+- timezone America/Sao_Paulo.
+
+## BANCO / SUPABASE
+
+Alteração permanente versionada em:
+
+supabase/sql/001-admin-blocked-times-policies.sql
+
+Policies administrativas existentes para blocked_times:
+
+- SELECT;
+- INSERT;
+- UPDATE;
+- DELETE.
+
+Privilégios necessários para authenticated confirmados anteriormente.
+
+NÃO repetir consultas de:
+- schema de blocked_times;
+- foreign key;
+- RLS;
+- policies;
+- privilégios;
+
+sem nova necessidade concreta.
+
+## TESTE DE EXCLUSÃO
+
+O registro de teste com motivo:
+
+Teste administrativo
+
+foi excluído com sucesso pela própria interface administrativa.
+
+Após a exclusão, a página apresentou:
+
+Nenhum bloqueio cadastrado
+
+Portanto o dado de teste não permaneceu no banco.
+
+## ACENTUAÇÃO
+
+A verificação visual no navegador confirmou que os textos são apresentados corretamente, incluindo:
+
+- períodos;
+- aparecerão;
+- início;
+- motivo.
+
+A saída corrompida observada anteriormente no PowerShell era relacionada à interpretação de encoding da saída e não representou problema visual na aplicação.
+
+## TESTES
+
+Executado após a implementação da exclusão:
+
+npm.cmd run build
+
+Resultado:
+
+APROVADO.
+
+- compilação concluída com sucesso;
+- TypeScript sem erros;
+- /admin/bloqueios reconhecida como rota dinâmica.
+
+Teste funcional/visual final:
+
+APROVADO.
+
+Confirmado:
+- formulário renderizado;
+- listagem renderizada;
+- exclusão funcionando;
+- confirmação de exclusão funcionando;
+- registro Teste administrativo removido;
+- estado vazio apresentado após remoção;
+- acentuação correta.
+
+## GIT
+
+Commit funcional:
+
+b90ea7b Implementa bloqueios administrativos
+
+Push realizado com sucesso:
+
+main → origin/main
+
+CODIGO-COMPLETO.txt não foi incluído e deve continuar untracked.
+
+## ESTADO CONSOLIDADO
+
+Integração assinaturas + agendamento:
+
+CONCLUÍDA.
+
+Dashboard administrativo:
+
+CONCLUÍDO.
+
+/admin/agenda:
+
+CONCLUÍDO.
+
+/admin/clientes:
+
+CONCLUÍDO.
+
+/admin/servicos:
+
+CONCLUÍDO.
+
+/admin/bloqueios:
+
+CONCLUÍDO.
+
+## PRÓXIMO PASSO EXATO
+
+Versionar somente esta atualização de CONTEXTO-PROJETO.md.
+
+Não incluir CODIGO-COMPLETO.txt.
+
+Depois executar git status e confirmar que permanece somente CODIGO-COMPLETO.txt como untracked.
+
+Somente depois desse checkpoint documental poderá ser iniciada a próxima funcionalidade administrativa.
+
+Não iniciar /admin/configuracoes antes de concluir esse checkpoint documental.

@@ -14,20 +14,26 @@ import { createClient } from "@/lib/supabase/server";
 
 type Appointment = {
   id: string;
+  customer_id: string;
+  barber_id: string;
   start_at: string;
   end_at: string;
   price: number | string;
   status: string;
-  customers: {
-    name: string;
-    phone: string | null;
-  }[];
-  barbers: {
-    name: string;
-  }[];
   appointment_services: {
     service_name: string;
   }[];
+};
+
+type Customer = {
+  id: string;
+  name: string;
+  phone: string | null;
+};
+
+type Barber = {
+  id: string;
+  name: string;
 };
 
 type AgendaPageProps = {
@@ -54,21 +60,16 @@ export default async function AgendaPage({
 
   const supabase = await createClient();
 
-  const { data, error } = await supabase
+  const appointmentsResult = await supabase
     .from("appointments")
     .select(`
       id,
+      customer_id,
+      barber_id,
       start_at,
       end_at,
       price,
       status,
-      customers (
-        name,
-        phone
-      ),
-      barbers (
-        name
-      ),
       appointment_services (
         service_name
       )
@@ -79,11 +80,71 @@ export default async function AgendaPage({
       ascending: true,
     });
 
-  if (error) {
-    console.error("Erro ao carregar agenda:", error);
+  if (appointmentsResult.error) {
+    console.error(
+      "Erro ao carregar agenda:",
+      appointmentsResult.error
+    );
   }
 
-  const appointments = (data ?? []) as Appointment[];
+  const appointments =
+    (appointmentsResult.data ?? []) as Appointment[];
+
+  const customerIds = [
+    ...new Set(
+      appointments.map((appointment) => appointment.customer_id)
+    ),
+  ];
+
+  const barberIds = [
+    ...new Set(
+      appointments.map((appointment) => appointment.barber_id)
+    ),
+  ];
+
+  let customers: Customer[] = [];
+  let barbers: Barber[] = [];
+
+  if (customerIds.length > 0) {
+    const customersResult = await supabase
+      .from("customers")
+      .select("id, name, phone")
+      .in("id", customerIds);
+
+    if (customersResult.error) {
+      console.error(
+        "Erro ao carregar clientes da agenda:",
+        customersResult.error
+      );
+    } else {
+      customers = (customersResult.data ?? []) as Customer[];
+    }
+  }
+
+  if (barberIds.length > 0) {
+    const barbersResult = await supabase
+      .from("barbers")
+      .select("id, name")
+      .in("id", barberIds);
+
+    if (barbersResult.error) {
+      console.error(
+        "Erro ao carregar profissionais da agenda:",
+        barbersResult.error
+      );
+    } else {
+      barbers = (barbersResult.data ?? []) as Barber[];
+    }
+  }
+
+  const customersById = new Map(
+    customers.map((customer) => [customer.id, customer])
+  );
+
+  const barbersById = new Map(
+    barbers.map((barber) => [barber.id, barber])
+  );
+
   const today = getTodayDateParam();
   const isToday = selectedDate === today;
   const previousDate = shiftDate(selectedDate, -1);
@@ -209,8 +270,13 @@ export default async function AgendaPage({
           }}
         >
           {appointments.map((appointment) => {
-            const customer = appointment.customers[0];
-            const barber = appointment.barbers[0];
+            const customer = customersById.get(
+              appointment.customer_id
+            );
+
+            const barber = barbersById.get(
+              appointment.barber_id
+            );
 
             return (
               <div
@@ -218,7 +284,7 @@ export default async function AgendaPage({
                 style={{
                   display: "grid",
                   gridTemplateColumns:
-                    "120px minmax(170px, 1fr) minmax(170px, 1fr) minmax(200px, 1.5fr) 120px",
+                    "repeat(auto-fit, minmax(150px, 1fr))",
                   alignItems: "center",
                   gap: "20px",
                   padding: "20px",
@@ -312,17 +378,13 @@ export default async function AgendaPage({
                   </strong>
                 </div>
 
-                <div
-                  style={{
-                    textAlign: "right",
-                  }}
-                >
+                <div>
                   <small style={labelStyle}>VALOR</small>
 
                   <strong
                     style={{
                       display: "flex",
-                      justifyContent: "flex-end",
+                      justifyContent: "flex-start",
                       alignItems: "center",
                       gap: "5px",
                       color: "#d29d4f",
@@ -457,3 +519,4 @@ function formatPrice(value: number | string) {
     currency: "BRL",
   });
 }
+

@@ -4535,3 +4535,334 @@ Depois encerrar esta etapa.
 
 Não iniciar uma nova funcionalidade antes de concluir o checkpoint documental.
 
+
+---
+
+# CHECKPOINT FINAL — EDIÇÃO ADMINISTRATIVA DE SERVIÇOS
+
+Data: 2026-09-07
+
+Este é o checkpoint mais recente e deve ter prioridade sobre checkpoints anteriores quando houver divergência.
+
+## STATUS
+
+Edição administrativa de Serviços:
+
+CONCLUÍDA, TESTADA E VERSIONADA.
+
+Rota de listagem:
+
+/admin/servicos
+
+Nova rota de edição:
+
+/admin/servicos/[id]
+
+Commit funcional:
+
+f859384 Adiciona edicao administrativa de servicos
+
+Push realizado com sucesso:
+
+main → origin/main
+
+## IMPLEMENTAÇÃO
+
+Arquivos alterados/criados:
+
+- app/admin/servicos/page.tsx
+- app/admin/servicos/[id]/page.tsx
+- app/admin/servicos/[id]/service-edit-form.tsx
+- supabase/sql/003-admin-services-update-policy.sql
+
+A listagem administrativa existente foi preservada.
+
+Foi adicionado botão EDITAR individual nos cards dos serviços.
+
+A nova página dinâmica carrega o serviço pelo próprio services.id.
+
+Padrão utilizado no Next.js 16:
+
+params: Promise<{ id: string }>
+
+com await antes da leitura do id.
+
+Serviço inexistente utiliza notFound().
+
+O formulário permite editar:
+
+- nome;
+- categoria;
+- preço;
+- duração em minutos;
+- descrição;
+- subscriber_service / Serviço de plano;
+- active / Serviço ativo.
+
+Validações implementadas:
+
+- nome obrigatório;
+- nome com pelo menos 2 caracteres;
+- categoria obrigatória;
+- preço numérico e não negativo;
+- duração inteira maior que zero.
+
+O formulário possui:
+
+- estado de salvamento;
+- feedback de erro;
+- feedback de sucesso;
+- SALVAR ALTERAÇÕES;
+- CANCELAR;
+- VOLTAR PARA SERVIÇOS.
+
+Mensagem de sucesso confirmada:
+
+Serviço atualizado com sucesso.
+
+## PRESERVAÇÃO DO REGISTRO
+
+A edição utiliza UPDATE diretamente em:
+
+public.services
+
+com filtro pelo mesmo:
+
+services.id
+
+Não existe delete ou recriação do serviço durante a edição.
+
+O registro existente e seu id são preservados.
+
+## PERMISSÃO ADMINISTRATIVA DE UPDATE
+
+No primeiro teste real, o Supabase retornou:
+
+permission denied for table services
+
+Foi realizada somente a verificação mínima necessária.
+
+Estado confirmado antes da correção:
+
+- RLS habilitado;
+- RLS forced = false;
+- authenticated SELECT = true;
+- authenticated INSERT = false;
+- authenticated UPDATE = false;
+- authenticated DELETE = false.
+
+Policy existente preservada:
+
+Servicos ativos sao publicos — SELECT — anon, authenticated — active = true
+
+Para permitir exclusivamente a edição administrativa foi criada a alteração versionada:
+
+supabase/sql/003-admin-services-update-policy.sql
+
+Ela concede:
+
+UPDATE em public.services para authenticated
+
+e cria a policy:
+
+Admin pode alterar servicos
+
+A policy exige:
+
+profiles.id = auth.uid()
+AND profiles.role = 'admin'
+
+tanto em USING quanto em WITH CHECK.
+
+Não foi concedido INSERT ou DELETE nesta etapa.
+
+O SQL foi executado uma única vez no Supabase com sucesso.
+
+Resultado:
+
+Success. No rows returned
+
+NÃO executar novamente 003-admin-services-update-policy.sql no banco atual sem necessidade concreta.
+
+## TESTE FUNCIONAL REAL
+
+Serviço utilizado:
+
+Barba
+
+Foi utilizado temporariamente no final da descrição:
+
+Teste edição administrativa
+
+O primeiro salvamento, anterior à policy administrativa, falhou com permission denied e não persistiu.
+
+Após a criação da permissão/policy administrativa:
+
+- salvamento realizado com sucesso;
+- mensagem de sucesso exibida;
+- F5 realizado;
+- texto temporário permaneceu, confirmando persistência real.
+
+Depois o texto de teste foi removido pela própria interface.
+
+A descrição foi restaurada exatamente para:
+
+Modelagem profissional da barba, do estilo moderno ao clássico.
+
+Novo salvamento foi realizado com sucesso.
+
+A restauração foi confirmada visualmente.
+
+Nenhum dado temporário permaneceu no serviço.
+
+Durante o teste não foram alterados:
+
+- nome;
+- categoria;
+- preço;
+- duração;
+- Serviço de plano;
+- Serviço ativo.
+
+## TESTE VISUAL FINAL
+
+/admin/servicos:
+
+APROVADO.
+
+Confirmado:
+
+- 24 serviços cadastrados;
+- 24 serviços ativos;
+- 4 serviços de plano;
+- cards preservados;
+- indicadores preservados;
+- botões EDITAR visíveis;
+- serviço Barba com descrição original;
+- nenhum erro visual observado.
+
+/admin/servicos/[id]:
+
+APROVADO.
+
+Confirmado:
+
+- carregamento pelo id;
+- campos preenchidos;
+- controles de plano e ativo;
+- feedback de sucesso;
+- persistência real.
+
+## BUILD FINAL
+
+Executado:
+
+npm.cmd run build
+
+Resultado:
+
+APROVADO.
+
+- Compiled successfully;
+- TypeScript sem erros;
+- geração das páginas concluída;
+- /admin/servicos reconhecida;
+- /admin/servicos/[id] reconhecida como rota dinâmica.
+
+## BANCO / SQL VERSIONADO
+
+Arquivos SQL conhecidos agora:
+
+- supabase/sql/001-admin-blocked-times-policies.sql
+- supabase/sql/002-business-settings.sql
+- supabase/sql/003-admin-services-update-policy.sql
+
+Toda nova alteração REAL de banco deve continuar sendo versionada em supabase/sql/.
+
+Não repetir consultas de RLS, policies e privilégios de services sem nova necessidade concreta.
+
+## GIT
+
+Commit funcional:
+
+f859384 Adiciona edicao administrativa de servicos
+
+Push realizado com sucesso para origin/main.
+
+CODIGO-COMPLETO.txt não foi incluído no commit e deve continuar untracked.
+
+## REGRA OPERACIONAL — COMANDOS
+
+Preferência explícita do responsável pelo projeto:
+
+Sempre fornecer comandos completos e prontos para copiar e colar sempre que possível.
+
+O responsável deve precisar apenas:
+
+1. copiar o comando;
+2. colar no PowerShell/terminal;
+3. devolver o resultado.
+
+Evitar pedir criação ou edição manual de arquivos quando um comando completo puder fazer a operação com segurança.
+
+Para arquivos de código, continuar preferindo arquivo completo via PowerShell Set-Content.
+
+Para leitura/verificação, fornecer também o comando exato.
+
+Não incluir o prompt PS C:\... dentro dos comandos.
+
+Na máquina atual, utilizar npm.cmd em vez de npm quando necessário por causa da ExecutionPolicy do PowerShell.
+
+Para diretórios contendo [id], continuar usando System.IO.Directory quando for necessária criação compatível.
+
+## ESTADO FUNCIONAL CONSOLIDADO
+
+Integração assinaturas + agendamento:
+
+CONCLUÍDA.
+
+/admin:
+
+CONCLUÍDO.
+
+/admin/agenda:
+
+CONCLUÍDO, com navegação por data.
+
+/admin/clientes:
+
+CONCLUÍDO, com listagem, busca e edição.
+
+/admin/servicos:
+
+CONCLUÍDO, agora com listagem e edição.
+
+/admin/servicos/[id]:
+
+CONCLUÍDO.
+
+/admin/bloqueios:
+
+CONCLUÍDO.
+
+/admin/configuracoes:
+
+CONCLUÍDA a primeira versão.
+
+Funcionalidades anteriores de barbeiros e assinantes permanecem concluídas.
+
+## PRÓXIMO PASSO
+
+Versionar somente esta atualização de CONTEXTO-PROJETO.md.
+
+Não incluir CODIGO-COMPLETO.txt.
+
+Depois fazer push e confirmar que o estado final permanece somente com:
+
+?? CODIGO-COMPLETO.txt
+
+como untracked.
+
+Somente depois iniciar outra evolução funcional.
+
+Continuar trabalhando UMA ETAPA POR VEZ.

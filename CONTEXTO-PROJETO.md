@@ -5077,3 +5077,234 @@ Antes de implementar escrita em appointments, manter privilégio mínimo e criar
 
 Continuar UMA ETAPA POR VEZ.
 
+
+---
+
+# CHECKPOINT FINAL — GESTÃO DE STATUS NA AGENDA ADMINISTRATIVA
+
+Data: 2026-09-07
+
+Este é o checkpoint mais recente e deve ter prioridade sobre registros anteriores quando houver divergência.
+
+## STATUS
+
+Gestão administrativa do status dos agendamentos:
+
+CONCLUÍDA, TESTADA E VERSIONADA.
+
+Rota:
+
+/admin/agenda
+
+Commit funcional:
+
+6453b4d Adiciona gestao de status na agenda administrativa
+
+Push realizado com sucesso:
+
+main → origin/main
+
+## STATUS SUPORTADOS
+
+A constraint existente de public.appointments foi consultada antes da implementação.
+
+Valores permitidos confirmados:
+
+- scheduled;
+- confirmed;
+- completed;
+- cancelled;
+- no_show.
+
+A interface apresenta respectivamente:
+
+- Agendado;
+- Confirmado;
+- Concluído;
+- Cancelado;
+- Não compareceu.
+
+Nenhum status novo foi criado.
+
+## IMPLEMENTAÇÃO
+
+Arquivos:
+
+- app/admin/agenda/page.tsx
+- app/admin/agenda/actions.ts
+- app/admin/agenda/appointment-status-form.tsx
+- supabase/sql/005-admin-appointments-update-policy.sql
+
+Cada agendamento da Agenda agora possui:
+
+- seletor de status;
+- botão SALVAR STATUS;
+- botão desabilitado enquanto não existe alteração;
+- estado SALVANDO;
+- feedback de erro;
+- feedback de sucesso.
+
+Mensagem de sucesso confirmada:
+
+Status atualizado com sucesso.
+
+## SERVER ACTION / SEGURANÇA
+
+A mutação foi implementada através de Server Action.
+
+A action:
+
+- valida appointmentId;
+- aceita somente os cinco status conhecidos;
+- chama supabase.auth.getUser();
+- revalida a sessão;
+- consulta profiles;
+- exige profiles.role = admin;
+- confirma a existência do agendamento;
+- altera somente appointments.status;
+- revalida /admin;
+- revalida /admin/agenda.
+
+A autorização do layout administrativo NÃO é considerada suficiente isoladamente.
+
+A própria Server Action revalida autenticação/autorização conforme a documentação local do Next.js 16.
+
+RLS permanece como segunda camada de proteção.
+
+## BANCO / SUPABASE
+
+Antes da implementação foi confirmado:
+
+- appointments possui RLS;
+- não existia UPDATE para authenticated;
+- não existia RPC específica para alteração/cancelamento de appointments;
+- não existem triggers customizados em appointments.
+
+Alteração permanente criada e executada uma única vez:
+
+supabase/sql/005-admin-appointments-update-policy.sql
+
+Ela concede:
+
+UPDATE em public.appointments para authenticated
+
+e cria:
+
+Admin pode alterar agendamentos
+
+A policy exige:
+
+profiles.id = auth.uid()
+AND profiles.role = 'admin'
+
+em USING e WITH CHECK.
+
+Não foi concedido INSERT ou DELETE.
+
+NÃO executar novamente 005-admin-appointments-update-policy.sql sem necessidade concreta.
+
+## TESTE FUNCIONAL REAL
+
+Foi utilizado o agendamento real de:
+
+04/09/2026
+16:15 - 17:00
+
+Estado inicial:
+
+scheduled / Agendado
+
+Para teste foi alterado temporariamente para:
+
+confirmed / Confirmado
+
+Resultado:
+
+- salvamento realizado com sucesso;
+- mensagem de sucesso apresentada;
+- F5 realizado;
+- Confirmado permaneceu selecionado;
+- persistência real no Supabase confirmada.
+
+Depois o mesmo agendamento foi restaurado pela interface para:
+
+scheduled / Agendado
+
+A restauração foi confirmada após novo carregamento.
+
+O segundo agendamento da data permaneceu Agendado durante o teste.
+
+Nenhuma alteração temporária do teste permaneceu nos dados.
+
+## LOG
+
+Após alteração e restauração, o log do Next.js foi verificado.
+
+Não foram encontrados:
+
+- Erro ao validar agendamento;
+- Erro ao atualizar status do agendamento;
+- erros de servidor relacionados à funcionalidade.
+
+## NEXT.JS 16 / AGENTS.md
+
+AGENTS.md foi respeitado.
+
+Documentação local consultada:
+
+- node_modules/next/dist/docs/01-app/01-getting-started/07-mutating-data.md
+- node_modules/next/dist/docs/01-app/02-guides/data-security.md
+
+Foi seguido o requisito de revalidar autenticação e autorização dentro da Server Action.
+
+## BUILD FINAL
+
+Executado:
+
+npm.cmd run build
+
+Resultado:
+
+APROVADO.
+
+- Compiled successfully;
+- TypeScript sem erros;
+- páginas geradas sem erro;
+- /admin/agenda permanece dinâmica.
+
+## SQLS VERSIONADOS ATUAIS
+
+- supabase/sql/001-admin-blocked-times-policies.sql
+- supabase/sql/002-business-settings.sql
+- supabase/sql/003-admin-services-update-policy.sql
+- supabase/sql/004-admin-appointments-read-policies.sql
+- supabase/sql/005-admin-appointments-update-policy.sql
+
+## ESTADO CONSOLIDADO DA AGENDA
+
+/admin/agenda agora possui:
+
+- navegação por data;
+- leitura real de agendamentos;
+- cliente;
+- telefone;
+- profissional;
+- serviços;
+- valor;
+- status;
+- cards responsivos;
+- gestão administrativa do status;
+- proteção administrativa de leitura e escrita.
+
+## PRÓXIMO PASSO
+
+Versionar somente esta atualização de CONTEXTO-PROJETO.md.
+
+Não incluir CODIGO-COMPLETO.txt.
+
+Depois fazer push.
+
+Somente após o checkpoint documental iniciar outra evolução funcional.
+
+Continuar UMA ETAPA POR VEZ.
+

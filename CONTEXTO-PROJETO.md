@@ -4866,3 +4866,214 @@ como untracked.
 Somente depois iniciar outra evolução funcional.
 
 Continuar trabalhando UMA ETAPA POR VEZ.
+
+---
+
+# CHECKPOINT — CORREÇÃO DA LEITURA ADMINISTRATIVA DA AGENDA
+
+Data: 2026-09-07
+
+Este checkpoint registra uma correção real identificada durante a preparação da próxima evolução da Agenda.
+
+## STATUS
+
+Correção da leitura administrativa da Agenda:
+
+CONCLUÍDA, TESTADA E VERSIONADA.
+
+Commit funcional:
+
+32c0525 Corrige leitura administrativa da agenda
+
+Push realizado com sucesso:
+
+main → origin/main
+
+## PROBLEMA IDENTIFICADO
+
+A rota:
+
+/admin/agenda
+
+aparentava funcionar anteriormente quando testada em datas sem agendamentos.
+
+Durante nova validação foi confirmado no log do Next.js:
+
+Erro ao carregar agenda: {}
+
+A causa era de permissão no Supabase.
+
+Estado confirmado de:
+
+public.appointments
+public.appointment_services
+
+antes da correção:
+
+- RLS habilitado;
+- authenticated sem SELECT;
+- nenhuma policy existente nas duas tabelas.
+
+A página convertia a falha da consulta em lista vazia através de:
+
+data ?? []
+
+fazendo o erro aparecer visualmente como:
+
+0 agendamentos
+
+Portanto o estado vazio anterior podia mascarar uma falha de permissão.
+
+## ALTERAÇÃO DE BANCO
+
+Foi criada e executada uma única vez a alteração versionada:
+
+supabase/sql/004-admin-appointments-read-policies.sql
+
+Ela concede somente SELECT para authenticated em:
+
+- public.appointments;
+- public.appointment_services.
+
+A leitura efetiva é protegida por RLS e exige:
+
+profiles.id = auth.uid()
+AND profiles.role = 'admin'
+
+Policies criadas:
+
+- Admin pode visualizar agendamentos
+- Admin pode visualizar servicos dos agendamentos
+
+Nenhuma permissão de INSERT, UPDATE ou DELETE foi concedida nesta alteração.
+
+NÃO executar novamente 004-admin-appointments-read-policies.sql sem necessidade concreta.
+
+## VALIDAÇÃO COM DADOS REAIS
+
+Datas existentes foram localizadas por consulta somente de leitura:
+
+- 2026-09-04 — 2 agendamentos;
+- 2026-09-03 — 1 agendamento;
+- 2026-09-02 — 4 agendamentos.
+
+Teste realizado em:
+
+http://localhost:3000/admin/agenda?data=2026-09-04
+
+Após a policy de leitura, a página passou a apresentar corretamente os 2 agendamentos reais.
+
+## CLIENTE E PROFISSIONAL
+
+Após a correção de SELECT, serviços apareciam corretamente, mas cliente e profissional ainda não eram apresentados pelo relacionamento aninhado.
+
+Foi confirmado que os appointments possuem customer_id e barber_id válidos.
+
+As policies já existentes de customers e barbers permitem leitura administrativa.
+
+A solução aplicada em:
+
+app/admin/agenda/page.tsx
+
+foi:
+
+- incluir customer_id;
+- incluir barber_id;
+- carregar somente os customers referenciados na data;
+- carregar somente os barbers referenciados na data;
+- resolver cliente e profissional pelos respectivos IDs.
+
+Nenhuma alteração adicional de banco foi necessária para customers ou barbers.
+
+Teste visual confirmou:
+
+- nome real do cliente;
+- telefone;
+- profissional;
+- serviços;
+- preço;
+- status.
+
+## AJUSTE VISUAL
+
+A grade fixa anterior dos cards da Agenda causava corte horizontal.
+
+Foi substituída por grade responsiva usando:
+
+repeat(auto-fit, minmax(150px, 1fr))
+
+O bloco de valor também foi alinhado de forma compatível com a nova grade.
+
+Teste visual final confirmou todos os campos visíveis sem o corte anterior.
+
+## TESTE REAL
+
+Na data 2026-09-04 foram exibidos:
+
+- 2 agendamentos;
+- clientes reais;
+- telefones;
+- profissional Rodrigo Alves Correa;
+- serviços;
+- serviço comum com valor R$ 70,00;
+- serviço de assinatura com valor histórico R$ 0,00;
+- status scheduled.
+
+Nenhum dado artificial foi criado para esse teste.
+
+Após a correção, o log não apresentou:
+
+- Erro ao carregar agenda;
+- Erro ao carregar clientes da agenda;
+- Erro ao carregar profissionais da agenda.
+
+## NEXT.JS 16
+
+AGENTS.md foi respeitado.
+
+Documentação local consultada:
+
+node_modules/next/dist/docs/01-app/01-getting-started/06-fetching-data.md
+
+Foi mantido o padrão de async Server Component com consultas de banco no servidor.
+
+## BUILD
+
+Executado:
+
+npm.cmd run build
+
+Resultado:
+
+APROVADO.
+
+- Compiled successfully;
+- TypeScript sem erros;
+- geração das páginas concluída;
+- /admin/agenda permanece rota dinâmica.
+
+## SQLS VERSIONADOS ATUAIS
+
+- supabase/sql/001-admin-blocked-times-policies.sql
+- supabase/sql/002-business-settings.sql
+- supabase/sql/003-admin-services-update-policy.sql
+- supabase/sql/004-admin-appointments-read-policies.sql
+
+## PRÓXIMA EVOLUÇÃO
+
+A Agenda agora possui leitura administrativa real e validada.
+
+Os status aceitos pela constraint atual de appointments foram confirmados como:
+
+- scheduled;
+- confirmed;
+- completed;
+- cancelled;
+- no_show.
+
+Gestão/alteração desses status ainda NÃO foi implementada.
+
+Antes de implementar escrita em appointments, manter privilégio mínimo e criar somente a autorização administrativa necessária, versionando qualquer alteração real de banco em supabase/sql/.
+
+Continuar UMA ETAPA POR VEZ.
+

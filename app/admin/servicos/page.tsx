@@ -1,7 +1,9 @@
+﻿import Link from "next/link";
 import {
   BadgeCheck,
   Clock3,
   DollarSign,
+  Pencil,
   Scissors,
 } from "lucide-react";
 
@@ -69,7 +71,7 @@ export default async function ServicosPage() {
           </h1>
 
           <p className="admin-subtitle">
-            Consulte os serviços oferecidos pela
+            Consulte e gerencie os serviços oferecidos pela
             barbearia.
           </p>
         </div>
@@ -279,6 +281,36 @@ export default async function ServicosPage() {
                 >
                   {service.description ?? "-"}
                 </p>
+              </div>
+
+              <div
+                style={{
+                  marginTop: "18px",
+                  paddingTop: "16px",
+                  borderTop: "1px solid #222",
+                }}
+              >
+                <Link
+                  href={`/admin/servicos/${service.id}`}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "7px",
+                    minHeight: "36px",
+                    padding: "0 12px",
+                    color: "#d29d4f",
+                    background: "#17130d",
+                    border:
+                      "1px solid rgba(210, 157, 79, 0.3)",
+                    borderRadius: "6px",
+                    textDecoration: "none",
+                    fontSize: "11px",
+                    fontWeight: 700,
+                  }}
+                >
+                  <Pencil size={14} />
+                  EDITAR
+                </Link>
               </div>
             </article>
           ))}

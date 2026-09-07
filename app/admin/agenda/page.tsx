@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
+import AppointmentStatusForm from "./appointment-status-form";
 
 type Appointment = {
   id: string;
@@ -395,16 +396,10 @@ export default async function AgendaPage({
                     {formatPrice(appointment.price)}
                   </strong>
 
-                  <div
-                    style={{
-                      color: "#777",
-                      fontSize: "11px",
-                      marginTop: "5px",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    {appointment.status}
-                  </div>
+                  <AppointmentStatusForm
+                    appointmentId={appointment.id}
+                    currentStatus={appointment.status}
+                  />
                 </div>
               </div>
             );
@@ -519,4 +514,5 @@ function formatPrice(value: number | string) {
     currency: "BRL",
   });
 }
+
 

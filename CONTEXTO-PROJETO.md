@@ -5308,3 +5308,235 @@ Somente após o checkpoint documental iniciar outra evolução funcional.
 
 Continuar UMA ETAPA POR VEZ.
 
+
+---
+
+# CHECKPOINT FINAL — EDIÇÃO ADMINISTRATIVA DE BARBEIROS
+
+Data: 2026-09-07
+
+Este é o checkpoint mais recente e deve ter prioridade sobre registros anteriores quando houver divergência.
+
+## STATUS
+
+Edição administrativa de barbeiros:
+
+CONCLUÍDA, TESTADA E VERSIONADA.
+
+Rota de listagem:
+
+/admin/barbeiros
+
+Nova rota de edição:
+
+/admin/barbeiros/[id]
+
+Commit funcional:
+
+9cc3e59 Adiciona edicao administrativa de barbeiros
+
+Push realizado com sucesso:
+
+main → origin/main
+
+## IMPLEMENTAÇÃO
+
+Arquivos criados:
+
+- app/admin/barbeiros/[id]/page.tsx
+- app/admin/barbeiros/[id]/barber-edit-form.tsx
+- app/admin/barbeiros/[id]/actions.ts
+
+O botão EDITAR já existente em:
+
+app/admin/barbeiros/page.tsx
+
+apontava para:
+
+/admin/barbeiros/[id]
+
+mas essa rota não existia.
+
+A rota foi implementada sem alterar as funcionalidades já existentes de:
+
+- cadastro de barbeiros;
+- horários;
+- serviços realizados.
+
+A página dinâmica utiliza:
+
+params: Promise<{ id: string }>
+
+e carrega o profissional pelo próprio:
+
+barbers.id
+
+Barbeiro inexistente utiliza:
+
+notFound().
+
+## CAMPOS EDITÁVEIS
+
+A edição permite alterar:
+
+- nome;
+- WhatsApp profissional;
+- status ativo/inativo.
+
+O telefone continua opcional, preservando a regra já existente no cadastro.
+
+Horários e serviços NÃO são editados nessa página e continuam nas rotas próprias:
+
+- /admin/barbeiros/[id]/horarios
+- /admin/barbeiros/[id]/servicos
+
+## VALIDAÇÕES
+
+Implementado:
+
+- nome obrigatório;
+- nome com pelo menos 2 caracteres;
+- telefone opcional;
+- quando informado, WhatsApp deve possuir 10 ou 11 dígitos.
+
+## SERVER ACTION / SEGURANÇA
+
+A edição utiliza Server Action.
+
+A action:
+
+- valida o id;
+- valida nome;
+- valida telefone;
+- chama supabase.auth.getUser();
+- revalida a sessão;
+- consulta profiles;
+- exige profiles.role = admin;
+- confirma a existência do barbeiro;
+- atualiza somente name, phone e active;
+- preserva o mesmo barbers.id;
+- revalida as rotas administrativas relacionadas.
+
+A policy de UPDATE de barbers já existia e foi confirmada antes da implementação:
+
+Admin pode alterar barbeiros
+
+Ela exige:
+
+profiles.id = auth.uid()
+AND profiles.role = 'admin'
+
+em USING e WITH CHECK.
+
+Nenhuma alteração de banco foi necessária.
+
+Nenhum novo SQL foi criado.
+
+## TESTE FUNCIONAL REAL
+
+Profissional utilizado:
+
+Rodrigo Alves Correa
+
+WhatsApp:
+
+(41) 98888-1149
+
+Status:
+
+ativo
+
+Para validar persistência, o nome foi temporariamente alterado para uma versão contendo:
+
+teste
+
+O salvamento apresentou:
+
+Barbeiro atualizado com sucesso.
+
+Após F5, o nome temporário permaneceu, confirmando persistência real.
+
+Depois o nome foi restaurado pela própria interface para exatamente:
+
+Rodrigo Alves Correa
+
+Novo salvamento foi realizado e a restauração foi confirmada após recarregar.
+
+WhatsApp e status não foram alterados durante o teste.
+
+Nenhum dado temporário permaneceu no barbeiro.
+
+## TESTE VISUAL
+
+A nova tela apresentou corretamente:
+
+- VOLTAR PARA BARBEIROS;
+- Editar barbeiro;
+- nome;
+- WhatsApp;
+- status;
+- Barbeiro ativo;
+- SALVAR ALTERAÇÕES;
+- CANCELAR;
+- feedback visual de sucesso.
+
+Layout e acentuação aprovados.
+
+## LOG
+
+Após teste e restauração, não foram encontrados:
+
+- Erro ao validar barbeiro;
+- Erro ao atualizar barbeiro;
+- erros de servidor relacionados à funcionalidade.
+
+## BUILD FINAL
+
+Executado:
+
+npm.cmd run build
+
+Resultado:
+
+APROVADO.
+
+- Compiled successfully;
+- TypeScript sem erros;
+- /admin/barbeiros/[id] reconhecida como rota dinâmica;
+- demais rotas existentes preservadas.
+
+## BANCO / SQL
+
+Nenhuma alteração de banco nesta funcionalidade.
+
+SQLs versionados permanecem:
+
+- supabase/sql/001-admin-blocked-times-policies.sql
+- supabase/sql/002-business-settings.sql
+- supabase/sql/003-admin-services-update-policy.sql
+- supabase/sql/004-admin-appointments-read-policies.sql
+- supabase/sql/005-admin-appointments-update-policy.sql
+
+## ESTADO CONSOLIDADO DE BARBEIROS
+
+Barbeiros agora possuem:
+
+- cadastro;
+- listagem;
+- edição;
+- status ativo/inativo;
+- serviços por barbeiro;
+- jornada semanal.
+
+## PRÓXIMO PASSO
+
+Versionar somente esta atualização de CONTEXTO-PROJETO.md.
+
+Não incluir CODIGO-COMPLETO.txt.
+
+Depois fazer push.
+
+Somente após o checkpoint documental iniciar outra evolução funcional.
+
+Continuar UMA ETAPA POR VEZ.
+

@@ -6444,3 +6444,162 @@ Depois fazer push e confirmar que git status --short apresenta somente:
 Somente após o checkpoint documental iniciar outra evolução funcional.
 
 Continuar trabalhando UMA ETAPA POR VEZ.
+
+---
+
+# CHECKPOINT FINAL — BUSCA E FILTRO ADMINISTRATIVO DE ASSINANTES
+
+Data: 2026-09-08
+
+Este é o checkpoint mais recente e deve ter prioridade sobre registros anteriores quando houver divergência.
+
+## STATUS
+
+Busca e filtro administrativo de assinantes:
+
+CONCLUÍDOS, TESTADOS E VERSIONADOS.
+
+Rota:
+
+/admin/assinantes
+
+Commit funcional:
+
+63db529 Adiciona busca e filtro de assinantes
+
+Push realizado com sucesso para origin/main.
+
+## IMPLEMENTAÇÃO
+
+Arquivo alterado:
+
+- app/admin/assinantes/page.tsx
+
+A listagem administrativa passou a possuir:
+
+- busca por nome do cliente;
+- busca por WhatsApp;
+- filtro por status;
+- combinação de busca e status;
+- parâmetros `busca` e `status` na URL;
+- botão Filtrar;
+- botão Limpar;
+- quantidade de resultados;
+- estado vazio para filtros sem correspondência.
+
+Status preservados:
+
+- active — Ativo;
+- paused — Pausado;
+- cancelled — Cancelado;
+- expired — Expirado.
+
+Nenhum status novo foi criado.
+
+As funcionalidades existentes de cadastro e edição de assinaturas foram preservadas.
+
+A integração assinaturas + agendamento NÃO foi alterada.
+
+## TESTES
+
+Executado:
+
+npm.cmd run build
+
+Resultado:
+
+APROVADO.
+
+- compilação concluída;
+- TypeScript sem erros;
+- /admin/assinantes reconhecida como rota dinâmica.
+
+Teste funcional/visual:
+
+APROVADO.
+
+Com 1 assinatura real existente, foi confirmado:
+
+- lista normal funcionando;
+- busca por `Rodrigo` → 1 resultado;
+- busca por `9990` → 1 resultado;
+- busca por `inexistente` → 0 resultados;
+- estado `Nenhum assinante encontrado`;
+- filtro Ativo → 1 resultado;
+- filtro Pausado → 0 resultados;
+- Limpar → lista completa restaurada;
+- card preservado;
+- serviços incluídos preservados;
+- status ATIVO preservado;
+- EDITAR ASSINATURA preservado.
+
+Nenhuma assinatura ou outro dado foi alterado durante os testes.
+
+## NEXT.JS 16 / AGENTS.md
+
+AGENTS.md foi respeitado.
+
+Foi mantido o padrão do Next.js 16 já confirmado pela documentação local:
+
+searchParams: Promise<...>
+
+com await antes da leitura dos parâmetros.
+
+## BANCO / SUPABASE
+
+Nenhuma alteração de banco.
+
+Nenhuma tabela, coluna, RPC, policy, função ou constraint foi criada ou alterada.
+
+Nenhum SQL foi executado.
+
+SQLs versionados permanecem:
+
+- supabase/sql/001-admin-blocked-times-policies.sql
+- supabase/sql/002-business-settings.sql
+- supabase/sql/003-admin-services-update-policy.sql
+- supabase/sql/004-admin-appointments-read-policies.sql
+- supabase/sql/005-admin-appointments-update-policy.sql
+- supabase/sql/006-admin-services-insert-policy.sql
+
+NÃO executar novamente esses SQLs sem necessidade concreta.
+
+## ESTADO FUNCIONAL CONSOLIDADO
+
+- integração assinaturas + agendamento: CONCLUÍDA;
+- /admin: CONCLUÍDO;
+- /admin/agenda: CONCLUÍDO;
+- /admin/clientes: CONCLUÍDO com listagem, busca, cadastro e edição;
+- /admin/servicos: CONCLUÍDO com listagem, cadastro e edição;
+- /admin/barbeiros: CONCLUÍDO com cadastro, listagem e edição;
+- /admin/bloqueios: CONCLUÍDO;
+- /admin/configuracoes: primeira versão CONCLUÍDA;
+- /admin/assinantes: CONCLUÍDO com cadastro, listagem, busca, filtro e edição.
+
+## GIT
+
+Último commit funcional:
+
+63db529 Adiciona busca e filtro de assinantes
+
+CODIGO-COMPLETO.txt deve permanecer untracked e NÃO deve ser versionado.
+
+## PRÓXIMO CHAT
+
+Usar este CONTEXTO-PROJETO.md como fonte principal.
+
+NÃO refazer funcionalidades registradas como concluídas.
+
+NÃO reconstruir assinaturas + agendamento.
+
+NÃO repetir testes, consultas ou verificações já documentados sem necessidade concreta.
+
+Primeiro confirmar o checkpoint Git mais recente e então identificar a próxima evolução funcional adequada.
+
+Trabalhar UMA ETAPA POR VEZ.
+
+Antes de alterar código, pedir somente o arquivo específico necessário.
+
+Toda alteração real futura de banco deve permanecer versionada em supabase/sql/.
+
+CODIGO-COMPLETO.txt deve continuar untracked.

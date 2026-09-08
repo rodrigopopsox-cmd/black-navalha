@@ -6603,3 +6603,182 @@ Antes de alterar código, pedir somente o arquivo específico necessário.
 Toda alteração real futura de banco deve permanecer versionada em supabase/sql/.
 
 CODIGO-COMPLETO.txt deve continuar untracked.
+
+---
+
+# CHECKPOINT FINAL — INDICADORES DO DASHBOARD POR STATUS
+
+Data: 2026-09-08
+
+Este é o checkpoint mais recente e deve ter prioridade sobre registros anteriores quando houver divergência.
+
+## STATUS
+
+Indicadores operacionais do dashboard alinhados aos status da Agenda:
+
+CONCLUÍDO, TESTADO E VERSIONADO.
+
+Rota:
+
+/admin
+
+Commit funcional:
+
+9e7efbf Ajusta indicadores do dashboard por status
+
+Push realizado com sucesso para origin/main.
+
+## REGRA DE NEGÓCIO
+
+Foi definido que os indicadores do dia devem considerar como atendimentos válidos:
+
+- scheduled — Agendado;
+- confirmed — Confirmado;
+- completed — Concluído.
+
+Não são considerados válidos para os indicadores/faturamento do dia:
+
+- cancelled — Cancelado;
+- no_show — Não compareceu.
+
+Essa regra evita que um atendimento desapareça dos indicadores do dashboard apenas por passar de Agendado para Confirmado ou Concluído.
+
+## IMPLEMENTAÇÃO
+
+Arquivo alterado:
+
+- app/admin/page.tsx
+
+Foi criada a lista:
+
+VALID_TODAY_STATUSES
+
+contendo:
+
+- scheduled;
+- confirmed;
+- completed.
+
+A coleção utilizada pelo dashboard passou a ser:
+
+validTodayAppointments
+
+Essa coleção é utilizada em:
+
+- quantidade de Agendamentos hoje;
+- cálculo de Faturamento hoje;
+- listagem Agenda de hoje.
+
+O faturamento continua utilizando o valor histórico já armazenado em:
+
+appointments.price
+
+Nenhuma regra de preço ou benefício de assinatura foi alterada.
+
+A integração assinaturas + agendamento permaneceu intacta.
+
+## NEXT.JS 16 / AGENTS.md
+
+AGENTS.md foi respeitado.
+
+Foi consultada a documentação local relevante:
+
+node_modules/next/dist/docs/01-app/01-getting-started/06-fetching-data.md
+
+Foi mantido o padrão existente de async Server Component com consultas de banco no servidor.
+
+## BUILD
+
+Executado:
+
+npm.cmd run build
+
+Resultado:
+
+APROVADO.
+
+- compilação concluída com sucesso;
+- TypeScript sem erros;
+- geração das páginas concluída;
+- /admin reconhecida como rota dinâmica.
+
+## TESTE VISUAL
+
+Testado:
+
+http://localhost:3000/admin
+
+Resultado:
+
+APROVADO para o estado atual.
+
+Confirmado:
+
+- página carregando corretamente;
+- layout preservado;
+- acentuação correta;
+- Agendamentos hoje: 0;
+- Faturamento hoje: R$ 0,00;
+- Clientes: 4;
+- Agenda de hoje em estado vazio correto.
+
+Não havia atendimento no dia do teste.
+
+Por isso a diferença visual entre scheduled, confirmed e completed não foi exercitada com um registro real.
+
+Nenhum dado artificial foi criado exclusivamente para o teste.
+
+Foi observado Barbeiros ativos: 0 no estado atual, mas esse dado não faz parte desta alteração e não foi investigado nesta etapa.
+
+## BANCO / SUPABASE
+
+Nenhuma alteração de banco.
+
+Nenhuma tabela, coluna, RPC, policy, função ou constraint foi criada ou alterada.
+
+Nenhum SQL foi executado.
+
+SQLs versionados permanecem:
+
+- supabase/sql/001-admin-blocked-times-policies.sql
+- supabase/sql/002-business-settings.sql
+- supabase/sql/003-admin-services-update-policy.sql
+- supabase/sql/004-admin-appointments-read-policies.sql
+- supabase/sql/005-admin-appointments-update-policy.sql
+- supabase/sql/006-admin-services-insert-policy.sql
+
+NÃO executar novamente esses SQLs sem necessidade concreta.
+
+## GIT
+
+Commit funcional:
+
+9e7efbf Ajusta indicadores do dashboard por status
+
+Push concluído:
+
+main → origin/main
+
+CODIGO-COMPLETO.txt deve continuar untracked e NÃO deve ser versionado.
+
+## ESTADO FUNCIONAL
+
+Dashboard administrativo:
+
+CONCLUÍDO, agora considerando scheduled, confirmed e completed como atendimentos válidos nos indicadores do dia.
+
+Demais funcionalidades consolidadas anteriormente permanecem concluídas e não foram alteradas.
+
+## PRÓXIMO PASSO
+
+Versionar somente esta atualização de CONTEXTO-PROJETO.md.
+
+Não incluir CODIGO-COMPLETO.txt.
+
+Depois fazer push e confirmar que git status --short apresenta somente:
+
+?? CODIGO-COMPLETO.txt
+
+Somente então iniciar outra evolução funcional.
+
+Continuar trabalhando UMA ETAPA POR VEZ.

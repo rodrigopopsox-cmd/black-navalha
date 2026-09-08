@@ -5854,3 +5854,593 @@ Depois fazer push e confirmar que git status --short apresenta somente:
 Somente após o checkpoint documental iniciar outra evolução funcional.
 
 Continuar trabalhando UMA ETAPA POR VEZ.
+
+---
+
+# CHECKPOINT FINAL — CADASTRO ADMINISTRATIVO DE CLIENTES
+
+Data: 2026-09-08
+
+Este é o checkpoint mais recente e deve ter prioridade sobre registros anteriores quando houver divergência.
+
+## STATUS
+
+Cadastro administrativo de Clientes:
+
+CONCLUÍDO, TESTADO E VERSIONADO.
+
+Rota de listagem:
+
+/admin/clientes
+
+Nova rota:
+
+/admin/clientes/novo
+
+Commit funcional:
+
+91cd08a Adiciona cadastro administrativo de clientes
+
+Push realizado com sucesso:
+
+main → origin/main
+
+## IMPLEMENTAÇÃO
+
+Arquivos alterados/criados:
+
+- app/admin/clientes/page.tsx
+- app/admin/clientes/novo/page.tsx
+- app/admin/clientes/novo/customer-create-form.tsx
+- app/admin/clientes/novo/actions.ts
+
+A listagem, busca e edição existentes foram preservadas.
+
+Foi adicionado na listagem o botão:
+
+NOVO CLIENTE
+
+O cadastro permite informar:
+
+- nome;
+- WhatsApp;
+- e-mail opcional;
+- observações opcionais.
+
+## VALIDAÇÕES
+
+Implementadas no formulário e novamente na Server Action:
+
+- nome obrigatório;
+- nome com pelo menos 2 caracteres;
+- WhatsApp obrigatório;
+- WhatsApp com 10 ou 11 dígitos;
+- validação básica do e-mail quando informado;
+- impedimento de novo cadastro quando já existe cliente com o mesmo WhatsApp normalizado.
+
+## SERVER ACTION / SEGURANÇA
+
+O cadastro utiliza Server Action.
+
+A action:
+
+- valida novamente os dados no servidor;
+- chama supabase.auth.getUser();
+- revalida a sessão;
+- consulta profiles;
+- exige profiles.role = admin;
+- verifica cliente existente pelo WhatsApp normalizado;
+- insere somente os campos necessários em public.customers;
+- revalida /admin;
+- revalida /admin/clientes.
+
+A autorização da própria Server Action complementa as regras existentes do Supabase.
+
+## BANCO / SUPABASE
+
+Nenhuma alteração estrutural ou permanente de banco foi necessária.
+
+O INSERT real em public.customers funcionou com o estado atual de permissões.
+
+Nenhuma nova:
+
+- tabela;
+- coluna;
+- RPC;
+- policy;
+- função;
+- constraint
+
+foi criada ou alterada.
+
+Nenhum novo arquivo SQL foi necessário.
+
+Permanecem versionados:
+
+- supabase/sql/001-admin-blocked-times-policies.sql
+- supabase/sql/002-business-settings.sql
+- supabase/sql/003-admin-services-update-policy.sql
+- supabase/sql/004-admin-appointments-read-policies.sql
+- supabase/sql/005-admin-appointments-update-policy.sql
+- supabase/sql/006-admin-services-insert-policy.sql
+
+Não executar novamente esses SQLs sem necessidade concreta.
+
+## TESTE FUNCIONAL REAL
+
+Foi criado pela própria interface um cliente temporário:
+
+Nome:
+
+Teste cadastro administrativo
+
+WhatsApp:
+
+(41) 90000-0001
+
+E-mail:
+
+não informado
+
+Observações:
+
+Cliente temporário para validar cadastro administrativo
+
+O cadastro foi realizado com sucesso.
+
+A aplicação retornou para:
+
+/admin/clientes
+
+O total passou temporariamente de 4 para 5 clientes.
+
+O registro temporário recebeu o id:
+
+084b67a9-fbf9-4a45-8eb3-2f32f0b351c9
+
+Após a validação, o registro foi removido especificamente pelo SQL Editor utilizando simultaneamente:
+
+- id;
+- telefone;
+- nome.
+
+O DELETE retornou exatamente o cliente temporário esperado.
+
+Nenhum cliente real foi removido.
+
+Após a limpeza, a listagem voltou a apresentar:
+
+4 clientes.
+
+Nenhum dado temporário permaneceu no banco.
+
+## TESTE VISUAL
+
+/admin/clientes:
+
+APROVADO.
+
+Confirmado:
+
+- 4 clientes reais após a limpeza;
+- busca existente preservada;
+- edição existente preservada;
+- botão NOVO CLIENTE;
+- cliente temporário ausente após a limpeza.
+
+/admin/clientes/novo:
+
+APROVADO.
+
+Confirmado:
+
+- nome;
+- WhatsApp;
+- e-mail;
+- observações;
+- CADASTRAR CLIENTE;
+- CANCELAR;
+- VOLTAR PARA CLIENTES;
+- layout administrativo preservado;
+- acentuação correta.
+
+## NEXT.JS 16 / AGENTS.md
+
+AGENTS.md foi respeitado.
+
+Documentação local consultada:
+
+- node_modules/next/dist/docs/01-app/01-getting-started/03-layouts-and-pages.md
+- node_modules/next/dist/docs/01-app/01-getting-started/07-mutating-data.md
+
+Foi utilizado o padrão de rota aninhada e Server Action com autenticação/autorização verificada no servidor.
+
+## BUILD FINAL
+
+Executado:
+
+npm.cmd run build
+
+Resultado:
+
+APROVADO.
+
+- Compiled successfully;
+- TypeScript sem erros;
+- geração das páginas concluída;
+- /admin/clientes reconhecida;
+- /admin/clientes/[id] reconhecida;
+- /admin/clientes/novo reconhecida como rota dinâmica.
+
+## GIT
+
+Commit funcional:
+
+91cd08a Adiciona cadastro administrativo de clientes
+
+Push realizado com sucesso para origin/main.
+
+CODIGO-COMPLETO.txt não foi incluído e deve continuar untracked.
+
+## ESTADO FUNCIONAL CONSOLIDADO
+
+Integração assinaturas + agendamento:
+
+CONCLUÍDA.
+
+/admin:
+
+CONCLUÍDO.
+
+/admin/agenda:
+
+CONCLUÍDO, incluindo navegação por data, leitura administrativa real e gestão de status.
+
+/admin/clientes:
+
+CONCLUÍDO, agora com listagem, busca, cadastro e edição.
+
+/admin/clientes/novo:
+
+CONCLUÍDO.
+
+/admin/clientes/[id]:
+
+CONCLUÍDO.
+
+/admin/servicos:
+
+CONCLUÍDO, com listagem, cadastro e edição.
+
+/admin/barbeiros:
+
+CONCLUÍDO, com cadastro, listagem e edição.
+
+/admin/barbeiros/[id]/horarios:
+
+CONCLUÍDO.
+
+/admin/barbeiros/[id]/servicos:
+
+CONCLUÍDO.
+
+/admin/bloqueios:
+
+CONCLUÍDO.
+
+/admin/configuracoes:
+
+CONCLUÍDA a primeira versão.
+
+Assinantes:
+
+Funcionalidades existentes permanecem concluídas.
+
+## PRÓXIMO PASSO
+
+Versionar somente esta atualização de CONTEXTO-PROJETO.md.
+
+Não incluir CODIGO-COMPLETO.txt.
+
+Depois fazer push e confirmar que git status --short apresenta somente:
+
+?? CODIGO-COMPLETO.txt
+
+Somente após o checkpoint documental iniciar outra evolução funcional.
+
+Continuar trabalhando UMA ETAPA POR VEZ.
+
+---
+
+# CHECKPOINT FINAL — CADASTRO ADMINISTRATIVO DE CLIENTES
+
+Data: 2026-09-08
+
+Este é o checkpoint mais recente e deve ter prioridade sobre registros anteriores quando houver divergência.
+
+## STATUS
+
+Cadastro administrativo de Clientes:
+
+CONCLUÍDO, TESTADO E VERSIONADO.
+
+Rota de listagem:
+
+/admin/clientes
+
+Nova rota:
+
+/admin/clientes/novo
+
+Commit funcional:
+
+91cd08a Adiciona cadastro administrativo de clientes
+
+Push realizado com sucesso:
+
+main → origin/main
+
+## IMPLEMENTAÇÃO
+
+Arquivos alterados/criados:
+
+- app/admin/clientes/page.tsx
+- app/admin/clientes/novo/page.tsx
+- app/admin/clientes/novo/customer-create-form.tsx
+- app/admin/clientes/novo/actions.ts
+
+A listagem, busca e edição existentes foram preservadas.
+
+Foi adicionado na listagem o botão:
+
+NOVO CLIENTE
+
+O cadastro permite informar:
+
+- nome;
+- WhatsApp;
+- e-mail opcional;
+- observações opcionais.
+
+## VALIDAÇÕES
+
+Implementadas no formulário e novamente na Server Action:
+
+- nome obrigatório;
+- nome com pelo menos 2 caracteres;
+- WhatsApp obrigatório;
+- WhatsApp com 10 ou 11 dígitos;
+- validação básica do e-mail quando informado;
+- impedimento de novo cadastro quando já existe cliente com o mesmo WhatsApp normalizado.
+
+## SERVER ACTION / SEGURANÇA
+
+O cadastro utiliza Server Action.
+
+A action:
+
+- valida novamente os dados no servidor;
+- chama supabase.auth.getUser();
+- revalida a sessão;
+- consulta profiles;
+- exige profiles.role = admin;
+- verifica cliente existente pelo WhatsApp normalizado;
+- insere somente os campos necessários em public.customers;
+- revalida /admin;
+- revalida /admin/clientes.
+
+A autorização da própria Server Action complementa as regras existentes do Supabase.
+
+## BANCO / SUPABASE
+
+Nenhuma alteração estrutural ou permanente de banco foi necessária.
+
+O INSERT real em public.customers funcionou com o estado atual de permissões.
+
+Nenhuma nova:
+
+- tabela;
+- coluna;
+- RPC;
+- policy;
+- função;
+- constraint
+
+foi criada ou alterada.
+
+Nenhum novo arquivo SQL foi necessário.
+
+Permanecem versionados:
+
+- supabase/sql/001-admin-blocked-times-policies.sql
+- supabase/sql/002-business-settings.sql
+- supabase/sql/003-admin-services-update-policy.sql
+- supabase/sql/004-admin-appointments-read-policies.sql
+- supabase/sql/005-admin-appointments-update-policy.sql
+- supabase/sql/006-admin-services-insert-policy.sql
+
+Não executar novamente esses SQLs sem necessidade concreta.
+
+## TESTE FUNCIONAL REAL
+
+Foi criado pela própria interface um cliente temporário:
+
+Nome:
+
+Teste cadastro administrativo
+
+WhatsApp:
+
+(41) 90000-0001
+
+E-mail:
+
+não informado
+
+Observações:
+
+Cliente temporário para validar cadastro administrativo
+
+O cadastro foi realizado com sucesso.
+
+A aplicação retornou para:
+
+/admin/clientes
+
+O total passou temporariamente de 4 para 5 clientes.
+
+O registro temporário recebeu o id:
+
+084b67a9-fbf9-4a45-8eb3-2f32f0b351c9
+
+Após a validação, o registro foi removido especificamente pelo SQL Editor utilizando simultaneamente:
+
+- id;
+- telefone;
+- nome.
+
+O DELETE retornou exatamente o cliente temporário esperado.
+
+Nenhum cliente real foi removido.
+
+Após a limpeza, a listagem voltou a apresentar:
+
+4 clientes.
+
+Nenhum dado temporário permaneceu no banco.
+
+## TESTE VISUAL
+
+/admin/clientes:
+
+APROVADO.
+
+Confirmado:
+
+- 4 clientes reais após a limpeza;
+- busca existente preservada;
+- edição existente preservada;
+- botão NOVO CLIENTE;
+- cliente temporário ausente após a limpeza.
+
+/admin/clientes/novo:
+
+APROVADO.
+
+Confirmado:
+
+- nome;
+- WhatsApp;
+- e-mail;
+- observações;
+- CADASTRAR CLIENTE;
+- CANCELAR;
+- VOLTAR PARA CLIENTES;
+- layout administrativo preservado;
+- acentuação correta.
+
+## NEXT.JS 16 / AGENTS.md
+
+AGENTS.md foi respeitado.
+
+Documentação local consultada:
+
+- node_modules/next/dist/docs/01-app/01-getting-started/03-layouts-and-pages.md
+- node_modules/next/dist/docs/01-app/01-getting-started/07-mutating-data.md
+
+Foi utilizado o padrão de rota aninhada e Server Action com autenticação/autorização verificada no servidor.
+
+## BUILD FINAL
+
+Executado:
+
+npm.cmd run build
+
+Resultado:
+
+APROVADO.
+
+- Compiled successfully;
+- TypeScript sem erros;
+- geração das páginas concluída;
+- /admin/clientes reconhecida;
+- /admin/clientes/[id] reconhecida;
+- /admin/clientes/novo reconhecida como rota dinâmica.
+
+## GIT
+
+Commit funcional:
+
+91cd08a Adiciona cadastro administrativo de clientes
+
+Push realizado com sucesso para origin/main.
+
+CODIGO-COMPLETO.txt não foi incluído e deve continuar untracked.
+
+## ESTADO FUNCIONAL CONSOLIDADO
+
+Integração assinaturas + agendamento:
+
+CONCLUÍDA.
+
+/admin:
+
+CONCLUÍDO.
+
+/admin/agenda:
+
+CONCLUÍDO, incluindo navegação por data, leitura administrativa real e gestão de status.
+
+/admin/clientes:
+
+CONCLUÍDO, agora com listagem, busca, cadastro e edição.
+
+/admin/clientes/novo:
+
+CONCLUÍDO.
+
+/admin/clientes/[id]:
+
+CONCLUÍDO.
+
+/admin/servicos:
+
+CONCLUÍDO, com listagem, cadastro e edição.
+
+/admin/barbeiros:
+
+CONCLUÍDO, com cadastro, listagem e edição.
+
+/admin/barbeiros/[id]/horarios:
+
+CONCLUÍDO.
+
+/admin/barbeiros/[id]/servicos:
+
+CONCLUÍDO.
+
+/admin/bloqueios:
+
+CONCLUÍDO.
+
+/admin/configuracoes:
+
+CONCLUÍDA a primeira versão.
+
+Assinantes:
+
+Funcionalidades existentes permanecem concluídas.
+
+## PRÓXIMO PASSO
+
+Versionar somente esta atualização de CONTEXTO-PROJETO.md.
+
+Não incluir CODIGO-COMPLETO.txt.
+
+Depois fazer push e confirmar que git status --short apresenta somente:
+
+?? CODIGO-COMPLETO.txt
+
+Somente após o checkpoint documental iniciar outra evolução funcional.
+
+Continuar trabalhando UMA ETAPA POR VEZ.

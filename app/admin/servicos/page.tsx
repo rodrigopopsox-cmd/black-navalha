@@ -4,6 +4,7 @@ import {
   Clock3,
   DollarSign,
   Pencil,
+  Plus,
   Scissors,
 } from "lucide-react";
 
@@ -75,6 +76,26 @@ export default async function ServicosPage() {
             barbearia.
           </p>
         </div>
+
+        <Link
+          href="/admin/servicos/novo"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "7px",
+            minHeight: "42px",
+            padding: "0 16px",
+            color: "#0a0704",
+            background: "#c89b58",
+            borderRadius: "6px",
+            textDecoration: "none",
+            fontSize: "12px",
+            fontWeight: 700,
+          }}
+        >
+          <Plus size={16} />
+          NOVO SERVIÇO
+        </Link>
       </div>
 
       <div

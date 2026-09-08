@@ -6782,3 +6782,239 @@ Depois fazer push e confirmar que git status --short apresenta somente:
 Somente então iniciar outra evolução funcional.
 
 Continuar trabalhando UMA ETAPA POR VEZ.
+
+---
+
+# CHECKPOINT FINAL — HISTÓRICO ADMINISTRATIVO DE CLIENTES
+
+Data: 2026-09-08
+
+Este é o checkpoint mais recente e deve ter prioridade sobre registros anteriores quando houver divergência.
+
+## STATUS
+
+Histórico administrativo de clientes:
+
+CONCLUÍDO, TESTADO E VERSIONADO.
+
+Rota de listagem:
+
+/admin/clientes
+
+Nova rota:
+
+/admin/clientes/[id]/historico
+
+Commit funcional:
+
+45f2311 Adiciona historico administrativo de clientes
+
+Push realizado com sucesso para origin/main.
+
+## IMPLEMENTAÇÃO
+
+Arquivos alterados/criados:
+
+- app/admin/clientes/page.tsx
+- app/admin/clientes/[id]/historico/page.tsx
+
+A listagem, busca, cadastro e edição administrativa de Clientes existentes foram preservados.
+
+Foi adicionado em cada card da listagem o botão:
+
+HISTÓRICO
+
+A nova rota apresenta os agendamentos vinculados ao customers.id selecionado.
+
+O histórico apresenta:
+
+- quantidade de agendamentos;
+- data;
+- horário inicial e final;
+- profissional;
+- serviços;
+- valor histórico do agendamento;
+- status;
+- estado vazio quando o cliente não possui agendamentos;
+- link ABRIR NA AGENDA para a data do atendimento.
+
+Os agendamentos são apresentados do mais recente para o mais antigo.
+
+Timezone preservado:
+
+America/Sao_Paulo
+
+Os status conhecidos são apresentados com os rótulos administrativos:
+
+- scheduled — Agendado;
+- confirmed — Confirmado;
+- completed — Concluído;
+- cancelled — Cancelado;
+- no_show — Não compareceu.
+
+## INTEGRAÇÃO COM A AGENDA
+
+Cada atendimento possui link para:
+
+/admin/agenda?data=AAAA-MM-DD
+
+O link foi testado com dado real e abriu corretamente a Agenda na data correspondente.
+
+Teste confirmado:
+
+http://localhost:3000/admin/agenda?data=2026-09-04
+
+A Agenda apresentou os 2 agendamentos reais existentes naquela data.
+
+Nenhuma funcionalidade da Agenda foi refeita ou alterada.
+
+## TESTE COM DADOS REAIS
+
+Foi validado um cliente real com histórico existente.
+
+O histórico carregou corretamente informações reais de atendimento, incluindo profissional, serviço, valor e status.
+
+Nenhum dado foi criado, alterado ou excluído durante o teste.
+
+## TESTE VISUAL DA LISTAGEM
+
+/admin/clientes:
+
+APROVADO.
+
+Confirmado:
+
+- 4 clientes preservados;
+- busca preservada;
+- NOVO CLIENTE preservado;
+- EDITAR preservado;
+- novo botão HISTÓRICO visível nos cards;
+- botões alinhados;
+- sem corte ou sobreposição visual observados.
+
+## NEXT.JS 16 / AGENTS.md
+
+AGENTS.md foi respeitado.
+
+Documentação local consultada:
+
+node_modules/next/dist/docs/01-app/01-getting-started/03-layouts-and-pages.md
+
+Foi confirmado:
+
+- roteamento aninhado por diretórios;
+- segmento dinâmico [id];
+- params como Promise no Next.js 16;
+- uso de Link para navegação interna.
+
+## BUILD
+
+Build final executado:
+
+npm.cmd run build
+
+Resultado:
+
+APROVADO.
+
+- compilação concluída com sucesso;
+- TypeScript sem erros;
+- geração das páginas concluída;
+- /admin/clientes/[id]/historico reconhecida como rota dinâmica.
+
+## BANCO / SUPABASE
+
+Nenhuma alteração de banco.
+
+Foram utilizadas as permissões administrativas de leitura já existentes e documentadas.
+
+Nenhuma tabela, coluna, RPC, policy, função, trigger ou constraint foi criada ou alterada.
+
+Nenhum SQL foi executado.
+
+SQLs versionados permanecem:
+
+- supabase/sql/001-admin-blocked-times-policies.sql
+- supabase/sql/002-business-settings.sql
+- supabase/sql/003-admin-services-update-policy.sql
+- supabase/sql/004-admin-appointments-read-policies.sql
+- supabase/sql/005-admin-appointments-update-policy.sql
+- supabase/sql/006-admin-services-insert-policy.sql
+
+Não executar novamente esses SQLs sem necessidade concreta.
+
+## GIT
+
+Commit funcional:
+
+45f2311 Adiciona historico administrativo de clientes
+
+Push concluído:
+
+main → origin/main
+
+CODIGO-COMPLETO.txt não foi versionado e deve continuar untracked.
+
+## ESTADO FUNCIONAL CONSOLIDADO
+
+Integração assinaturas + agendamento:
+
+CONCLUÍDA.
+
+/admin:
+
+CONCLUÍDO, incluindo indicadores por status.
+
+/admin/agenda:
+
+CONCLUÍDO, incluindo navegação por data, leitura administrativa real e gestão de status.
+
+/admin/clientes:
+
+CONCLUÍDO, com listagem, busca, cadastro, edição e acesso ao histórico.
+
+/admin/clientes/[id]/historico:
+
+CONCLUÍDO.
+
+/admin/servicos:
+
+CONCLUÍDO, com listagem, cadastro e edição.
+
+/admin/barbeiros:
+
+CONCLUÍDO, com cadastro, listagem e edição.
+
+/admin/barbeiros/[id]/horarios:
+
+CONCLUÍDO.
+
+/admin/barbeiros/[id]/servicos:
+
+CONCLUÍDO.
+
+/admin/bloqueios:
+
+CONCLUÍDO.
+
+/admin/configuracoes:
+
+CONCLUÍDA a primeira versão.
+
+/admin/assinantes:
+
+CONCLUÍDO, com cadastro, listagem, busca, filtro e edição.
+
+## PRÓXIMO PASSO
+
+Versionar somente esta atualização de CONTEXTO-PROJETO.md.
+
+Não incluir CODIGO-COMPLETO.txt.
+
+Depois fazer push e confirmar que git status --short apresenta somente:
+
+?? CODIGO-COMPLETO.txt
+
+Somente após esse checkpoint documental iniciar outra evolução funcional.
+
+Continuar trabalhando UMA ETAPA POR VEZ.

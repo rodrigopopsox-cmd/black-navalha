@@ -90,6 +90,26 @@ export default async function ClientesPage({
             Consulte os clientes cadastrados na barbearia.
           </p>
         </div>
+
+        <Link
+          href="/admin/clientes/novo"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            minHeight: "42px",
+            padding: "0 16px",
+            color: "#111",
+            background: "#d29d4f",
+            border: "1px solid #d29d4f",
+            borderRadius: "6px",
+            textDecoration: "none",
+            fontSize: "12px",
+            fontWeight: 700,
+          }}
+        >
+          NOVO CLIENTE
+        </Link>
       </div>
 
       <div

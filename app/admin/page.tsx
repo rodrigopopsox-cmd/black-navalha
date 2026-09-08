@@ -1,4 +1,4 @@
-import {
+﻿import {
   CalendarDays,
   Clock3,
   DollarSign,
@@ -24,6 +24,12 @@ type TodayAppointment = {
     service_name: string;
   }[];
 };
+
+const VALID_TODAY_STATUSES = [
+  "scheduled",
+  "confirmed",
+  "completed",
+];
 
 export default async function AdminPage() {
   const supabase = await createClient();
@@ -100,15 +106,15 @@ export default async function AdminPage() {
     (appointmentsResult.data ??
       []) as TodayAppointment[];
 
-  const scheduledAppointments =
-    appointments.filter(
-      (appointment) =>
-        appointment.status ===
-        "scheduled"
+  const validTodayAppointments =
+    appointments.filter((appointment) =>
+      VALID_TODAY_STATUSES.includes(
+        appointment.status
+      )
     );
 
   const todayRevenue =
-    scheduledAppointments.reduce(
+    validTodayAppointments.reduce(
       (total, appointment) =>
         total +
         Number(appointment.price),
@@ -144,7 +150,7 @@ export default async function AdminPage() {
         <DashboardCard
           title="Agendamentos hoje"
           value={String(
-            scheduledAppointments.length
+            validTodayAppointments.length
           )}
           icon={<CalendarDays />}
         />
@@ -192,7 +198,7 @@ export default async function AdminPage() {
           Agenda de hoje
         </h2>
 
-        {scheduledAppointments.length ===
+        {validTodayAppointments.length ===
         0 ? (
           <div className="admin-empty">
             <CalendarDays
@@ -215,7 +221,7 @@ export default async function AdminPage() {
               gap: "10px",
             }}
           >
-            {scheduledAppointments.map(
+            {validTodayAppointments.map(
               (appointment) => (
                 <div
                   key={appointment.id}
@@ -259,9 +265,9 @@ export default async function AdminPage() {
                     </small>
 
                     <strong>
-  {appointment.customers[0]?.name ??
-    "Cliente"}
-</strong>
+                      {appointment.customers[0]?.name ??
+                        "Cliente"}
+                    </strong>
                   </div>
 
                   <div>
@@ -276,8 +282,9 @@ export default async function AdminPage() {
                     </small>
 
                     <strong>
-  {appointment.barbers[0]?.name ?? "-"}
-</strong>
+                      {appointment.barbers[0]?.name ??
+                        "-"}
+                    </strong>
                   </div>
 
                   <div>

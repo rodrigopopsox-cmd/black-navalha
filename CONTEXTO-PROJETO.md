@@ -5540,3 +5540,317 @@ Somente após o checkpoint documental iniciar outra evolução funcional.
 
 Continuar UMA ETAPA POR VEZ.
 
+
+---
+
+# CHECKPOINT FINAL — CADASTRO ADMINISTRATIVO DE SERVIÇOS
+
+Data: 2026-09-08
+
+Este é o checkpoint mais recente e deve ter prioridade sobre registros anteriores quando houver divergência.
+
+## STATUS
+
+Cadastro administrativo de Serviços:
+
+CONCLUÍDO, TESTADO E VERSIONADO.
+
+Rota de listagem:
+
+/admin/servicos
+
+Nova rota de cadastro:
+
+/admin/servicos/novo
+
+Commit funcional:
+
+27827f7 Adiciona cadastro administrativo de servicos
+
+Push realizado com sucesso:
+
+main → origin/main
+
+## IMPLEMENTAÇÃO
+
+Arquivos alterados/criados:
+
+- app/admin/servicos/page.tsx
+- app/admin/servicos/novo/page.tsx
+- app/admin/servicos/novo/service-create-form.tsx
+- app/admin/servicos/novo/actions.ts
+- supabase/sql/006-admin-services-insert-policy.sql
+
+A listagem e a edição administrativa de Serviços existentes foram preservadas.
+
+Foi adicionado na listagem o botão:
+
+NOVO SERVIÇO
+
+A nova página permite cadastrar:
+
+- nome;
+- categoria;
+- preço;
+- duração em minutos;
+- descrição;
+- Serviço de plano;
+- Serviço ativo.
+
+Serviço ativo inicia marcado por padrão.
+
+## VALIDAÇÕES
+
+Implementadas no formulário e novamente na Server Action:
+
+- nome obrigatório;
+- nome com pelo menos 2 caracteres;
+- categoria obrigatória;
+- preço numérico e não negativo;
+- duração inteira maior que zero.
+
+## SERVER ACTION / SEGURANÇA
+
+O cadastro utiliza Server Action.
+
+A action:
+
+- valida os dados;
+- chama supabase.auth.getUser();
+- revalida a sessão;
+- consulta profiles;
+- exige profiles.role = admin;
+- insere somente os campos necessários em public.services;
+- revalida /admin;
+- revalida /admin/servicos;
+- revalida /agendar.
+
+A autorização administrativa da própria action é complementada pela RLS do Supabase.
+
+## BANCO / SUPABASE
+
+O estado anterior documentado possuía UPDATE administrativo de services, mas não INSERT para authenticated.
+
+Foi criada a alteração permanente:
+
+supabase/sql/006-admin-services-insert-policy.sql
+
+Ela concede somente:
+
+INSERT em public.services para authenticated
+
+e cria a policy:
+
+Admin pode cadastrar servicos
+
+A policy exige:
+
+profiles.id = auth.uid()
+AND profiles.role = 'admin'
+
+em WITH CHECK.
+
+Não foi concedido DELETE.
+
+O SQL 006 foi executado uma única vez no Supabase com sucesso.
+
+NÃO executar novamente supabase/sql/006-admin-services-insert-policy.sql no banco atual sem necessidade concreta.
+
+## TESTE FUNCIONAL REAL
+
+Foi criado pela própria interface um serviço temporário:
+
+Nome:
+Teste cadastro administrativo
+
+Categoria:
+Teste
+
+Preço:
+R$ 1,00
+
+Duração:
+5 minutos
+
+Descrição:
+Serviço temporário para validar cadastro administrativo
+
+Serviço de plano:
+desmarcado
+
+Serviço ativo:
+marcado
+
+O cadastro foi realizado com sucesso.
+
+A aplicação retornou para:
+
+/admin/servicos
+
+e o serviço apareceu corretamente na listagem.
+
+O total passou temporariamente de 24 para 25 serviços.
+
+O registro temporário recebeu o id:
+
+8f1a29d2-af6b-491e-82ac-1fae6422d6db
+
+Após a validação, esse registro foi removido especificamente através do SQL Editor.
+
+A remoção retornou exatamente o registro de teste.
+
+Nenhum serviço real foi removido.
+
+Após a limpeza, a listagem voltou a apresentar:
+
+24 serviços cadastrados;
+24 serviços ativos;
+4 serviços de plano.
+
+Nenhum dado temporário permaneceu no banco.
+
+## TESTE VISUAL FINAL
+
+/admin/servicos:
+
+APROVADO.
+
+Confirmado:
+
+- 24 serviços cadastrados;
+- 24 serviços ativos;
+- 4 serviços de plano;
+- botão NOVO SERVIÇO;
+- cards existentes preservados;
+- registro temporário ausente.
+
+/admin/servicos/novo:
+
+APROVADO.
+
+Confirmado:
+
+- formulário vazio;
+- todos os campos esperados;
+- Serviço de plano desmarcado;
+- Serviço ativo marcado por padrão;
+- botão CADASTRAR SERVIÇO;
+- botão CANCELAR;
+- layout e acentuação corretos.
+
+## NEXT.JS 16 / AGENTS.md
+
+AGENTS.md foi respeitado.
+
+Documentação local consultada antes da implementação:
+
+- node_modules/next/dist/docs/01-app/01-getting-started/03-layouts-and-pages.md
+- node_modules/next/dist/docs/01-app/01-getting-started/07-mutating-data.md
+
+Foi utilizado o padrão documentado para rota aninhada e Server Action com autenticação/autorização revalidada no servidor.
+
+## BUILD FINAL
+
+Executado:
+
+npm.cmd run build
+
+Resultado:
+
+APROVADO.
+
+- Compiled successfully;
+- TypeScript sem erros;
+- geração das páginas concluída;
+- /admin/servicos reconhecida;
+- /admin/servicos/[id] reconhecida;
+- /admin/servicos/novo reconhecida como rota dinâmica.
+
+## SQLS VERSIONADOS ATUAIS
+
+- supabase/sql/001-admin-blocked-times-policies.sql
+- supabase/sql/002-business-settings.sql
+- supabase/sql/003-admin-services-update-policy.sql
+- supabase/sql/004-admin-appointments-read-policies.sql
+- supabase/sql/005-admin-appointments-update-policy.sql
+- supabase/sql/006-admin-services-insert-policy.sql
+
+Não executar novamente esses SQLs sem necessidade concreta.
+
+## GIT
+
+Commit funcional:
+
+27827f7 Adiciona cadastro administrativo de servicos
+
+Push realizado com sucesso para origin/main.
+
+CODIGO-COMPLETO.txt não foi incluído e deve continuar untracked.
+
+## ESTADO FUNCIONAL CONSOLIDADO
+
+Integração assinaturas + agendamento:
+
+CONCLUÍDA.
+
+/admin:
+
+CONCLUÍDO.
+
+/admin/agenda:
+
+CONCLUÍDO, incluindo navegação por data, leitura administrativa real e gestão de status.
+
+/admin/clientes:
+
+CONCLUÍDO, com listagem, busca e edição.
+
+/admin/servicos:
+
+CONCLUÍDO, agora com listagem, cadastro e edição.
+
+/admin/servicos/novo:
+
+CONCLUÍDO.
+
+/admin/servicos/[id]:
+
+CONCLUÍDO.
+
+/admin/barbeiros:
+
+CONCLUÍDO, incluindo cadastro, listagem e edição.
+
+/admin/barbeiros/[id]/horarios:
+
+CONCLUÍDO.
+
+/admin/barbeiros/[id]/servicos:
+
+CONCLUÍDO.
+
+/admin/bloqueios:
+
+CONCLUÍDO.
+
+/admin/configuracoes:
+
+CONCLUÍDA a primeira versão.
+
+Assinantes:
+
+Funcionalidades existentes permanecem concluídas.
+
+## PRÓXIMO PASSO
+
+Versionar somente esta atualização de CONTEXTO-PROJETO.md.
+
+Não incluir CODIGO-COMPLETO.txt.
+
+Depois fazer push e confirmar que git status --short apresenta somente:
+
+?? CODIGO-COMPLETO.txt
+
+Somente após o checkpoint documental iniciar outra evolução funcional.
+
+Continuar trabalhando UMA ETAPA POR VEZ.

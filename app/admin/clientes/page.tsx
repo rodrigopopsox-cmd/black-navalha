@@ -3,6 +3,7 @@
 import {
   CalendarDays,
   FileText,
+  History,
   Mail,
   Pencil,
   Phone,
@@ -310,6 +311,7 @@ export default async function ClientesPage({
                   display: "flex",
                   alignItems: "flex-start",
                   justifyContent: "space-between",
+                  flexWrap: "wrap",
                   gap: "12px",
                   marginBottom: "18px",
                 }}
@@ -348,27 +350,56 @@ export default async function ClientesPage({
                   </div>
                 </div>
 
-                <Link
-                  href={`/admin/clientes/${customer.id}`}
-                  aria-label={`Editar ${customer.name}`}
+                <div
                   style={{
-                    display: "inline-flex",
+                    display: "flex",
                     alignItems: "center",
+                    flexWrap: "wrap",
                     gap: "6px",
-                    flexShrink: 0,
-                    minHeight: "32px",
-                    padding: "0 10px",
-                    color: "#d29d4f",
-                    border: "1px solid #3a3020",
-                    borderRadius: "5px",
-                    textDecoration: "none",
-                    fontSize: "10px",
-                    fontWeight: 700,
                   }}
                 >
-                  <Pencil size={13} />
-                  EDITAR
-                </Link>
+                  <Link
+                    href={`/admin/clientes/${customer.id}/historico`}
+                    aria-label={`Histórico de ${customer.name}`}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      minHeight: "32px",
+                      padding: "0 10px",
+                      color: "#bbb",
+                      border: "1px solid #333",
+                      borderRadius: "5px",
+                      textDecoration: "none",
+                      fontSize: "10px",
+                      fontWeight: 700,
+                    }}
+                  >
+                    <History size={13} />
+                    HISTÓRICO
+                  </Link>
+
+                  <Link
+                    href={`/admin/clientes/${customer.id}`}
+                    aria-label={`Editar ${customer.name}`}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      minHeight: "32px",
+                      padding: "0 10px",
+                      color: "#d29d4f",
+                      border: "1px solid #3a3020",
+                      borderRadius: "5px",
+                      textDecoration: "none",
+                      fontSize: "10px",
+                      fontWeight: 700,
+                    }}
+                  >
+                    <Pencil size={13} />
+                    EDITAR
+                  </Link>
+                </div>
               </div>
 
               <div

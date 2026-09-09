@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect} from "react";
 
 import {
   ArrowLeft,
@@ -55,6 +55,15 @@ type CalendarCell = {
 } | null;
 
 
+function getCategoryAnchor(category: string) {
+  return `categoria-${category
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")}`;
+}
 export default function BookingFlow({
   services,
   barbers,
@@ -65,6 +74,38 @@ export default function BookingFlow({
   links: BarberService[];
 }) {
   const supabase = createClient();
+
+  useEffect(() => {
+    const hash = window.location.hash;
+
+    if (!hash.startsWith("#categoria-")) {
+      return;
+    }
+
+    const targetId = decodeURIComponent(hash.slice(1));
+
+    const scrollToCategory = () => {
+      const target = document.getElementById(targetId);
+
+      if (!target) {
+        return;
+      }
+
+      target.scrollIntoView({
+        behavior: "auto",
+        block: "start",
+      });
+    };
+
+    const frame = window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(scrollToCategory);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
+  }, []);
+
 
   const [step, setStep] = useState(1);
 
@@ -885,6 +926,7 @@ export default function BookingFlow({
 
                 <section
                   className="booking-category"
+                  id={getCategoryAnchor(category)}
                   key={category}
                 >
 
@@ -2203,3 +2245,5 @@ function capitalize(
     value.slice(1)
   );
 }
+
+

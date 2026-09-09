@@ -1,4 +1,4 @@
-# CONTEXTO-PROJETO — Black Navalha
+﻿# CONTEXTO-PROJETO — Black Navalha
 
 Última atualização: 2026-09-04
 
@@ -7018,3 +7018,1760 @@ Depois fazer push e confirmar que git status --short apresenta somente:
 Somente após esse checkpoint documental iniciar outra evolução funcional.
 
 Continuar trabalhando UMA ETAPA POR VEZ.
+
+---
+
+# CHECKPOINT INTERMEDIÁRIO — ÁREA PÚBLICA / NOVA HOME
+
+Data: 2026-09-08
+
+Este é o checkpoint mais recente e deve ter prioridade sobre checkpoints anteriores quando houver divergência.
+
+## NOVA FASE DO PROJETO
+
+A expansão da área administrativa foi temporariamente interrompida.
+
+Fase atual:
+
+ÁREA PÚBLICA / EXPERIÊNCIA DO CLIENTE.
+
+Objetivo:
+
+Preparar o projeto para apresentação ao proprietário da Black Navalha, transformando a experiência pública em uma apresentação convincente de produto real.
+
+Regras mantidas:
+
+- NÃO reconstruir /agendar;
+- integração assinaturas + agendamento permanece concluída;
+- NÃO refazer funcionalidades administrativas concluídas;
+- NÃO realizar auditoria geral;
+- NÃO alterar banco sem necessidade concreta;
+- toda alteração futura real de banco continua versionada em supabase/sql/;
+- trabalhar UMA ETAPA POR VEZ;
+- utilizar npm.cmd nesta máquina;
+- CODIGO-COMPLETO.txt deve permanecer untracked e NÃO deve ser versionado.
+
+## GIT OFICIAL NO INÍCIO DESTA FASE
+
+Branch:
+
+main
+
+Último commit funcional confirmado:
+
+45f2311 Adiciona historico administrativo de clientes
+
+Checkpoint documental oficial informado no início da continuidade:
+
+60f2584 Registra historico administrativo de clientes
+
+main informada como sincronizada com origin/main.
+
+CODIGO-COMPLETO.txt permanece untracked.
+
+## HOME PÚBLICA ANTERIOR
+
+Arquivo analisado:
+
+app/page.tsx
+
+Estado encontrado antes desta evolução:
+
+- Server Component;
+- consulta de services ativos;
+- catálogo simples de serviços;
+- fundo preto;
+- cards básicos;
+- identificação de serviços subscriber_service como "Incluso no plano";
+- título principal "Agende seu horário";
+- não existia apresentação institucional forte;
+- não existia CTA claro levando para /agendar;
+- não utilizava business_settings;
+- não utilizava fotografias reais da Black Navalha.
+
+## REFERÊNCIAS VISUAIS RECEBIDAS
+
+Foram fornecidas artes e fotografias reais da Black Navalha usadas como referência de identidade.
+
+Direção visual identificada:
+
+- preto como base dominante;
+- branco de alto contraste;
+- dourado/bronze como destaque;
+- títulos grandes, pesados e condensados;
+- fotografia real como elemento importante;
+- comunicação baseada em identidade, técnica, atenção, precisão, detalhes e valorização pessoal.
+
+Frases presentes nas referências reforçam conceitos como:
+
+- Seu cabelo tem identidade;
+- O diferencial está nos detalhes;
+- Um bom corte valoriza você;
+- O corte certo muda completamente sua aparência.
+
+Também foi fornecida a logo oficial da Black Navalha.
+
+## ATIVOS PÚBLICOS ADICIONADOS LOCALMENTE
+
+Foi criada:
+
+public/black-navalha/
+
+Arquivos atualmente adicionados:
+
+- public/black-navalha/hero.jpg
+- public/black-navalha/resultado-01.jpg
+- public/black-navalha/resultado-02.jpg
+- public/black-navalha/fachada.jpg
+- public/black-navalha/logo.png
+
+As fotografias representam:
+
+- imagem principal para hero;
+- resultados reais de cortes/acabamentos;
+- fachada real da Black Navalha.
+
+A logo possui:
+
+1591x1180
+
+Foi verificado o pixel do canto superior esquerdo:
+
+A=0 R=255 G=255 B=255
+
+Portanto o PNG possui transparência real e pode ser utilizado sobre fundo escuro.
+
+IMPORTANTE:
+
+A logo ainda NÃO foi incorporada ao cabeçalho da Home.
+
+Esse é um dos próximos ajustes.
+
+## NEXT.JS 16 / AGENTS.md
+
+AGENTS.md foi lido e respeitado.
+
+Foram localizados e consultados os guias locais relevantes do Next.js 16:
+
+- node_modules/next/dist/docs/01-app/01-getting-started/04-linking-and-navigating.md
+- node_modules/next/dist/docs/01-app/01-getting-started/11-css.md
+- node_modules/next/dist/docs/01-app/01-getting-started/12-images.md
+
+Foi confirmado o uso de:
+
+- Link para navegação;
+- CSS Modules para estilos locais;
+- next/image para imagens;
+- arquivos em public acessados a partir da raiz.
+
+Não repetir essa leitura sem nova necessidade relacionada a essas mesmas convenções.
+
+## BUSINESS_SETTINGS
+
+Foi consultado somente:
+
+app/admin/configuracoes/page.tsx
+
+Foi confirmado que a configuração institucional existente é carregada de:
+
+public.business_settings
+
+utilizando:
+
+- ordenação por created_at ascendente;
+- limit(1);
+- maybeSingle().
+
+Campos utilizados:
+
+- name;
+- whatsapp;
+- address;
+- instagram.
+
+A nova Home segue o mesmo padrão de leitura.
+
+Nenhuma consulta de schema/policies foi repetida.
+
+Nenhuma alteração de banco foi realizada.
+
+## IMPLEMENTAÇÃO ATUAL DA NOVA HOME
+
+Arquivos criados/alterados nesta etapa:
+
+- app/page.tsx
+- app/page.module.css
+- public/black-navalha/hero.jpg
+- public/black-navalha/resultado-01.jpg
+- public/black-navalha/resultado-02.jpg
+- public/black-navalha/fachada.jpg
+- public/black-navalha/logo.png
+
+app/page.tsx continua como Server Component.
+
+A implementação atual:
+
+- consulta services ativos;
+- consulta business_settings;
+- executa as duas leituras em paralelo;
+- utiliza dados institucionais reais quando disponíveis;
+- possui fallback para Black Navalha;
+- cria navegação pública;
+- cria hero;
+- possui CTA direto para /agendar;
+- possui seção de trabalhos reais;
+- possui vitrine dos serviços reais;
+- mantém serviços subscriber_service apresentados como "Incluso no plano";
+- NÃO trata R$ 0,00 como gratuidade pública;
+- possui seção de experiência;
+- utiliza a foto da fachada;
+- apresenta endereço, WhatsApp e Instagram quando configurados;
+- possui múltiplos caminhos para /agendar;
+- inclui tratamento de links de WhatsApp e Instagram;
+- possui responsividade no CSS Module.
+
+A integração existente de /agendar NÃO foi alterada.
+
+## CSS
+
+Foi criado:
+
+app/page.module.css
+
+Motivo:
+
+Manter toda a nova identidade visual da Home isolada e evitar aumentar/conflitar com app/globals.css, que já possui grande quantidade de estilos administrativos e do fluxo de agendamento.
+
+A paleta atual da Home utiliza principalmente:
+
+- #080808 / preto;
+- tons de cinza;
+- branco;
+- dourado #d29d4f;
+- dourado claro #e6b96d.
+
+## BUILD
+
+Executado após a primeira implementação:
+
+npm.cmd run build
+
+Resultado:
+
+APROVADO.
+
+- Next.js 16.3.4;
+- Compiled successfully;
+- TypeScript concluído sem erros;
+- geração das páginas concluída;
+- rota / reconhecida como dinâmica;
+- nenhum erro de build.
+
+## SERVIDOR LOCAL
+
+Já existia um next dev deste mesmo projeto em:
+
+http://localhost:3000
+
+PID observado:
+
+16676
+
+Não foi necessário iniciar outro servidor.
+
+## VALIDAÇÃO VISUAL INTERMEDIÁRIA
+
+A nova Home foi aberta no navegador em:
+
+http://localhost:3000/
+
+Foi fornecida captura visual do hero em desktop.
+
+Confirmado visualmente:
+
+- cabeçalho público;
+- navegação Trabalhos / Serviços / Contato;
+- CTA AGENDAR HORÁRIO;
+- hero com fotografia real;
+- mensagem "SEU ESTILO. SUA IDENTIDADE.";
+- identidade preta/branca/dourada;
+- CTA principal AGENDAR HORÁRIO;
+- CTA VER SERVIÇOS;
+- bloco "O DIFERENCIAL ESTÁ NOS DETALHES";
+- direção visual coerente com as artes fornecidas.
+
+A validação é INTERMEDIÁRIA.
+
+A Home ainda NÃO deve ser considerada concluída.
+
+## PENDÊNCIAS DA HOME
+
+No próximo chat continuar exatamente desta implementação.
+
+Primeiro ajuste previsto:
+
+- substituir a marca textual "BLACK NAVALHA" do cabeçalho pela logo oficial transparente, dimensionada de forma adequada ao header.
+
+Depois continuar a validação visual da página completa.
+
+Ainda deve ser validado:
+
+- hero depois da inclusão da logo;
+- seção Trabalhos;
+- seção Serviços com dados reais;
+- seção Experiência;
+- informações vindas de business_settings;
+- rodapé;
+- navegação por âncoras;
+- CTA para /agendar;
+- WhatsApp;
+- Instagram;
+- responsividade/mobile.
+
+Fazer refinamentos somente a partir da aparência real observada.
+
+## IMPORTANTE — NÃO COMMITAR AINDA
+
+A funcionalidade pública está EM IMPLEMENTAÇÃO.
+
+NÃO criar commit funcional desta Home neste checkpoint.
+
+NÃO fazer push desta implementação ainda.
+
+Primeiro concluir:
+
+- logo no cabeçalho;
+- validação visual completa;
+- responsividade;
+- teste dos links/CTAs;
+- npm.cmd run build após o último ajuste.
+
+Somente depois:
+
+- git status;
+- staging com caminhos explícitos;
+- NÃO incluir CODIGO-COMPLETO.txt;
+- commit funcional;
+- push;
+- atualizar CONTEXTO-PROJETO.md;
+- criar checkpoint documental final.
+
+## BANCO / SUPABASE NESTA ETAPA
+
+Nenhuma alteração.
+
+Nenhuma tabela, coluna, RPC, policy, função, trigger ou constraint foi criada ou alterada.
+
+Nenhum SQL foi executado.
+
+Não há necessidade de criar novo SQL para a Home atual.
+
+## PRÓXIMO PASSO EXATO PARA O PRÓXIMO CHAT
+
+Usar este checkpoint como prioridade.
+
+NÃO reiniciar a análise da Home.
+
+NÃO pedir novamente:
+
+- app/page.tsx;
+- app/globals.css;
+- app/admin/configuracoes/page.tsx;
+- AGENTS.md;
+- documentação de Link/CSS/Image;
+- listagem inicial dos ativos.
+
+Os arquivos atuais necessários já foram analisados e alterados.
+
+Continuar a partir da captura visual intermediária recebida.
+
+Primeiro:
+
+incorporar public/black-navalha/logo.png ao cabeçalho da Home.
+
+Depois:
+
+validar visualmente a página e realizar os refinamentos necessários UMA ETAPA POR VEZ.
+
+A Home ainda está EM IMPLEMENTAÇÃO.
+
+
+---
+
+# CHECKPOINT INTERMEDIÁRIO — ÁREA PÚBLICA / REFINAMENTO DA NOVA HOME
+Data: 2026-09-08
+
+## Estado da fase
+
+A fase atual continua sendo:
+
+ÁREA PÚBLICA / EXPERIÊNCIA DO CLIENTE.
+
+A expansão administrativa permanece temporariamente interrompida.
+
+A Home `/` continua EM IMPLEMENTAÇÃO e NÃO deve receber commit funcional ainda.
+
+## Estado Git de referência
+
+Branch:
+main
+
+Último commit funcional anterior:
+45f2311 Adiciona historico administrativo de clientes
+
+Último checkpoint documental anterior:
+60f2584 Registra historico administrativo de clientes
+
+`CODIGO-COMPLETO.txt` deve continuar untracked e NÃO deve ser versionado.
+
+## Arquivos da Home em trabalho
+
+- app/page.tsx
+- app/page.module.css
+- public/black-navalha/hero.jpg
+- public/black-navalha/resultado-01.jpg
+- public/black-navalha/resultado-02.jpg
+- public/black-navalha/fachada.jpg
+- public/black-navalha/logo.png
+
+## O que já estava implementado
+
+A Home utiliza:
+
+- Server Component;
+- serviços ativos reais do Supabase;
+- `business_settings` reais;
+- hero com fotografia real;
+- identidade preto/branco/dourado;
+- navegação Trabalhos / Serviços / Contato;
+- CTA para `/agendar`;
+- seção de trabalhos;
+- fachada;
+- endereço;
+- WhatsApp;
+- Instagram;
+- rodapé;
+- CSS Module próprio e responsivo.
+
+Build da primeira implementação da Home:
+
+`npm.cmd run build`
+
+APROVADO anteriormente, sem erros de TypeScript.
+
+IMPORTANTE: ainda será necessário executar novo build ao final dos refinamentos atuais.
+
+## Cabeçalho / logo — estado atual
+
+A marca textual original do cabeçalho foi substituída.
+
+O cabeçalho agora utiliza:
+
+- o emblema de `public/black-navalha/logo.png`;
+- texto `BLACK NAVALHA` ao lado;
+- composição inspirada na identidade visual enviada como referência;
+- dimensionamento específico para desktop/mobile.
+
+A composição foi visualmente aceita como direção atual.
+
+## Serviços — nova direção implementada
+
+A antiga grade que exibia cada serviço individualmente com preço e duração foi abandonada.
+
+A Home agora agrupa os serviços reais em grandes cards por categoria.
+
+Estrutura atual:
+
+- ASSINATURA;
+- BARBA;
+- CABELO;
+- DEPILAÇÃO;
+- ESTÉTICA;
+- demais categorias reais, caso existam.
+
+Os dados continuam vindo dos serviços ativos reais do Supabase.
+
+### Assinaturas
+
+Os serviços com `subscriber_service` são separados dos serviços regulares e apresentados no card:
+
+BLACK NAVALHA
+ASSINATURA
+
+Exemplos atualmente exibidos:
+
+- Barba Assinante Mensal;
+- Cabelo + Barba Assinante Mensal;
+- Cabelo Assinante Mensal;
+- Raspado + Barba Assinante Mensal.
+
+O card de assinatura possui o botão:
+
+CONHECER PLANOS
+
+A página/rota de planos AINDA NÃO deve ser criada.
+Por enquanto esse botão é somente parte da proposta visual.
+
+### Categorias regulares
+
+Os demais serviços são agrupados dinamicamente por `category`.
+
+Cada card utiliza o padrão visual:
+
+BLACK NAVALHA
+NOME DA CATEGORIA
+
+Exemplos visualizados:
+
+- BARBA;
+- CABELO;
+- DEPILAÇÃO;
+- ESTÉTICA.
+
+Dentro de cada card aparecem somente os nomes dos serviços.
+
+Foram removidos da vitrine da Home:
+
+- preços;
+- duração;
+- selo Plano;
+- checks;
+- texto "Serviço disponível para agendamento".
+
+Os marcadores das listas foram refinados para pequenas bolinhas douradas sólidas.
+
+Os cards regulares são links para:
+
+`/agendar`
+
+O card ASSINATURA é a exceção e não deve enviar diretamente para `/agendar`.
+
+O botão geral:
+
+`VER SERVIÇOS E AGENDAR`
+
+foi removido da parte inferior da seção.
+
+Também foi solicitado retirar do texto introdutório:
+
+`Valores e horários são apresentados no momento do agendamento.`
+
+## Experiência / Como chegar — estado funcional atual, VISUAL NÃO APROVADO
+
+A antiga área “A EXPERIÊNCIA” continha:
+
+- título “Mais do que cortar o cabelo”;
+- tópicos numerados 01, 02 e 03;
+- botão “Agendar agora”.
+
+Foi solicitado substituir essa parte por uma área de localização.
+
+A implementação atual já substituiu funcionalmente esse conteúdo por:
+
+- título `COMO CHEGAR`;
+- título principal `ENCONTRE A BLACK NAVALHA.`;
+- mapa Google Maps incorporado;
+- endereço real de `business_settings`;
+- WhatsApp real;
+- Instagram real;
+- botão `COMO CHEGAR`;
+- botão abre Google Maps em nova aba usando o endereço real.
+
+A fachada continua sendo exibida ao lado.
+
+O mapa utiliza o endereço para construir:
+
+- URL de pesquisa do Google Maps;
+- URL de embed do Google Maps.
+
+NÃO foi feita alteração no banco.
+
+### PROBLEMA VISUAL ATUAL
+
+A implementação funcional de “Como chegar” entrou, porém o resultado visual foi REPROVADO.
+
+Captura mais recente mostrou:
+
+- fachada grande à esquerda;
+- conteúdo de localização à direita;
+- título excessivamente grande;
+- mapa pequeno e comprimido;
+- endereço/WhatsApp/Instagram sem hierarquia visual adequada;
+- pouco equilíbrio entre mapa, dados e fotografia;
+- composição geral visualmente ruim.
+
+NÃO remover a funcionalidade já criada sem necessidade.
+
+O próximo passo deve ser REFINAR VISUALMENTE essa seção, preservando:
+
+- foto da fachada;
+- mapa;
+- endereço real;
+- WhatsApp real;
+- Instagram real;
+- botão funcional de Como chegar.
+
+Não voltar aos tópicos 01/02/03.
+
+## Próximo passo EXATO
+
+Começar pelo refinamento visual da seção:
+
+COMO CHEGAR / LOCALIZAÇÃO.
+
+Não reiniciar a análise da Home.
+
+Usar o estado visual mais recente como referência.
+
+Objetivo sugerido:
+
+- equilibrar fachada e bloco de localização;
+- reduzir e reorganizar tipografia;
+- dar mais espaço e presença ao mapa;
+- organizar Endereço / WhatsApp / Instagram;
+- manter estética preto/branco/dourado;
+- manter o botão Como chegar funcional;
+- validar desktop visualmente;
+- depois validar mobile.
+
+Trabalhar UMA ETAPA POR VEZ e esperar validação visual antes de seguir.
+
+## Depois da seção Como chegar
+
+Continuar validação gradual de:
+
+- hero;
+- Trabalhos;
+- Serviços;
+- business_settings;
+- rodapé;
+- âncoras;
+- CTA para `/agendar`;
+- WhatsApp;
+- Instagram;
+- mobile/responsividade.
+
+Fazer refinamentos somente com base no estado visual real.
+
+## Restrições que continuam válidas
+
+- NÃO reconstruir `/agendar`;
+- NÃO alterar banco;
+- NÃO retomar funcionalidades administrativas;
+- NÃO fazer auditoria geral;
+- NÃO pedir novamente arquivos/documentos já analisados sem necessidade;
+- NÃO repetir documentação de Link, CSS Modules ou next/image;
+- trabalhar UMA ETAPA POR VEZ;
+- preferir `Set-Content` ao alterar código;
+- fornecer UM único comando completo por etapa;
+- usar `npm.cmd` nesta máquina;
+- NÃO fazer commit enquanto a Home estiver em implementação;
+- antes do commit final executar `npm.cmd run build`;
+- fazer teste visual/funcional final;
+- staging somente com caminhos explícitos;
+- NÃO incluir `CODIGO-COMPLETO.txt`;
+- ao concluir a Home: commit funcional + push;
+- depois atualizar `CONTEXTO-PROJETO.md` e criar checkpoint documental.
+
+---
+
+# CHECKPOINT INTERMEDIÁRIO — ÁREA PÚBLICA / HOME — REFINAMENTOS E NAVEGAÇÃO POR CATEGORIA
+
+Data: 2026-09-09
+
+Este é o checkpoint mais recente e deve ter PRIORIDADE ABSOLUTA sobre checkpoints anteriores quando houver divergência.
+
+## FASE ATUAL
+
+ÁREA PÚBLICA / EXPERIÊNCIA DO CLIENTE.
+
+A expansão administrativa permanece temporariamente interrompida.
+
+A Home `/` continua EM IMPLEMENTAÇÃO.
+
+NÃO fazer commit funcional da Home ainda.
+
+## GIT DE REFERÊNCIA
+
+Branch:
+
+main
+
+Último commit funcional anterior:
+
+45f2311 Adiciona historico administrativo de clientes
+
+Último checkpoint documental anterior informado no início desta fase:
+
+60f2584 Registra historico administrativo de clientes
+
+Existem alterações locais da Home ainda não versionadas.
+
+CODIGO-COMPLETO.txt deve continuar untracked e NÃO deve ser versionado.
+
+## REGRAS DE CONTINUIDADE
+
+- NÃO reiniciar a análise da Home;
+- NÃO reconstruir `/agendar`;
+- NÃO alterar banco;
+- NÃO retomar funcionalidades administrativas;
+- NÃO fazer auditoria geral;
+- NÃO repetir consultas/documentação já realizadas sobre Link, CSS Modules ou next/image;
+- trabalhar UMA ETAPA POR VEZ;
+- fornecer UM único comando completo por etapa;
+- usar npm.cmd nesta máquina;
+- preferir Set-Content para alterações de código;
+- NÃO fazer commit enquanto a Home estiver em implementação;
+- CODIGO-COMPLETO.txt deve permanecer untracked.
+
+## ARQUIVOS PRINCIPAIS ATUALMENTE EM TRABALHO
+
+- app/page.tsx
+- app/page.module.css
+- app/gallery-lightbox.tsx
+- app/agendar/booking-flow.tsx
+- public/black-navalha/hero.jpg
+- public/black-navalha/resultado-01.jpg
+- public/black-navalha/resultado-02.jpg
+- public/black-navalha/fachada.jpg
+- public/black-navalha/logo.png
+
+IMPORTANTE:
+
+app/agendar/booking-flow.tsx foi alterado SOMENTE para suportar navegação/scroll até uma categoria a partir da Home.
+
+Nenhuma regra de negócio do agendamento foi reconstruída ou alterada.
+
+## CABEÇALHO
+
+Estado atual aprovado como base:
+
+- logo oficial transparente;
+- emblema;
+- texto BLACK NAVALHA;
+- identidade preto/branco/dourado.
+
+## SERVIÇOS NA HOME
+
+Os serviços ativos reais continuam vindo do Supabase.
+
+Serviços subscriber_service aparecem no card especial:
+
+BLACK NAVALHA
+ASSINATURA
+
+Exemplos existentes:
+
+- Barba Assinante Mensal;
+- Cabelo + Barba Assinante Mensal;
+- Cabelo Assinante Mensal;
+- Raspado + Barba Assinante Mensal.
+
+O card possui:
+
+CONHECER PLANOS
+
+NÃO criar ainda página de planos.
+
+ASSINATURA NÃO deve direcionar para `/agendar` nesta lógica de categorias.
+
+Os serviços regulares são agrupados dinamicamente por category.
+
+Exemplos:
+
+- BARBA;
+- CABELO;
+- DEPILAÇÃO;
+- ESTÉTICA.
+
+Dentro dos cards aparecem somente nomes dos serviços.
+
+Não exibir:
+
+- preços;
+- duração;
+- checks;
+- texto "Serviço disponível para agendamento".
+
+Marcadores atuais:
+
+pequenas bolinhas douradas sólidas.
+
+## NAVEGAÇÃO HOME → CATEGORIA DO AGENDAMENTO
+
+Nova melhoria implementada e testada nesta sessão.
+
+Objetivo:
+
+Ao clicar no card/botão AGENDAR de uma categoria regular da Home, abrir `/agendar` diretamente na categoria correspondente.
+
+Exemplo validado:
+
+BARBA
+→ /agendar#categoria-barba
+
+O comportamento NÃO seleciona automaticamente nenhum serviço.
+
+Ele apenas posiciona a página na categoria correspondente.
+
+ASSINATURA permanece fora dessa lógica.
+
+Implementação:
+
+Foi criada uma função getCategoryAnchor(category) em:
+
+- app/page.tsx
+- app/agendar/booking-flow.tsx
+
+Ela:
+
+- normaliza acentos;
+- converte para minúsculas;
+- transforma espaços/caracteres em hífens;
+- gera ids no padrão:
+
+categoria-barba
+categoria-cabelo
+categoria-depilacao
+categoria-estetica
+
+Na Home, os cards regulares passaram de:
+
+/agendar
+
+para:
+
+/agendar#categoria-...
+
+No BookingFlow, cada seção:
+
+booking-category
+
+recebe:
+
+id={getCategoryAnchor(category)}
+
+Como o salto nativo do hash ocorreu antes do momento adequado de montagem/hidratação do Client Component, inicialmente `/agendar#categoria-barba` abriu em posição incorreta próxima ao final da página.
+
+A correção foi implementar em BookingFlow um useEffect que:
+
+- lê window.location.hash;
+- aceita hashes iniciados por #categoria-;
+- localiza o elemento correspondente por document.getElementById();
+- aguarda frames de renderização com requestAnimationFrame;
+- executa scrollIntoView();
+- não altera nenhuma seleção.
+
+Também foi necessário adicionar useEffect ao import React do booking-flow.tsx.
+
+Teste final realizado:
+
+Home
+→ card BARBA
+→ AGENDAR
+
+Resultado:
+
+APROVADO.
+
+A URL abriu como:
+
+/agendar#categoria-barba
+
+e a página foi posicionada corretamente na seção BARBA.
+
+Nenhum serviço foi selecionado automaticamente.
+
+Não houve alteração de preço, assinatura, disponibilidade, profissional, data, horário ou criação de agendamento.
+
+As demais categorias utilizam a mesma geração dinâmica, mas o teste solicitado nesta etapa foi especificamente BARBA.
+
+## COMO CHEGAR — REFINAMENTO DESKTOP
+
+A seção funcional de localização foi mantida e refinada visualmente.
+
+Preservado:
+
+- fachada real;
+- mapa Google Maps;
+- endereço real de business_settings;
+- WhatsApp real;
+- Instagram real;
+- botão COMO CHEGAR;
+- abertura do Google Maps em nova aba.
+
+Refinamento desktop realizado em app/page.module.css:
+
+- melhor proporção entre fachada e conteúdo;
+- coluna do mapa ganhou maior presença;
+- título reduzido;
+- melhor hierarquia;
+- mapa ampliado;
+- informações organizadas;
+- endereço/WhatsApp/Instagram distribuídos de forma mais clara;
+- botão Como chegar destacado;
+- estética preto/branco/dourado preservada.
+
+Validação visual:
+
+APROVADA pelo responsável.
+
+## AVALIAÇÕES DO GOOGLE
+
+Foi adicionada nova seção entre:
+
+COMO CHEGAR
+
+e:
+
+PRONTO PARA CUIDAR DO VISUAL?
+
+A seção utiliza conteúdo editorial baseado em avaliações reais fornecidas por captura do perfil da Black Navalha no Google.
+
+Perfil utilizado:
+
+Barbearia Black Navalha | Atuba Pinhais
+
+URL real do Google Maps foi fornecida e utilizada no link para ver todas as avaliações.
+
+Indicador observado na captura:
+
+5,0
+90 avaliações
+
+Avaliações reais utilizadas na Home:
+
+Wellington Salazario:
+"Ótimo atendimento, corte tri bom! Profissional excelente! O melhor da região! Voltarei outras vezes."
+
+Paulo Otavio:
+"Curti muito a experiência e podem ter certeza que ganharam mais um cliente."
+
+Carlos Mateus:
+"Parabéns ao atendimento e pelo excelente trabalho vcs são fera."
+
+As três aparecem com 5 estrelas.
+
+A seção possui:
+
+- label AVALIAÇÕES;
+- título QUEM CONHECE, RECOMENDA.;
+- resumo 5,0;
+- cinco estrelas;
+- 90 avaliações;
+- três cards;
+- botão/link VER TODAS AS AVALIAÇÕES NO GOOGLE.
+
+IMPORTANTE:
+
+Esses dados NÃO são sincronizados automaticamente com Google.
+
+São conteúdo editorial real obtido das capturas fornecidas.
+
+Não foi criada integração com Google Places API.
+
+Nenhuma API key foi criada.
+
+Nenhum scraping foi implementado.
+
+Validação visual desktop:
+
+APROVADA pelo responsável.
+
+## GALERIA / TRABALHOS
+
+Foi identificado que as fotos da seção Trabalhos eram recortadas devido ao uso de:
+
+object-fit: cover
+
+Foi decidido preservar a composição visual da galeria e permitir ampliação das fotos.
+
+Criado:
+
+app/gallery-lightbox.tsx
+
+O componente é Client Component e isola a interação da galeria sem transformar app/page.tsx inteiro em Client Component.
+
+A galeria agora permite clicar nas imagens para ampliar.
+
+Lightbox implementado com:
+
+- fundo escuro;
+- fotografia inteira usando object-fit: contain;
+- botão X para fechar;
+- fechamento pela tecla Escape;
+- fechamento clicando no fundo;
+- bloqueio de scroll da página enquanto aberto;
+- indicação de "Clique para ampliar";
+- cursor de zoom;
+- hover preservado.
+
+As fotografias usadas continuam:
+
+- resultado-01.jpg;
+- resultado-02.jpg;
+- hero.jpg.
+
+## TROCA DE IMAGENS / CACHE DO NEXT.JS
+
+Durante a sessão, algumas imagens em public/black-navalha foram substituídas mantendo exatamente os mesmos nomes.
+
+Foi observado que F5 podia continuar exibindo imagens antigas por causa do cache/otimização local do Next.js.
+
+Foi tentado inicialmente adicionar query string `?v=...` aos src de next/image.
+
+Isso causou erro no Next.js 16:
+
+Image ... is using a query string which is not configured in images.localPatterns
+
+Essa tentativa foi DESFEITA.
+
+NÃO voltar a adicionar `?v=` diretamente aos src locais de next/image neste projeto sem configuração correspondente.
+
+Solução utilizada com sucesso:
+
+- remover query strings;
+- parar o servidor;
+- apagar `.next`;
+- reiniciar com npm.cmd run dev.
+
+Procedimento recomendado quando uma foto for substituída mantendo o mesmo nome e o cache persistir:
+
+parar o servidor com Ctrl+C
+
+e executar:
+
+if (Test-Path ".next") { Remove-Item ".next" -Recurse -Force }; npm.cmd run dev
+
+Isso funcionou.
+
+## ESTADO VISUAL ATUAL
+
+Desktop:
+
+- cabeçalho aprovado como direção;
+- hero existente;
+- Trabalhos com lightbox;
+- Serviços agrupados por categoria;
+- Como chegar refinado e aprovado;
+- Avaliações adicionadas e aprovadas;
+- CTA final preservado;
+- identidade preto/branco/dourado preservada.
+
+Ainda NÃO considerar Home concluída.
+
+## BUILD
+
+A primeira implementação da Home havia passado anteriormente em:
+
+npm.cmd run build
+
+Porém ocorreram várias alterações depois desse build.
+
+Portanto é OBRIGATÓRIO executar novamente:
+
+npm.cmd run build
+
+antes do commit funcional final.
+
+NÃO assumir que o build anterior cobre o estado atual.
+
+## BANCO / SUPABASE
+
+Nenhuma alteração nesta fase de refinamento.
+
+Não criar SQL.
+
+Não alterar business_settings.
+
+Não alterar serviços no banco.
+
+## HOME E AGENDAMENTO
+
+A integração assinaturas + agendamento continua considerada concluída.
+
+A única alteração atual em app/agendar/booking-flow.tsx é de navegação visual por hash/categoria.
+
+NÃO reconstruir essa página.
+
+NÃO alterar regras de preço ou assinatura.
+
+## PRÓXIMO CHAT — CONTINUIDADE
+
+Começar deste estado.
+
+NÃO reiniciar análise.
+
+Antes de concluir a Home ainda falta validar/refinar gradualmente:
+
+- comportamento das demais categorias Home → /agendar além de BARBA;
+- responsividade/mobile da nova Home;
+- responsividade de COMO CHEGAR;
+- responsividade da seção AVALIAÇÕES;
+- galeria/lightbox em mobile;
+- hero;
+- Serviços;
+- rodapé;
+- âncoras;
+- CTAs;
+- WhatsApp;
+- Instagram.
+
+ASSINATURA ainda terá decisão própria posteriormente.
+
+O botão CONHECER PLANOS ainda NÃO possui página dedicada e não deve ser enviado automaticamente para /agendar.
+
+Trabalhar UMA ETAPA POR VEZ.
+
+Esperar validação do responsável antes de avançar.
+
+## ANTES DO COMMIT FINAL DA HOME
+
+Obrigatório:
+
+1. concluir refinamentos;
+2. testar desktop;
+3. testar mobile;
+4. testar links/CTAs;
+5. testar navegação por categorias;
+6. testar lightbox;
+7. executar npm.cmd run build;
+8. verificar git status;
+9. staging SOMENTE com caminhos explícitos;
+10. NÃO incluir CODIGO-COMPLETO.txt;
+11. commit funcional;
+12. push;
+13. atualizar CONTEXTO-PROJETO.md;
+14. criar checkpoint documental final.
+
+A Home continua EM IMPLEMENTAÇÃO.
+
+
+---
+
+# CHECKPOINT INTERMEDIÁRIO — HOME / RESPONSIVIDADE MOBILE — CONTINUIDADE
+
+Data: 2026-09-09
+
+Este checkpoint complementa o checkpoint mais recente da Home de 2026-09-09.
+
+A Home continua EM IMPLEMENTAÇÃO.
+
+NÃO fazer commit ainda.
+
+## REGRA PARA A PRÓXIMA CONTINUIDADE
+
+Antes de trabalhar no projeto, LER INTEGRALMENTE o CONTEXTO-PROJETO.md e dar prioridade absoluta aos checkpoints mais recentes.
+
+NÃO reiniciar a análise do zero.
+
+## FASE ATUAL
+
+ÁREA PÚBLICA / EXPERIÊNCIA DO CLIENTE.
+
+A expansão administrativa continua interrompida.
+
+NÃO alterar banco.
+
+NÃO reconstruir /agendar.
+
+CODIGO-COMPLETO.txt deve continuar untracked e NÃO deve ser versionado.
+
+## NAVEGAÇÃO HOME → CATEGORIAS
+
+Validação atualizada nesta sessão:
+
+TODOS os cards regulares da Home que possuem AGENDAR foram testados pelo responsável e estão funcionando.
+
+Resultado aprovado:
+
+- categoria correspondente abre em /agendar#categoria-...;
+- scroll posiciona na categoria correta;
+- nenhum serviço é selecionado automaticamente.
+
+Portanto considerar a navegação de TODAS as categorias regulares:
+
+APROVADA.
+
+ASSINATURA permanece fora dessa lógica.
+
+CONHECER PLANOS continua sem página/destino definitivo.
+
+## OBJETIVO ATUAL
+
+A etapa atual é:
+
+RESPONSIVIDADE MOBILE DA HOME.
+
+Durante validação em Chrome DevTools Device Mode foram encontrados problemas reais principalmente em:
+
+- Serviços;
+- Como chegar;
+- Avaliações.
+
+Avaliações recebeu ajuste responsivo e apresentou resultado visual significativamente melhor em captura posterior.
+
+Como chegar também chegou a apresentar composição mobile adequada em uma captura, com:
+
+- fachada;
+- título;
+- mapa;
+- endereço;
+- WhatsApp;
+- Instagram;
+- botão Como chegar
+
+organizados verticalmente.
+
+Esses resultados ainda devem ser revisitados dentro de uma emulação mobile confiável antes de aprovação final.
+
+## PROBLEMA ATUAL — SERVIÇOS MOBILE
+
+A seção Serviços continua apresentando overflow/layout horizontal em algumas capturas mobile.
+
+A estrutura REAL atual identificada em app/page.tsx utiliza:
+
+- serviceGroups;
+- serviceGroup;
+- subscriptionGroup;
+- serviceGroupLink;
+- serviceGroupHeader;
+- serviceList.
+
+O container real é:
+
+serviceGroups
+
+A regra base identificada em app/page.module.css é:
+
+.serviceGroups {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(280px, 1fr));
+  ...
+}
+
+Foi identificado que regras mobile antigas existentes utilizavam:
+
+.servicesGrid
+
+e:
+
+.serviceCard
+
+mas essas classes NÃO correspondem à estrutura atual dos cards agrupados.
+
+Portanto qualquer correção futura de Serviços mobile deve considerar as classes atuais:
+
+serviceGroups / serviceGroup
+
+e não depender das classes antigas servicesGrid / serviceCard.
+
+## ALTERAÇÕES CSS EXPERIMENTAIS DESTA SESSÃO
+
+Foram acrescentados ao FINAL de:
+
+app/page.module.css
+
+blocos @media (max-width: 620px) experimentais.
+
+O primeiro tenta tratar:
+
+- Serviços;
+- Como chegar;
+- Avaliações.
+
+Porém parte de Serviços nesse primeiro bloco utiliza classes antigas:
+
+.servicesGrid
+.serviceCard
+
+Avaliações apresentou melhora visual após esse bloco.
+
+Como chegar também apresentou composição mobile adequada em captura posterior.
+
+Depois foi acrescentado outro bloco específico utilizando as classes atuais:
+
+.serviceGroups
+.serviceGroup
+.serviceGroupHeader
+.serviceList
+
+Apesar disso, em determinadas capturas do Device Mode os cards ainda apareceram lado a lado.
+
+IMPORTANTE:
+
+Esses blocos foram tentativas intermediárias.
+
+NÃO considerar a correção de Serviços mobile concluída.
+
+Antes de qualquer nova alteração, inspecionar o estado FINAL atual de app/page.module.css, especialmente os blocos adicionados ao fim do arquivo.
+
+Evitar continuar acumulando overrides sem entender o estado atual.
+
+## CHROME DEVICE MODE / VIEWPORT
+
+Durante o diagnóstico houve comportamento inconsistente no Chrome DevTools.
+
+Em alguns momentos:
+
+- Device Mode mostrava largura aproximada de 390 px;
+- window.innerWidth retornava 890.
+
+Em outro momento, após alternar Device Mode:
+
+window.innerWidth retornou 405.
+
+Posteriormente voltou a retornar 890.
+
+Foi confirmado diretamente no navegador que a meta viewport existente era:
+
+width=device-width, initial-scale=1
+
+A documentação local do Next.js 16 também confirmou que essa viewport é gerada automaticamente por padrão.
+
+Portanto NÃO assumir que a ausência de viewport era a causa do problema.
+
+O diagnóstico do comportamento inconsistente do Chrome Device Mode ficou INCONCLUSIVO.
+
+Também foi confundido temporariamente o controle visual de zoom "100%" do Device Mode com DPR. Essa interpretação estava errada.
+
+NÃO usar essa hipótese na próxima continuidade.
+
+## DOCUMENTAÇÃO NEXT.JS 16 CONSULTADA NESTA SESSÃO
+
+Foi lido:
+
+node_modules/next/dist/docs/01-app/03-api-reference/04-functions/generate-viewport.md
+
+A documentação confirmou:
+
+- viewport estática pode ser exportada em layout/page Server Component;
+- Next.js já gera viewport padrão automaticamente;
+- padrão normalmente suficiente;
+- configuração manual geralmente desnecessária.
+
+Não repetir essa leitura sem necessidade concreta.
+
+## ALTERAÇÃO EXPERIMENTAL EM app/layout.tsx
+
+Durante o diagnóstico foi substituído:
+
+app/layout.tsx
+
+Foi adicionado explicitamente:
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
+Também foram alterados:
+
+- title para Black Navalha;
+- description para Barbearia Black Navalha;
+- html lang de en para pt-BR.
+
+IMPORTANTE:
+
+A viewport explícita NÃO resolveu o comportamento observado no Device Mode.
+
+Essa alteração NÃO foi validada como necessária para corrigir responsividade.
+
+O próximo chat deve REVISAR app/layout.tsx antes de decidir mantê-la.
+
+Não presumir que viewport explícita é a solução.
+
+Não fazer commit dessa alteração automaticamente.
+
+## AVISO DO NEXT/IMAGE
+
+O Console apresentou warning relacionado a:
+
+/black-navalha/hero.jpg
+
+O warning informa que a imagem com fill possui:
+
+sizes="100vw"
+
+mas não é renderizada na largura total da viewport.
+
+Também apareceu anteriormente recomendação relacionada a LCP/loading.
+
+Isso é warning de performance e NÃO foi identificado como causa do problema de layout mobile.
+
+Não priorizar esse warning antes de resolver a responsividade visual atual.
+
+## TEXTO IDENTIFICADO COMO PENDÊNCIA
+
+Foi observado em app/page.tsx que ainda existe o texto:
+
+"Valores e horários são apresentados no momento do agendamento."
+
+Checkpoint anterior registrava solicitação para removê-lo.
+
+Não misturar essa pequena correção com diagnóstico de responsividade sem necessidade.
+
+## ESTADO DE APROVAÇÃO
+
+Desktop anteriormente aprovado:
+
+- Como chegar;
+- Avaliações;
+- navegação por categoria;
+- direção visual geral.
+
+Mobile:
+
+- ainda NÃO aprovado como conjunto;
+- Serviços ainda possui problema pendente;
+- hero ainda precisa refinamento/validação final;
+- galeria/lightbox ainda precisa teste mobile final;
+- rodapé, CTAs e links ainda precisam validação final.
+
+## PRÓXIMO PASSO EXATO
+
+No próximo chat:
+
+1. ler integralmente CONTEXTO-PROJETO.md;
+2. priorizar este checkpoint e o checkpoint anterior de 2026-09-09;
+3. NÃO alterar banco;
+4. NÃO retomar Admin;
+5. NÃO reconstruir /agendar;
+6. NÃO fazer commit;
+7. inspecionar somente o estado final atual de app/page.module.css, especialmente os últimos blocos @media adicionados nesta sessão;
+8. inspecionar app/layout.tsx somente para decidir conscientemente se a alteração experimental deve permanecer;
+9. remover/consolidar overrides mobile experimentais se necessário, em vez de continuar acumulando CSS;
+10. corrigir primeiro Serviços mobile usando as classes atuais serviceGroups/serviceGroup;
+11. validar em viewport mobile confiável;
+12. depois continuar Como chegar, Avaliações, hero, galeria/lightbox, rodapé e CTAs.
+
+Antes do commit final da Home ainda permanece obrigatório:
+
+- validação desktop;
+- validação mobile;
+- links e CTAs;
+- lightbox;
+- npm.cmd run build;
+- git status;
+- staging somente com caminhos explícitos;
+- nunca incluir CODIGO-COMPLETO.txt;
+- commit funcional;
+- push;
+- atualização final de CONTEXTO-PROJETO.md;
+- checkpoint documental.
+
+## IMPORTANTE
+
+Nenhuma alteração desta sessão deve ser considerada automaticamente pronta para commit.
+
+A prioridade do próximo chat é estabilizar o CSS responsivo atual com mudanças mínimas e verificáveis.
+---
+
+# CHECKPOINT INTERMEDIÁRIO — HOME MOBILE VALIDADA / PRÓXIMA FASE ASSINATURAS — 2026-09-09
+
+## HOME / MOBILE — ESTADO VALIDADO
+
+A etapa de refinamento mobile da Home avançou e os seguintes pontos foram validados visualmente em Device Mode de aproximadamente 390 x 844:
+
+- Serviços mobile corrigidos para a estrutura REAL atual baseada em `serviceGroups` / `serviceGroup`.
+- `.serviceGroups` passa para uma única coluna no breakpoint mobile.
+- As regras obsoletas de `.servicesGrid` / `.serviceCard`, pertencentes à estrutura antiga e sem uso nos componentes atuais, foram removidas de `app/page.module.css`.
+- A seção Serviços permaneceu correta após a consolidação do CSS.
+- Foi removido de `app/page.tsx` o texto pendente:
+  `Valores e horários são apresentados no momento do agendamento.`
+- Foi identificado overflow no Hero mobile causado pela escala tipográfica do título `SUA IDENTIDADE.`.
+- A regra mobile do título foi ajustada de:
+  `font-size: clamp(50px, 18vw, 75px);`
+  para:
+  `font-size: clamp(46px, 15vw, 64px);`
+- Após esse ajuste, o Hero ficou corretamente contido na viewport.
+- O problema visual observado anteriormente nas fotos também desapareceu após a correção do overflow do Hero.
+- As três imagens da galeria foram testadas no mobile.
+- O lightbox mobile foi validado nas três imagens, sem estouro lateral e com botão de fechar acessível.
+- Avaliações e Como chegar já haviam apresentado bom comportamento mobile e continuam pendentes apenas da validação final geral da Home antes do commit.
+- As categorias regulares da Home continuam APROVADAS.
+- ASSINATURA continua fora da navegação por categoria.
+- CONHECER PLANOS ainda não possui destino definitivo.
+
+## IMPORTANTE — HOME AINDA SEM COMMIT
+
+Não fazer commit da Home neste momento.
+
+Antes do commit final da Home ainda permanecem as validações finais previstas no histórico do projeto, incluindo desktop, mobile geral, CTAs/links, WhatsApp, Instagram, build e git status.
+
+`CODIGO-COMPLETO.txt` deve permanecer untracked e nunca deve ser versionado.
+
+## PRÓXIMA FRENTE FUNCIONAL — ÁREA DO ASSINANTE / ASSINATURAS
+
+A intenção de produto registrada para a próxima frente é transformar Assinaturas em uma funcionalidade real do cliente.
+
+Direção inicial solicitada:
+
+- começar exibindo o(s) plano(s) de assinatura existente(s) e seus valores;
+- aparentemente existe apenas um plano no estado atual, mas isso deve ser confirmado no código/dados existentes antes de implementar;
+- permitir futuramente contratação e pagamento da assinatura pelo próprio site;
+- após confirmação válida do pagamento, permitir ativação/liberação da assinatura pelo sistema;
+- cada plano/estrutura deverá considerar uma quantidade máxima `X` de assinantes, a ser definida;
+- no momento da contratação, o cliente deverá poder escolher a qual barbeiro deseja vincular sua assinatura;
+- cada barbeiro deverá possuir sua própria base/quantidade de assinantes vinculados;
+- barbeiros contratados deverão receber comissão relacionada às respectivas assinaturas, conforme regra ainda a ser definida.
+
+## REGRAS PARA INICIAR ASSINATURAS
+
+Antes de qualquer implementação:
+
+- inspecionar o que já existe no projeto para assinatura, planos, preços, usuários/clientes, barbeiros e pagamentos;
+- não assumir estrutura de banco nem criar migration antes dessa inspeção;
+- não alterar banco sem etapa específica e autorização;
+- definir claramente o modelo de capacidade/limite de assinantes;
+- definir regra de vínculo cliente ↔ assinatura ↔ barbeiro;
+- definir regra de comissão;
+- escolher posteriormente o provedor de pagamento e o fluxo de confirmação/webhook;
+- não liberar assinatura apenas com retorno do navegador; a confirmação de pagamento deverá ser validada no servidor quando essa integração for implementada;
+- manter a lógica atual de agendamento intacta até que seja explicitamente planejada alguma integração com benefícios da assinatura.
+
+## ALTERAÇÃO EXPERIMENTAL AINDA PENDENTE
+
+`app/layout.tsx` possui alteração experimental documentada anteriormente, incluindo viewport explícita e mudanças de metadata/lang.
+
+A viewport explícita não foi responsável pela correção do problema mobile observado.
+
+Essa alteração ainda precisa ser revisada conscientemente e não deve ser automaticamente incluída em commit futuro.
+
+
+---
+
+# CHECKPOINT INTERMEDIÁRIO — ASSINATURAS / REGRAS DE PRODUTO E ARQUITETURA — 2026-09-09
+
+## DIRETRIZ DE EXECUÇÃO
+
+A partir deste ponto, evitar microperguntas e etapas de diagnóstico sem necessidade concreta.
+
+Avançar com defaults técnicos seguros e reversíveis sempre que possível.
+
+Agrupar dúvidas de produto quando forem realmente necessárias.
+
+Interromper para autorização antes de:
+- alteração de banco/schema;
+- migration;
+- escolha/instalação de gateway ou dependência relevante;
+- operação destrutiva;
+- decisão financeira relevante ainda não definida;
+- commit/push.
+
+Continuam obrigatórias:
+- uma etapa por vez;
+- um único comando completo por etapa;
+- usar npm.cmd nesta máquina;
+- preferir Set-Content para código;
+- não reconstruir /agendar;
+- não alterar a lógica atual de benefício/agendamento;
+- não fazer commit enquanto houver trabalho em andamento;
+- CODIGO-COMPLETO.txt permanece untracked e nunca deve ser versionado.
+
+## ESTADO PÚBLICO IMPLEMENTADO LOCALMENTE
+
+Foi criada, ainda sem commit:
+
+- /assinaturas
+
+A página foi validada visualmente em desktop e mobile.
+
+Exibe provisoriamente no código:
+
+- Plano Mensal;
+- R$ 150,00 por mês.
+
+Os serviços incluídos são carregados dos serviços reais com:
+
+subscriber_service = true
+active = true
+
+Foram encontrados quatro serviços ativos de assinatura, todos corretamente com price = 0:
+
+- Barba Assinante Mensal;
+- Cabelo + Barba Assinante Mensal;
+- Cabelo Assinante Mensal;
+- Raspado + Barba Assinante Mensal.
+
+Esses R$ 0,00 NÃO representam o preço comercial da assinatura. Representam benefícios incluídos na mensalidade.
+
+O botão CONHECER PLANOS da Home foi ligado a:
+
+/assinaturas
+
+e o fluxo foi validado.
+
+A Home continua sem commit.
+
+## ARQUITETURA EXISTENTE CONFIRMADA
+
+subscriptions representa a assinatura concreta de um cliente e possui:
+
+- id uuid;
+- customer_id uuid;
+- name text;
+- status text;
+- starts_at date;
+- expires_at date;
+- notes text;
+- created_at timestamptz;
+- updated_at timestamptz;
+- weekly_limit integer;
+- monthly_limit integer;
+- allowed_weekdays integer[].
+
+Status permitidos atualmente:
+
+- active;
+- paused;
+- cancelled;
+- expired.
+
+Não adicionar estados financeiros diretamente nesse status sem necessidade.
+
+subscription_services possui chave composta:
+
+- subscription_id;
+- service_id.
+
+subscriptions.customer_id referencia customers.id.
+
+Não existe atualmente, no schema inspecionado:
+- catálogo comercial de planos;
+- preço/mensalidade em subscriptions;
+- vínculo subscription -> barber;
+- capacidade de assinantes por barbeiro;
+- estrutura de pagamentos;
+- estrutura de comissão.
+
+A arquitetura já existente de benefícios no agendamento deve ser preservada.
+
+## MODELO COMERCIAL DEFINIDO
+
+Plano inicial:
+
+Plano Mensal
+
+Mensalidade:
+
+R$ 150,00
+
+Não assumir para sempre que haverá apenas um plano. A evolução deve permitir catálogo de planos.
+
+Direção de modelagem futura:
+
+- subscription_plans para catálogo comercial;
+- subscriptions continua representando a assinatura concreta;
+- assinatura futura vinculada a plan_id;
+- assinatura futura vinculada a barber_id;
+- pagamentos em estrutura financeira separada;
+- comissão separada e auditável.
+
+Nenhuma migration foi criada ainda.
+
+## CAPACIDADE POR BARBEIRO
+
+Capacidade inicial:
+
+30 assinantes por barbeiro.
+
+A capacidade pertence ao barbeiro.
+
+Somente assinatura financeiramente em dia ocupa vaga normal.
+
+Após o encerramento de um ciclo mensal já validado/pago, o assinante mantém sua vaga reservada por:
+
+2 dias.
+
+Durante essa carência a vaga continua pertencendo ao assinante.
+
+Se não houver confirmação do pagamento de renovação dentro da carência, a vaga é liberada.
+
+Depois de liberada, o antigo assinante só consegue reativar/contratar se houver capacidade disponível.
+
+A implementação futura da capacidade deverá ser segura contra concorrência. Não permitir que checkouts simultâneos gerem mais de 30 assinantes válidos para o mesmo barbeiro.
+
+## VÍNCULO COM BARBEIRO
+
+Na contratação, o cliente escolhe o barbeiro.
+
+O barbeiro fica travado durante o ciclo mensal vigente.
+
+O cliente não troca de barbeiro no meio do ciclo.
+
+Na renovação ele pode:
+
+- permanecer com o barbeiro atual;
+- escolher outro barbeiro.
+
+Troca depende de capacidade disponível no novo barbeiro.
+
+Durante os 2 dias de carência, a vaga do barbeiro antigo permanece reservada.
+
+Se o cliente solicitar renovação com outro barbeiro, a vaga antiga só é liberada quando o pagamento da renovação vinculada ao novo barbeiro estiver efetivamente confirmado.
+
+Pagamento pendente ou falhado não libera antecipadamente a vaga antiga.
+
+## PAGAMENTOS
+
+Gateway ainda NÃO escolhido.
+
+Não instalar SDK/biblioteca até decisão específica.
+
+Fluxo obrigatório futuro:
+
+cliente -> plano -> barbeiro -> capacidade -> criação segura da cobrança -> gateway -> webhook/validação no servidor -> pagamento confirmado -> ativação/renovação.
+
+Nunca ativar assinatura apenas por retorno/redirecionamento do navegador.
+
+O sistema deverá manter registros financeiros próprios para auditoria e conciliação.
+
+Estados financeiros não devem depender somente de subscriptions.status.
+
+Webhooks deverão ser autenticados e idempotentes.
+
+Eventos repetidos do gateway não podem:
+- ativar duas vezes;
+- renovar duas vezes;
+- duplicar receita;
+- duplicar comissão.
+
+## COMISSÃO
+
+Percentual/regra numérica ainda NÃO definidos.
+
+A comissão nasce somente após confirmação válida do pagamento da mensalidade.
+
+Cada renovação paga pode gerar nova comissão para o barbeiro vinculado àquele ciclo.
+
+Não geram comissão:
+- pagamento pendente;
+- pagamento falhado;
+- pagamento cancelado;
+- cobrança expirada/não paga.
+
+Em caso de estorno posterior, preservar histórico e registrar reversão da comissão correspondente, em vez de apagar registros financeiros.
+
+## PRÓXIMA DIREÇÃO
+
+Avançar com rapidez, evitando novas microperguntas.
+
+Próxima fase técnica:
+
+desenhar a menor evolução de schema necessária para:
+- catálogo do plano;
+- vínculo assinatura/plano;
+- vínculo assinatura/barbeiro;
+- capacidade;
+- ciclos financeiros/pagamentos;
+- comissão auditável.
+
+Antes de aplicar qualquer SQL:
+- apresentar a modelagem;
+- analisar compatibilidade com subscriptions existente;
+- obter autorização explícita para alteração do banco.
+
+Não implementar gateway ainda.
+Não alterar /agendar.
+Não fazer commit.

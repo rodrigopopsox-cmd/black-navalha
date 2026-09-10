@@ -8775,3 +8775,809 @@ Antes de aplicar qualquer SQL:
 Não implementar gateway ainda.
 Não alterar /agendar.
 Não fazer commit.
+
+---
+
+# CHECKPOINT DE RECUPERAÇÃO — ASSINATURAS / PRÉ-CHECKOUT / CREDENCIAL SERVER-SIDE — 2026-09-10
+
+## PRIORIDADE
+
+Este é o checkpoint mais recente e deve ter prioridade absoluta no próximo chat.
+
+NÃO reiniciar análise do projeto.
+
+Trabalhar em BLOCOS/LOTES MAIORES.
+
+Evitar microetapas e diagnósticos repetitivos.
+
+Quando o responsável precisar executar algo, fornecer preferencialmente UM comando PowerShell completo, pronto para copiar e colar.
+
+Usar npm.cmd.
+
+Preferir Set-Content para código.
+
+NÃO fazer commit/push sem autorização.
+
+## OBJETIVO ATUAL
+
+Continuar diretamente a implementação do fluxo público de contratação em:
+
+/assinaturas
+
+Fluxo pretendido:
+
+plano real do banco
+→ dados do cliente
+→ escolha do barbeiro
+→ disponibilidade
+→ criação server-side do pré-checkout
+→ create_subscription_checkout
+→ hold transacional de 15 minutos
+→ subscription_charge pending
+→ PARAR antes do gateway.
+
+Gateway ainda NÃO foi escolhido.
+
+NÃO instalar gateway.
+
+NÃO realizar cobrança real.
+
+NÃO ativar assinatura pelo browser.
+
+NÃO criar ciclo paid antes de pagamento confirmado.
+
+NÃO gerar comissão antes de pagamento confirmado.
+
+## BANCO — ESTADO CONFIRMADO
+
+Já foram criados e APLICADOS com sucesso no Supabase:
+
+supabase/sql/007-subscriptions-commerce.sql
+supabase/sql/008-subscription-checkout-capacity.sql
+supabase/sql/009-subscription-checkout.sql
+
+Todos retornaram:
+
+Success. No rows returned
+
+NÃO reaplicar sem necessidade concreta.
+
+### Plano
+
+Existe:
+
+subscription_plans
+
+Plano real:
+
+Plano Mensal
+R$ 150,00
+billing_interval_months = 1
+grace_days = 2
+active = true
+
+O banco é autoridade sobre preço comercial.
+
+services.price = 0 para subscriber_service continua significando benefício coberto pela mensalidade.
+
+### Assinatura legada
+
+subscriptions possui plan_id nullable.
+
+Existe uma assinatura legada com plan_id NULL.
+
+Preservar.
+
+Não fabricar histórico financeiro.
+
+### Capacidade
+
+barbers possui subscriber_capacity.
+
+Capacidade inicial:
+
+30 por barbeiro.
+
+Barbeiro validado:
+
+Rodrigo Alves Correa
+
+Proteção concorrente utiliza PostgreSQL:
+
+SELECT ... FOR UPDATE
+
+Preservar obrigatoriamente.
+
+### Ciclos
+
+Existe:
+
+subscription_cycles
+
+Barbeiro é historicamente vinculado ao ciclo.
+
+Carência após ciclo pago:
+
+2 dias.
+
+Não confundir com hold de checkout.
+
+### Hold
+
+Existe:
+
+subscription_capacity_reservations
+
+Hold de pré-checkout:
+
+15 minutos.
+
+008 permitiu pré-checkout sem subscription_id.
+
+Existe checkout_token.
+
+Existe RPC:
+
+reserve_subscription_checkout_capacity(...)
+
+Ela protege capacidade de forma concorrente/transacional.
+
+### Checkout
+
+009 preparou:
+
+subscription_charges.customer_name
+subscription_charges.customer_phone
+subscription_charges.customer_email
+subscription_charges.checkout_token
+
+subscription_charges.subscription_id aceita NULL durante pré-checkout.
+
+Existe RPC pública mínima:
+
+get_public_subscription_barbers()
+
+Ela foi testada com publishable/anon e funcionou.
+
+Resultado confirmado:
+
+1 barbeiro retornado.
+
+Existe RPC privilegiada:
+
+create_subscription_checkout(...)
+
+Ela:
+
+- valida plano;
+- valida comprador;
+- valida barbeiro;
+- valida capacidade;
+- cria hold transacional;
+- cria subscription_charge pending;
+- utiliza preço real de subscription_plans;
+- é idempotente via checkout_token.
+
+Ela NÃO:
+
+- ativa assinatura;
+- confirma pagamento;
+- cria comissão.
+
+## PERMISSÃO PÚBLICA DO PLANO
+
+Foi confirmado por teste direto:
+
+subscription_plans via publishable/anon retorna:
+
+code 42501
+permission denied for table subscription_plans
+
+O hint do Supabase sugeriu GRANT SELECT para anon.
+
+NÃO foi aplicado novo GRANT/migration.
+
+services via publishable funciona.
+
+get_public_subscription_barbers() via publishable funciona.
+
+Para evitar alteração de banco apenas para renderização, a direção atual foi carregar subscription_plans server-side utilizando lib/supabase/admin.ts.
+
+## SEGURANÇA SERVER-SIDE
+
+Existe:
+
+lib/supabase/admin.ts
+
+Ele utiliza:
+
+import "server-only"
+
+e lê:
+
+SUPABASE_SERVICE_ROLE_KEY
+
+A chave nunca deve:
+
+- ser impressa;
+- ir para browser;
+- receber NEXT_PUBLIC_;
+- ser versionada;
+- ser colada no chat.
+
+.env.local permanece fora do Git.
+
+## BLOQUEIO ATUAL
+
+A credencial configurada em:
+
+SUPABASE_SERVICE_ROLE_KEY
+
+não está funcionando contra a API do projeto.
+
+Teste direto retornou:
+
+Invalid API key
+
+O Project URL local possui formato válido.
+
+Project ref identificado:
+
+elpvjgxixzktgwxdfckb
+
+O bloqueio atual é:
+
+OBTER/CONFIGURAR UMA CREDENCIAL SERVER-SIDE VÁLIDA DO MESMO PROJETO SUPABASE.
+
+Pode ser, conforme disponibilidade no painel:
+
+- Secret key server-side;
+- ou service_role legada.
+
+Não registrar nem expor o valor da chave.
+
+Não continuar tentando contornar isso com credencial pública.
+
+Quando a credencial server-side válida estiver configurada, validar acesso server-side a subscription_plans e seguir imediatamente com o pré-checkout.
+
+## CÓDIGO IMPLEMENTADO LOCALMENTE
+
+Existe:
+
+app/assinaturas/subscription-checkout-form.tsx
+
+O formulário já possui:
+
+- nome;
+- WhatsApp;
+- e-mail opcional;
+- escolha de barbeiro;
+- exibição de vagas;
+- estados de loading/erro;
+- resultado de hold preparado;
+- mensagem explícita de que não houve pagamento;
+- mensagem explícita de que assinatura não foi ativada.
+
+Foi alterado para gerar checkout_token no browser uma vez por tentativa usando:
+
+crypto.randomUUID()
+
+O mesmo token é enviado ao backend para permitir idempotência da tentativa.
+
+Botão atual:
+
+PREPARAR CONTRATAÇÃO
+
+Não promete pagamento real.
+
+Existe:
+
+app/api/assinaturas/checkout/route.ts
+
+A rota:
+
+- é server-side;
+- usa createAdminClient();
+- valida entrada;
+- recebe checkoutToken;
+- chama create_subscription_checkout;
+- não marca pagamento como paid;
+- não ativa assinatura;
+- não cria comissão.
+
+Existe:
+
+app/assinaturas/page.tsx
+
+Direção implementada:
+
+- services pelo client existente;
+- disponibilidade via get_public_subscription_barbers();
+- subscription_plans via createAdminClient();
+- SubscriptionCheckoutForm conectado à página.
+
+O erro visual atual:
+
+"Não foi possível carregar os planos disponíveis no momento."
+
+ocorre porque a credencial server-side configurada está inválida.
+
+## BUILD
+
+Após as alterações de pré-checkout:
+
+npm.cmd run build
+
+PASSOU.
+
+Resultado:
+
+Compiled successfully
+Finished TypeScript
+rotas geradas normalmente.
+
+Existe rota:
+
+/api/assinaturas/checkout
+
+Existe rota:
+
+/assinaturas
+
+Não é necessário repetir build antes de resolver a credencial, salvo alteração de código.
+
+Antes de commit final, build continua obrigatório.
+
+## TESTE FUNCIONAL AINDA PENDENTE
+
+Ainda NÃO foi executado com sucesso o POST real de create_subscription_checkout porque o plano não consegue ser carregado via admin enquanto a credencial server-side estiver inválida.
+
+Depois de corrigir a credencial:
+
+1. validar /assinaturas;
+2. confirmar Plano Mensal R$ 150;
+3. confirmar quatro serviços incluídos;
+4. confirmar Rodrigo Alves Correa e disponibilidade;
+5. testar desktop;
+6. testar mobile;
+7. executar UMA tentativa real de PREPARAR CONTRATAÇÃO;
+8. confirmar hold de 15 minutos;
+9. confirmar subscription_charge pending;
+10. confirmar que nenhuma assinatura ficou active;
+11. confirmar que nenhum ciclo ficou paid;
+12. confirmar que nenhuma comissão foi criada.
+
+Depois disso PARAR antes de gateway.
+
+## FINANCEIRO
+
+Estados previstos:
+
+pending
+paid
+failed
+cancelled
+expired
+refunded
+partially_refunded
+
+Existe payment_events para idempotência futura.
+
+Existe subscription_commission_entries.
+
+Percentual de comissão ainda NÃO definido.
+
+NÃO inventar percentual.
+
+Gateway ainda NÃO escolhido.
+
+NÃO instalar SDK.
+
+Fluxo futuro:
+
+cliente
+→ plano
+→ barbeiro
+→ capacidade
+→ hold
+→ cobrança interna pending
+→ gateway
+→ webhook/validação segura
+→ pagamento confirmado
+→ ativação/renovação
+→ comissão.
+
+## NÃO ALTERAR
+
+Não alterar:
+
+/agendar
+
+Não alterar:
+
+create_public_multi_appointment
+
+Não reconstruir integração de benefícios da assinatura.
+
+Não reaplicar 007/008/009.
+
+Não fabricar histórico da assinatura legada.
+
+Não alterar comissão sem decisão financeira.
+
+Não escolher gateway sem autorização.
+
+## GIT / ARQUIVOS LOCAIS
+
+Estado conhecido:
+
+M app/assinaturas/page.module.css
+M app/assinaturas/page.tsx
+?? ASSINATURAS-LOTE.txt
+?? CODIGO-COMPLETO.txt
+?? app/api/
+?? app/assinaturas/subscription-checkout-form.tsx
+?? lib/supabase/admin.ts
+?? supabase/sql/007-subscriptions-commerce.sql
+?? supabase/sql/008-subscription-checkout-capacity.sql
+?? supabase/sql/009-subscription-checkout.sql
+
+CODIGO-COMPLETO.txt deve continuar untracked e NUNCA ser versionado.
+
+ASSINATURAS-LOTE.txt é arquivo auxiliar e NÃO deve entrar em staging.
+
+Nunca usar:
+
+git add .
+
+Staging somente com caminhos explícitos.
+
+Commit/push somente após autorização consciente.
+
+## PRÓXIMO PASSO EXATO
+
+NÃO diagnosticar novamente arquitetura, banco, migrations, /agendar ou formulário.
+
+Resolver primeiro o bloqueio:
+
+CONFIGURAR UMA CREDENCIAL SERVER-SIDE VÁLIDA DO PROJETO SUPABASE elpvjgxixzktgwxdfckb.
+
+Depois:
+
+validar subscription_plans server-side
+→ abrir /assinaturas
+→ validar plano/barbeiro/disponibilidade
+→ executar uma tentativa de pré-checkout
+→ confirmar hold + charge pending
+→ parar antes de gateway.
+
+Priorizar velocidade e comandos completos prontos para copiar/colar.
+
+---
+
+---
+
+# CHECKPOINT FINAL DA SESSÃO — ASSINATURAS / PRÉ-CHECKOUT FUNCIONAL — 2026-09-10
+
+## PRIORIDADE
+
+Este é o checkpoint mais recente e deve ter PRIORIDADE ABSOLUTA no próximo chat.
+
+NÃO reiniciar análise.
+
+NÃO reaplicar migrations 007/008/009/010/011.
+
+NÃO reconstruir /agendar nem create_public_multi_appointment.
+
+## ESTADO ATUAL
+
+O fluxo público de Assinaturas avançou até o pré-checkout real.
+
+Rota:
+
+/assinaturas
+
+Plano real carregado server-side:
+
+Plano Mensal
+R$ 150,00
+billing_interval_months = 1
+grace_days = 2
+active = true
+
+Serviços incluídos confirmados:
+
+- Barba Assinante Mensal
+- Cabelo + Barba Assinante Mensal
+- Cabelo Assinante Mensal
+- Raspado + Barba Assinante Mensal
+
+Barbeiro:
+
+Rodrigo Alves Correa
+
+Capacidade real no banco:
+
+30 assinantes.
+
+A proteção concorrente PostgreSQL com SELECT ... FOR UPDATE deve ser preservada.
+
+## CREDENCIAL SERVER-SIDE
+
+Foi configurada localmente uma service_role LEGADA válida do projeto:
+
+elpvjgxixzktgwxdfckb
+
+Ela está em:
+
+.env.local
+
+variável:
+
+SUPABASE_SERVICE_ROLE_KEY
+
+NUNCA imprimir, expor, enviar ao browser ou versionar essa chave.
+
+Uma Secret API key moderna também foi criada no painel durante os testes, mas a arquitetura local utiliza atualmente a service_role legada em SUPABASE_SERVICE_ROLE_KEY.
+
+Uma chave Secret criada anteriormente foi exposta acidentalmente no chat e foi REVOGADA/EXCLUÍDA imediatamente.
+
+Não reutilizar aquela chave.
+
+## MIGRATION 010
+
+Criada e aplicada com sucesso:
+
+supabase/sql/010-service-role-subscription-plans-read.sql
+
+Objetivo:
+
+GRANT SELECT em public.subscription_plans somente para service_role.
+
+Resultado no Supabase:
+
+Success. No rows returned
+
+Após 010, leitura server-side foi validada:
+
+PLANOS SERVER-SIDE: OK
+
+Plano retornado:
+
+Plano Mensal
+R$ 150
+intervalo 1 mês
+carência 2 dias
+active true
+
+Não abriu subscription_plans para anon.
+
+## MIGRATION 011
+
+Criada e aplicada com sucesso:
+
+supabase/sql/011-service-role-subscription-checkout.sql
+
+Objetivo:
+
+- EXECUTE de create_subscription_checkout para service_role;
+- SELECT server-side para estruturas necessárias de auditoria do pré-checkout;
+- sem novos privilégios para anon/authenticated.
+
+Resultado no Supabase:
+
+Success. No rows returned
+
+NÃO reaplicar.
+
+## PRÉ-CHECKOUT DIRETO VALIDADO
+
+Foi executada uma tentativa real de create_subscription_checkout.
+
+Resultado confirmado:
+
+- amount = 150;
+- currency = BRL;
+- subscription_charge = pending;
+- subscription_id = null;
+- hold = held;
+- cycle_id = null;
+- hold exatamente 15 minutos;
+- paid cycles total = 0;
+- commissions = [].
+
+Exemplo validado:
+
+charge_id:
+49eb2e92-dae5-4c2c-89d9-8c04421084f9
+
+checkout_token:
+0e737b16-f992-45e4-a359-a18d68bb0245
+
+created_at:
+2026-09-10T04:36:04.076513+00:00
+
+reservation_expires_at:
+2026-09-10T04:51:04.076513+00:00
+
+O hold expirou normalmente e a disponibilidade retornou de 29 para 30.
+
+Isso confirmou operacionalmente a reserva temporária de capacidade.
+
+## PRÉ-CHECKOUT PELA INTERFACE
+
+Depois da aplicação da 011, o fluxo real pela interface também FUNCIONOU.
+
+Foi preenchido:
+
+- nome;
+- WhatsApp;
+- e-mail;
+- Rodrigo Alves Correa.
+
+Foi clicado uma única vez:
+
+PREPARAR CONTRATAÇÃO
+
+Resultado visual:
+
+Vaga reservada temporariamente.
+
+A interface informou:
+
+- checkout de R$ 150,00 preparado;
+- vaga reservada até o horário de expiração;
+- cobrança real ainda não disponível;
+- nenhum pagamento realizado;
+- assinatura ainda não ativada.
+
+Portanto:
+
+browser
+→ /api/assinaturas/checkout
+→ create_subscription_checkout
+→ hold
+→ charge pending
+
+está funcional.
+
+## AUDITORIA FINAL DA ÚLTIMA TENTATIVA
+
+Ainda está PENDENTE executar a auditoria somente-leitura da ÚLTIMA tentativa feita pela interface.
+
+No próximo chat, antes de avançar para gateway, confirmar explicitamente:
+
+- charge = pending;
+- subscription_id = null;
+- hold correspondente;
+- nenhum ciclo paid criado pela tentativa;
+- nenhuma comissão criada;
+- nenhuma assinatura ativada pela tentativa.
+
+Não criar outro checkout antes dessa verificação sem necessidade.
+
+## DECISÕES DE UI PARA O PRÓXIMO CHAT
+
+### Contagem regressiva
+
+Quando a área de pagamento for implementada, substituir a apresentação textual simples da reserva por cronômetro regressivo real:
+
+15:00
+→
+00:00
+
+A contagem deve ser baseada em:
+
+reservation_expires_at
+
+retornado pelo servidor.
+
+Não criar um timer independente que possa divergir do hold real do banco.
+
+### Disponibilidade do barbeiro
+
+Não mostrar ao cliente a quantidade exata de vagas.
+
+Em vez de:
+
+30 vagas disponíveis
+29 vagas disponíveis
+
+mostrar somente:
+
+Vagas disponíveis
+
+ou:
+
+Indisponível
+
+A capacidade numérica real continua sendo controlada no backend/banco.
+
+## GATEWAY / FINANCEIRO
+
+Gateway ainda NÃO escolhido.
+
+NÃO instalar gateway no próximo chat sem decisão/autorização específica.
+
+NÃO realizar pagamento real antes dessa escolha.
+
+NÃO ativar assinatura por retorno do navegador.
+
+NÃO criar ciclo paid antes de confirmação segura do pagamento.
+
+Percentual de comissão ainda NÃO definido.
+
+NÃO inventar percentual.
+
+Comissão somente após pagamento confirmado futuramente.
+
+## REGRAS DE NEGÓCIO PRESERVADAS
+
+Hold do checkout:
+
+15 minutos.
+
+Carência após ciclo pago:
+
+2 dias.
+
+NÃO confundir essas regras.
+
+Capacidade:
+
+30 assinantes por barbeiro.
+
+Barbeiro escolhido fica vinculado conforme regras já definidas anteriormente.
+
+Proteção concorrente via PostgreSQL SELECT ... FOR UPDATE deve permanecer.
+
+## ARQUIVOS IMPORTANTES
+
+Implementação de Assinaturas:
+
+- lib/supabase/admin.ts
+- app/assinaturas/page.tsx
+- app/assinaturas/page.module.css
+- app/assinaturas/subscription-checkout-form.tsx
+- app/api/assinaturas/checkout/route.ts
+
+SQL:
+
+- supabase/sql/007-subscriptions-commerce.sql
+- supabase/sql/008-subscription-checkout-capacity.sql
+- supabase/sql/009-subscription-checkout.sql
+- supabase/sql/010-service-role-subscription-plans-read.sql
+- supabase/sql/011-service-role-subscription-checkout.sql
+
+007/008/009/010/011 já foram aplicadas.
+
+NÃO reaplicar.
+
+## GIT / SEGURANÇA
+
+Nunca versionar:
+
+CODIGO-COMPLETO.txt
+ASSINATURAS-LOTE.txt
+.env.local
+
+Nunca usar:
+
+git add .
+
+Staging somente com caminhos explícitos.
+
+## PRÓXIMO PASSO EXATO
+
+No próximo chat:
+
+1. ler integralmente CONTEXTO-PROJETO.md;
+2. priorizar este checkpoint;
+3. executar a auditoria somente-leitura da última tentativa de pré-checkout feita pela interface;
+4. confirmar ausência de active/paid/comissão;
+5. ajustar a UI do barbeiro para mostrar somente Vagas disponíveis / Indisponível;
+6. preservar o requisito futuro do cronômetro 15:00 → 00:00 baseado em reservation_expires_at;
+7. PARAR antes de gateway até escolha/autorização específica.
+
+Gateway ainda não escolhido.
+

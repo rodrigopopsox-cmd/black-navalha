@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { FormEvent, useRef, useState } from "react";
 
@@ -248,13 +248,7 @@ export default function SubscriptionCheckoutForm({
                 <span>
                   <strong>{barber.name}</strong>
                   <small>
-                    {available
-                      ? `${barber.available_slots} ${
-                          barber.available_slots === 1
-                            ? "vaga disponível"
-                            : "vagas disponíveis"
-                        }`
-                      : "Sem vagas"}
+                    {available ? "Vagas disponíveis" : "Indisponível"}
                   </small>
                 </span>
 

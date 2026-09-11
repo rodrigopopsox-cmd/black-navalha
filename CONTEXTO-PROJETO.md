@@ -10697,3 +10697,558 @@ No próximo chat:
 
 Não realizar cobrança real.
 
+
+---
+
+# CHECKPOINT FINAL DA SESSÃO — MERCADO PAGO / IMPLEMENTAÇÃO SERVER-SIDE E WEBHOOK — 2026-09-11
+
+## PRIORIDADE ABSOLUTA
+
+Este é o checkpoint mais recente e deve ter PRIORIDADE ABSOLUTA na próxima sessão.
+
+ANTES DE QUALQUER AÇÃO:
+
+- ler INTEGRALMENTE CONTEXTO-PROJETO.md;
+- NÃO reiniciar a análise;
+- NÃO repetir inspeções de migrations 007–013, package.json, AGENTS.md ou documentação já confirmada;
+- NÃO reconstruir /agendar;
+- NÃO alterar create_public_multi_appointment;
+- preservar obrigatoriamente SELECT ... FOR UPDATE na proteção de capacidade;
+- usar npm.cmd;
+- fornecer UM comando PowerShell completo por etapa quando o responsável precisar executar algo;
+- preferir Set-Content para código;
+- nunca usar git add .;
+- staging somente com caminhos explícitos;
+- commit/push somente com autorização;
+- nunca exibir nem versionar .env.local.
+
+## GIT DE REFERÊNCIA NO INÍCIO DESTA SESSÃO
+
+Branch:
+
+main
+
+HEAD/origin confirmado:
+
+b7f8b39 Prepara integracao de assinaturas com Mercado Pago
+
+Arquivos untracked auxiliares:
+
+- ASSINATURAS-LOTE.txt
+- CODIGO-COMPLETO.txt
+
+Esses arquivos NÃO devem ser versionados.
+
+## MERCADO PAGO
+
+Aplicação:
+
+Black Navalha - Desenvolvimento
+
+Ambiente:
+
+TESTE
+
+Modalidade:
+
+Assinaturas com integração
+
+Contas Vendedor/Comprador de teste já existem.
+
+MERCADO_PAGO_ACCESS_TOKEN de TESTE continua salvo somente em .env.local.
+
+Nenhum pagamento de teste foi realizado nesta sessão.
+
+Nenhuma cobrança real foi realizada.
+
+## API ATUAL CONFIRMADA
+
+Mantêm-se confirmados:
+
+POST https://api.mercadopago.com/preapproval_plan
+
+POST https://api.mercadopago.com/preapproval
+
+Webhook:
+
+- subscription_preapproval
+- subscription_authorized_payment
+
+Cabeçalhos:
+
+- x-signature
+- x-request-id
+
+Manifesto HMAC SHA-256:
+
+id:[data.id_url];request-id:[x-request-id_header];ts:[ts_header];
+
+Também foi confirmado nesta sessão diretamente na referência atual do Mercado Pago:
+
+GET https://api.mercadopago.com/authorized_payments/{id}
+
+Exemplo atual documentado de authorized payment contém:
+
+- id;
+- preapproval_id;
+- external_reference;
+- currency_id;
+- transaction_amount;
+- status da fatura;
+- payment.id;
+- payment.status;
+- payment.status_detail.
+
+REGRA IMPLEMENTADA:
+
+authorized_payment.status = scheduled NÃO é considerado confirmação financeira.
+
+Somente:
+
+payment.status = approved
+
+pode avançar para processamento financeiro, e ainda exige validações internas adicionais.
+
+## SCHEMA/ÍNDICES CONFIRMADOS NESTA SESSÃO
+
+Foram consultados somente os contratos necessários das estruturas financeiras atuais.
+
+Confirmado:
+
+payment_events possui UNIQUE:
+
+(provider, provider_event_id)
+
+subscription_charges possui UNIQUE:
+
+idempotency_key
+
+e UNIQUE parcial:
+
+(provider, provider_charge_id)
+
+subscription_capacity_reservations possui UNIQUE:
+
+checkout_token
+
+subscription_cycles possui UNIQUE:
+
+(subscription_id, period_start)
+
+subscription_commission_entries possui proteção contra comissão duplicada por charge.
+
+customers.phone possui índice comum, NÃO UNIQUE.
+
+Portanto não utilizar ON CONFLICT(phone).
+
+Não repetir essas consultas sem necessidade concreta.
+
+## REGRA DE CICLO DEFINIDA
+
+Para pagamento inicial confirmado na data D em America/Sao_Paulo:
+
+period_start = D
+
+period_end = D + billing_interval_months - 1 dia
+
+Exemplo:
+
+11/09/2026
+→
+10/10/2026
+
+subscriptions.starts_at = início da contratação válida.
+
+subscriptions.expires_at = fim do ciclo pago atual.
+
+grace_until considera grace_days do plano após o encerramento do ciclo.
+
+Para renovação, o próximo ciclo deve continuar após o period_end anterior quando aplicável.
+
+## MIGRATION 013
+
+Criada:
+
+supabase/sql/013-mercado-pago-payment-confirmation.sql
+
+Autorização de criação e aplicação foi fornecida explicitamente.
+
+Migration aplicada no Supabase em 2026-09-11.
+
+Resultado:
+
+Success. No rows returned
+
+NÃO reaplicar.
+
+Ela cria:
+
+public.confirm_mercado_pago_subscription_payment(...)
+
+RPC SECURITY DEFINER acessível ao service_role.
+
+Objetivo:
+
+processar de maneira transacional/idempotente a confirmação financeira já validada server-side.
+
+A RPC:
+
+- bloqueia subscription_charge com FOR UPDATE;
+- exige provider = mercado_pago;
+- exige provider_charge_id correspondente;
+- aceita processamento financeiro novo somente para charge pending;
+- retorna idempotentemente se charge já estiver paid e completa;
+- carrega o plano;
+- bloqueia o barbeiro com FOR UPDATE;
+- preserva proteção de capacidade;
+- carrega o hold pelo checkout_token;
+- revalida capacidade se o hold tiver expirado;
+- não ultrapassa subscriber_capacity;
+- normaliza WhatsApp;
+- localiza cliente existente pelo telefone normalizado;
+- cria cliente quando necessário;
+- não usa ON CONFLICT(phone), pois customers.phone não é UNIQUE;
+- preserva assinatura legada com plan_id NULL;
+- cria/reutiliza assinatura comercial vinculada ao plano;
+- cria ciclo paid;
+- vincula barbeiro historicamente no ciclo;
+- atualiza assinatura para active;
+- registra expires_at do ciclo;
+- copia os services ativos subscriber_service para subscription_services;
+- transforma o hold em consumed;
+- vincula charge a subscription/cycle;
+- marca charge como paid;
+- registra paid_at;
+- NÃO cria comissão.
+
+Percentual/regra de comissão continuam NÃO definidos.
+
+Não inventar comissão.
+
+## IMPLEMENTAÇÃO REST MERCADO PAGO
+
+Criado:
+
+lib/mercado-pago/client.ts
+
+Responsabilidades:
+
+- acesso exclusivamente server-side;
+- MERCADO_PAGO_ACCESS_TOKEN lido do ambiente;
+- fetch nativo;
+- Authorization Bearer;
+- suporte a X-Idempotency-Key;
+- tratamento de respostas/erros;
+- nenhum SDK do Mercado Pago instalado.
+
+Criado/alterado:
+
+lib/mercado-pago/subscriptions.ts
+
+Implementado:
+
+- criação de preapproval_plan;
+- criação de preapproval;
+- consulta GET de preapproval;
+- consulta GET de authorized_payments/{id};
+- parsing defensivo dos campos necessários.
+
+## CRIAÇÃO DO PREAPPROVAL
+
+Criado:
+
+app/api/assinaturas/mercado-pago/route.ts
+
+A rota:
+
+- recebe chargeId + checkoutToken;
+- busca somente subscription_charge correspondente;
+- exige charge pending;
+- exige e-mail para prosseguir ao Mercado Pago;
+- valida hold vigente;
+- valida plano interno ativo;
+- compara preço da charge com preço do plano;
+- exige BRL;
+- cria preapproval_plan no Mercado Pago quando ainda não existe vínculo;
+- utiliza X-Idempotency-Key determinístico para o plano;
+- persiste mercado_pago_preapproval_plan_id no subscription_plans;
+- cria preapproval associado ao plano;
+- utiliza external_reference = subscription_charge.id;
+- utiliza idempotência determinística baseada na charge;
+- persiste:
+  provider = mercado_pago
+  provider_charge_id = preapproval.id
+- em retry com provider_charge_id existente, consulta o preapproval no Mercado Pago em vez de criar outro;
+- retorna init_point;
+- retorna reservationExpiresAt.
+
+IMPORTANTE:
+
+A rota ainda NÃO foi chamada em teste nesta sessão.
+
+Portanto nenhum preapproval_plan/preapproval foi criado por esta implementação até este checkpoint.
+
+## WEBHOOK IMPLEMENTADO
+
+Criado:
+
+app/api/mercado-pago/webhook/route.ts
+
+Criado:
+
+lib/mercado-pago/webhook-signature.ts
+
+Implementado:
+
+- POST Route Handler;
+- leitura de x-signature;
+- leitura de x-request-id;
+- extração de data.id;
+- parsing de ts/v1;
+- construção do manifesto documentado;
+- HMAC SHA-256;
+- comparação timing-safe;
+- rejeição de assinatura inválida;
+- nenhum segredo enviado ao browser;
+- suporte aos tópicos:
+  subscription_preapproval
+  subscription_authorized_payment
+- armazenamento em payment_events;
+- idempotência baseada em provider + provider_event_id;
+- provider_event_id utiliza type + x-request-id + data.id;
+- eventos duplicados retornam sucesso sem reprocessar;
+- subscription_preapproval é consultado server-side antes de ser considerado processado;
+- subscription_authorized_payment é consultado server-side em:
+  GET /authorized_payments/{id}.
+
+## REGRA FINANCEIRA DO WEBHOOK
+
+Para subscription_authorized_payment:
+
+NÃO confiar somente no webhook.
+
+Primeiro consultar o recurso no Mercado Pago server-side.
+
+Somente continuar se:
+
+payment.status = approved
+
+Depois validar:
+
+- external_reference existe;
+- external_reference corresponde ao subscription_charge.id;
+- charge existe;
+- provider = mercado_pago;
+- provider_charge_id corresponde a authorized_payment.preapproval_id;
+- currency_id corresponde à charge;
+- transaction_amount corresponde à charge.
+
+Somente depois chamar:
+
+confirm_mercado_pago_subscription_payment
+
+Somente após sucesso da RPC:
+
+- payment_events recebe charge_id;
+- processed_at é preenchido;
+- processamento é considerado concluído.
+
+Eventos não aprovados não ativam assinatura.
+
+Erros não marcam o evento como processado com sucesso.
+
+## SEGREDO DO WEBHOOK
+
+Ainda NÃO existe/configurado no projeto:
+
+MERCADO_PAGO_WEBHOOK_SECRET
+
+O código já exige essa variável para validar notificações.
+
+Não pedir o valor no chat.
+
+Não exibir.
+
+Não versionar.
+
+Ela deverá ser criada/obtida no painel do Mercado Pago somente na próxima etapa de configuração do Webhook e salva diretamente em .env.local.
+
+## UI / CRONÔMETRO
+
+Alterado:
+
+app/assinaturas/subscription-checkout-form.tsx
+
+Agora o pré-checkout preserva:
+
+- chargeId;
+- checkoutToken;
+- amount;
+- currency;
+- reservationExpiresAt.
+
+E-mail passou a ser obrigatório para avançar ao fluxo Mercado Pago.
+
+Foi implementado cronômetro:
+
+15:00
+→
+00:00
+
+A contagem é calculada obrigatoriamente a partir de:
+
+reservation_expires_at
+
+retornado pelo servidor.
+
+Não existe timer independente da validade real do hold.
+
+Quando expira:
+
+- botão de Mercado Pago fica desabilitado;
+- UI informa que nova contratação deve ser preparada.
+
+Foi criado botão:
+
+CONTINUAR PARA O MERCADO PAGO
+
+Ele chama:
+
+/api/assinaturas/mercado-pago
+
+e utiliza init_point retornado pelo servidor.
+
+IMPORTANTE:
+
+Esse botão NÃO foi utilizado nesta sessão.
+
+Nenhum preapproval foi iniciado pela interface.
+
+Nenhum pagamento foi realizado.
+
+## BUILD
+
+Foram executados builds após os principais lotes.
+
+Build final desta sessão:
+
+npm.cmd run build
+
+APROVADO.
+
+Resultado:
+
+- Compiled successfully;
+- TypeScript sem erros;
+- rotas geradas normalmente.
+
+Novas rotas reconhecidas:
+
+/api/assinaturas/mercado-pago
+/api/mercado-pago/webhook
+
+Rota /assinaturas permanece funcional no build.
+
+Houve apenas aviso Git de conversão futura LF → CRLF em subscription-checkout-form.tsx.
+
+Não foi erro de build.
+
+## BANCO
+
+Migrations 007–013 estão aplicadas.
+
+NÃO reaplicar.
+
+A única alteração permanente de banco desta sessão foi a migration 013, aplicada com autorização explícita.
+
+## ARQUITETURA PRESERVADA
+
+Fluxo continua:
+
+cliente
+→ plano
+→ barbeiro
+→ capacidade
+→ SELECT ... FOR UPDATE
+→ hold 15 minutos
+→ subscription_charge pending
+→ preapproval Mercado Pago em TESTE
+→ webhook autenticado
+→ consulta server-side ao Mercado Pago
+→ validação de pagamento aprovado
+→ RPC transacional/idempotente
+→ assinatura/ciclo
+→ comissão somente futuramente.
+
+O navegador NÃO confirma pagamento.
+
+Redirect não confirma pagamento.
+
+Nenhuma comissão antes de confirmação server-side.
+
+## PRÓXIMO PASSO EXATO
+
+A próxima etapa foi autorizada pelo responsável antes do encerramento:
+
+usar um TÚNEL HTTPS TEMPORÁRIO para expor localhost:3000 ao Mercado Pago.
+
+Ainda NÃO foi iniciado o túnel.
+
+Próxima sessão:
+
+1. ler integralmente CONTEXTO-PROJETO.md;
+2. priorizar este checkpoint;
+3. confirmar estado Git após os checkpoints;
+4. NÃO repetir análise/inspeções já concluídas;
+5. iniciar servidor local caso necessário;
+6. abrir túnel HTTPS temporário para localhost:3000;
+7. usar a URL pública:
+   https://URL-DO-TUNEL/api/mercado-pago/webhook
+8. configurar Webhook em MODO DE TESTE no painel Mercado Pago;
+9. selecionar eventos de Assinaturas necessários, conforme painel atual;
+10. gerar/obter assinatura secreta do Webhook;
+11. salvar localmente em .env.local como:
+    MERCADO_PAGO_WEBHOOK_SECRET=...
+12. NÃO mostrar o segredo no chat;
+13. reiniciar servidor se necessário para carregar a variável;
+14. validar endpoint/webhook;
+15. somente depois preparar uma contratação de TESTE;
+16. somente depois criar preapproval/plano no ambiente de TESTE;
+17. somente depois realizar pagamento com Comprador/cartão de TESTE;
+18. auditar charge, evento, assinatura, ciclo e hold;
+19. confirmar que nenhum evento duplicou processamento;
+20. confirmar que nenhuma comissão foi criada.
+
+Nenhuma cobrança real.
+
+## TÚNEL
+
+Uso de túnel HTTPS temporário foi explicitamente AUTORIZADO.
+
+A sugestão preparada foi utilizar localtunnel temporariamente com:
+
+npx.cmd --yes localtunnel --port 3000
+
+sem adicionar dependência ao package.json.
+
+Ainda NÃO foi executado.
+
+Se a ferramenta apresentar problema, escolher alternativa somente com necessidade concreta.
+
+## GIT / SEGURANÇA
+
+Nunca versionar:
+
+.env.local
+ASSINATURAS-LOTE.txt
+CODIGO-COMPLETO.txt
+
+Nunca usar:
+
+git add .
+
+Staging somente com caminhos explícitos.
+
+Neste checkpoint deve ser versionado apenas o código/migration/contexto apropriados.
+
+# FIM DO CHECKPOINT — 2026-09-11

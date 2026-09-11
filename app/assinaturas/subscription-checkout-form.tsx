@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import { FormEvent, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 
 import styles from "./page.module.css";
 
@@ -19,6 +19,8 @@ type Barber = {
 };
 
 type PreparedCheckout = {
+  chargeId: string;
+  checkoutToken: string;
   amount: number;
   currency: string;
   reservationExpiresAt: string;
@@ -34,19 +36,30 @@ function formatPrice(value: number) {
 function formatPhone(value: string) {
   const digits = value.replace(/\D/g, "").slice(0, 11);
 
-  if (digits.length <= 2) {
-    return digits ? `(${digits}` : "";
-  }
-
-  if (digits.length <= 6) {
-    return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-  }
+  if (digits.length <= 2) return digits ? `(${digits}` : "";
+  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
 
   if (digits.length <= 10) {
     return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
   }
 
   return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+}
+
+function getRemainingSeconds(expiresAt: string) {
+  return Math.max(
+    0,
+    Math.ceil((new Date(expiresAt).getTime() - Date.now()) / 1000)
+  );
+}
+
+function formatCountdown(seconds: number) {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+
+  return `${String(minutes).padStart(2, "0")}:${String(
+    remainingSeconds
+  ).padStart(2, "0")}`;
 }
 
 export default function SubscriptionCheckoutForm({
@@ -61,8 +74,10 @@ export default function SubscriptionCheckoutForm({
   const [customerEmail, setCustomerEmail] = useState("");
   const [barberId, setBarberId] = useState("");
   const [loading, setLoading] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState(false);
   const [error, setError] = useState("");
   const [prepared, setPrepared] = useState<PreparedCheckout | null>(null);
+  const [remainingSeconds, setRemainingSeconds] = useState(0);
 
   const checkoutTokenRef = useRef<string | null>(null);
 
@@ -74,11 +89,24 @@ export default function SubscriptionCheckoutForm({
     return checkoutTokenRef.current;
   }
 
+  useEffect(() => {
+    if (!prepared) return;
+
+    function updateCountdown() {
+      setRemainingSeconds(
+        getRemainingSeconds(prepared!.reservationExpiresAt)
+      );
+    }
+
+    updateCountdown();
+    const timer = window.setInterval(updateCountdown, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [prepared]);
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
     setError("");
-    setPrepared(null);
 
     if (customerName.trim().length < 2) {
       setError("Informe seu nome.");
@@ -92,6 +120,11 @@ export default function SubscriptionCheckoutForm({
       return;
     }
 
+    if (!customerEmail.trim()) {
+      setError("Informe seu e-mail para continuar ao pagamento.");
+      return;
+    }
+
     if (!barberId) {
       setError("Escolha seu barbeiro.");
       return;
@@ -102,9 +135,7 @@ export default function SubscriptionCheckoutForm({
     try {
       const response = await fetch("/api/assinaturas/checkout", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           planId: plan.id,
           barberId,
@@ -127,41 +158,110 @@ export default function SubscriptionCheckoutForm({
       }
 
       setPrepared({
+        chargeId: result.checkout.chargeId,
+        checkoutToken: result.checkout.checkoutToken,
         amount: Number(result.checkout.amount),
         currency: result.checkout.currency,
         reservationExpiresAt: result.checkout.reservationExpiresAt,
       });
     } catch {
-      setError(
-        "Não foi possível preparar sua contratação. Tente novamente."
-      );
+      setError("Não foi possível preparar sua contratação. Tente novamente.");
     } finally {
       setLoading(false);
     }
   }
 
+  async function handleMercadoPago() {
+    if (!prepared || remainingSeconds <= 0) return;
+
+    setError("");
+    setPaymentLoading(true);
+
+    try {
+      const response = await fetch("/api/assinaturas/mercado-pago", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chargeId: prepared.chargeId,
+          checkoutToken: prepared.checkoutToken,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        setError(
+          typeof result.error === "string"
+            ? result.error
+            : "Não foi possível iniciar o pagamento."
+        );
+        return;
+      }
+
+      if (typeof result.initPoint !== "string" || !result.initPoint) {
+        setError("O Mercado Pago não retornou a página de pagamento.");
+        return;
+      }
+
+      window.location.assign(result.initPoint);
+    } catch {
+      setError("Não foi possível iniciar o pagamento. Tente novamente.");
+    } finally {
+      setPaymentLoading(false);
+    }
+  }
+
   if (prepared) {
-    const expiresAt = new Date(
-      prepared.reservationExpiresAt
-    ).toLocaleTimeString("pt-BR", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    const expired = remainingSeconds <= 0;
 
     return (
       <div className={styles.checkoutSuccess} role="status">
         <strong>Vaga reservada temporariamente.</strong>
 
         <p>
-          O checkout de {formatPrice(prepared.amount)} foi preparado e a vaga
-          escolhida está reservada até {expiresAt}.
+          O checkout de {formatPrice(prepared.amount)} foi preparado.
         </p>
 
+        <div
+          aria-label={`Tempo restante da reserva: ${formatCountdown(
+            remainingSeconds
+          )}`}
+          style={{
+            fontSize: "2rem",
+            fontWeight: 800,
+            letterSpacing: "0.08em",
+          }}
+        >
+          {formatCountdown(remainingSeconds)}
+        </div>
+
         <p>
-          A cobrança real ainda não está disponível porque o meio de pagamento
-          ainda será integrado. Nenhum pagamento foi realizado e sua assinatura
-          ainda não foi ativada.
+          {expired
+            ? "A reserva expirou. Inicie a contratação novamente para verificar a disponibilidade."
+            : "Este tempo acompanha a expiração real da reserva no servidor."}
         </p>
+
+        {error && (
+          <p className={styles.checkoutError} role="alert">
+            {error}
+          </p>
+        )}
+
+        <button
+          type="button"
+          className={styles.checkoutButton}
+          disabled={expired || paymentLoading}
+          onClick={handleMercadoPago}
+        >
+          {paymentLoading
+            ? "ABRINDO MERCADO PAGO..."
+            : "CONTINUAR PARA O MERCADO PAGO"}
+        </button>
+
+        <small className={styles.checkoutFootnote}>
+          Sua assinatura só será ativada após confirmação segura do pagamento
+          pelo Mercado Pago no servidor.
+        </small>
       </div>
     );
   }
@@ -173,8 +273,7 @@ export default function SubscriptionCheckoutForm({
         <strong>Seus dados e barbeiro</strong>
         <p>
           Escolha o profissional que ficará vinculado à assinatura durante o
-          ciclo mensal. A disponibilidade mostrada abaixo pode mudar até a
-          confirmação da reserva.
+          ciclo mensal. A disponibilidade pode mudar até a reserva.
         </p>
       </div>
 
@@ -209,7 +308,7 @@ export default function SubscriptionCheckoutForm({
         </label>
 
         <label className={styles.fullField}>
-          <span>E-mail (opcional)</span>
+          <span>E-mail</span>
           <input
             type="email"
             value={customerEmail}
@@ -217,6 +316,7 @@ export default function SubscriptionCheckoutForm({
             autoComplete="email"
             maxLength={254}
             disabled={loading}
+            required
           />
         </label>
       </div>
@@ -276,9 +376,8 @@ export default function SubscriptionCheckoutForm({
       </button>
 
       <small className={styles.checkoutFootnote}>
-        Esta etapa apenas prepara a contratação e reserva a vaga por 15 minutos.
-        A assinatura só será ativada após confirmação segura de pagamento,
-        quando essa integração estiver disponível.
+        Esta etapa reserva a vaga por 15 minutos. A assinatura só será ativada
+        após confirmação segura do pagamento.
       </small>
     </form>
   );

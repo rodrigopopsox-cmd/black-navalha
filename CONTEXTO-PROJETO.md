@@ -9581,3 +9581,403 @@ No próximo chat:
 
 Gateway ainda não escolhido.
 
+
+---
+
+# CHECKPOINT FINAL DA SESSÃO — MERCADO PAGO / INÍCIO DA INTEGRAÇÃO — 2026-09-11
+
+## PRIORIDADE
+
+Este é o checkpoint mais recente e deve ter PRIORIDADE ABSOLUTA no próximo chat.
+
+NÃO reiniciar a análise.
+
+Ler os checkpoints anteriores de Assinaturas, especialmente:
+
+- CHECKPOINT FINAL DA SESSÃO — ASSINATURAS / PRÉ-CHECKOUT FUNCIONAL — 2026-09-10.
+
+## ASSINATURAS / PRÉ-CHECKOUT
+
+O pré-checkout permanece funcional e foi auditado novamente nesta sessão.
+
+Auditoria somente-leitura da última tentativa realizada pela interface confirmou:
+
+- amount = 150;
+- currency = BRL;
+- charge = pending;
+- subscription_id = null;
+- cycle_id = null;
+- hold correspondente = held;
+- hold exatamente 15 minutos;
+- nenhum ciclo paid criado;
+- nenhuma comissão criada;
+- nenhuma assinatura ativada.
+
+Tentativa auditada:
+
+charge_id:
+81a7824b-dcb7-41c6-9cf4-0678da0fbdfa
+
+hold_id:
+55195e5b-40a7-48e1-afe7-f312eea1ce05
+
+created_at:
+2026-09-10T17:26:46.493532+00:00
+
+expires_at:
+2026-09-10T17:41:46.493532+00:00
+
+Nenhum novo checkout foi criado durante a auditoria.
+
+## DISPONIBILIDADE DO BARBEIRO
+
+A UI foi alterada conforme decisão já tomada.
+
+Antes:
+
+30 vagas disponíveis
+29 vagas disponíveis
+etc.
+
+Agora:
+
+Vagas disponíveis
+
+ou:
+
+Indisponível
+
+A quantidade numérica NÃO é exibida ao cliente.
+
+A lógica interna continua utilizando:
+
+barber.available_slots > 0
+
+A capacidade real continua sendo 30 assinantes por barbeiro e permanece controlada pelo backend/banco.
+
+Nenhuma regra de capacidade foi alterada.
+
+A proteção PostgreSQL com:
+
+SELECT ... FOR UPDATE
+
+deve continuar obrigatoriamente preservada.
+
+Build após o ajuste:
+
+APROVADO.
+
+Teste visual em /assinaturas:
+
+APROVADO.
+
+Rodrigo Alves Correa apareceu como:
+
+Vagas disponíveis
+
+sem quantidade numérica.
+
+## GIT — CHECKPOINT DA DISPONIBILIDADE
+
+Commit:
+
+a50240f Oculta quantidade de vagas nas assinaturas
+
+Push realizado com sucesso para origin/main.
+
+ASSINATURAS-LOTE.txt e CODIGO-COMPLETO.txt permaneceram fora.
+
+## HOME — FECHAMENTO
+
+A Home foi validada novamente nesta sessão.
+
+Validação final informada como aprovada:
+
+- desktop;
+- mobile;
+- Hero;
+- Trabalhos;
+- Serviços;
+- Como chegar;
+- Avaliações;
+- CTA final;
+- rodapé;
+- lightbox;
+- navegação por âncoras;
+- /agendar;
+- navegação das categorias regulares;
+- /assinaturas;
+- WhatsApp;
+- Instagram;
+- Como chegar;
+- avaliações no Google.
+
+Build final:
+
+npm.cmd run build
+
+APROVADO.
+
+Foi corrigido app/layout.tsx para remover metadata padrão do Create Next App.
+
+Estado atual:
+
+title:
+Black Navalha
+
+description:
+Black Navalha — barbearia, estilo e cuidado em cada detalhe.
+
+html lang:
+pt-BR
+
+A viewport experimental documentada anteriormente NÃO permaneceu.
+
+Commit:
+
+e34a702 Atualiza metadados da Black Navalha
+
+HEAD/origin foram confirmados sincronizados nesse commit após o push.
+
+## GIT — ESTADO APÓS CHECKPOINTS
+
+Após os checkpoints funcionais, o estado confirmado era somente:
+
+?? ASSINATURAS-LOTE.txt
+?? CODIGO-COMPLETO.txt
+
+Esses dois arquivos NÃO devem ser versionados.
+
+.env.local NÃO deve ser exibido nem versionado.
+
+Nunca usar:
+
+git add .
+
+Commit/push somente com autorização.
+
+## GATEWAY ESCOLHIDO
+
+Foi decidido utilizar:
+
+MERCADO PAGO
+
+para desenvolvimento e testes da integração.
+
+A decisão de gateway está autorizada para a fase de testes.
+
+Não realizar cobrança real nesta fase.
+
+Não utilizar a futura conta financeira da Black Navalha sem aprovação/autorização do estabelecimento.
+
+A estratégia definida é:
+
+- conta atual do responsável pelo desenvolvimento para ambiente de desenvolvimento/testes;
+- apresentar o projeto funcional à Black Navalha;
+- se aprovado, configurar produção posteriormente usando a conta/credenciais pertencentes ao estabelecimento.
+
+Credenciais de desenvolvimento e produção NÃO devem ser misturadas.
+
+## CONTA MERCADO PAGO
+
+Foi criada uma conta Mercado Pago do responsável pelo desenvolvimento.
+
+Não registrar neste contexto:
+
+- CPF;
+- senha;
+- códigos SMS;
+- tokens;
+- Client Secret;
+- Access Token;
+- outras credenciais.
+
+Não pedir que credenciais secretas sejam coladas no chat.
+
+## PORTAL DE DESENVOLVEDORES
+
+Foi acessado com sucesso:
+
+https://www.mercadopago.com.br/developers/panel/app
+
+A tela:
+
+Integrações
+→ Suas aplicações
+
+foi aberta corretamente.
+
+Inicialmente não existiam aplicações.
+
+Foi clicado:
+
+Criar aplicação
+
+A sessão terminou na etapa:
+
+Crie uma aplicação
+1 de 4
+
+Campo atual:
+
+Nome da aplicação
+
+Nome decidido para desenvolvimento:
+
+Black Navalha - Desenvolvimento
+
+Ainda NÃO avançamos pelas etapas seguintes.
+
+## PRÓXIMO PASSO EXATO — MERCADO PAGO
+
+No próximo chat:
+
+1. ler integralmente CONTEXTO-PROJETO.md;
+2. priorizar este checkpoint;
+3. continuar na criação da aplicação Mercado Pago;
+4. preencher o nome:
+   Black Navalha - Desenvolvimento
+5. clicar Continuar;
+6. analisar a etapa 2 de 4 antes de selecionar produto/opção;
+7. orientar a escolha adequada ao fluxo existente de pré-checkout + pagamento online + webhook;
+8. não instalar SDK antes de saber exatamente qual integração será utilizada;
+9. não realizar cobrança real;
+10. não ativar assinatura pelo retorno do navegador.
+
+## ARQUITETURA FINANCEIRA QUE DEVE SER PRESERVADA
+
+Fluxo pretendido:
+
+cliente
+→ plano
+→ barbeiro
+→ capacidade
+→ hold de 15 minutos
+→ subscription_charge pending
+→ Mercado Pago em ambiente de teste
+→ webhook/validação server-side
+→ pagamento confirmado
+→ ativação/renovação
+→ ciclo financeiro
+→ comissão futuramente.
+
+O navegador NÃO é autoridade para confirmar pagamento.
+
+Webhooks futuros deverão ser:
+
+- autenticados;
+- idempotentes.
+
+Eventos repetidos não podem:
+
+- ativar duas vezes;
+- renovar duas vezes;
+- duplicar receita;
+- duplicar comissão.
+
+## CRONÔMETRO
+
+Quando a área de pagamento for implementada, apresentar:
+
+15:00
+→
+00:00
+
+usando obrigatoriamente:
+
+reservation_expires_at
+
+retornado pelo servidor.
+
+Não criar timer independente do hold real.
+
+## COMISSÃO
+
+Percentual ainda NÃO definido.
+
+NÃO inventar percentual.
+
+Nenhuma comissão antes de pagamento confirmado.
+
+A definição financeira de comissão permanece pendente.
+
+## BANCO
+
+Migrations já aplicadas e que NÃO devem ser reaplicadas:
+
+supabase/sql/007-subscriptions-commerce.sql
+supabase/sql/008-subscription-checkout-capacity.sql
+supabase/sql/009-subscription-checkout.sql
+supabase/sql/010-service-role-subscription-plans-read.sql
+supabase/sql/011-service-role-subscription-checkout.sql
+
+Plano real:
+
+Plano Mensal
+R$ 150,00
+billing_interval_months = 1
+grace_days = 2
+active = true
+
+Capacidade:
+
+30 por barbeiro.
+
+Hold:
+
+15 minutos.
+
+Carência após ciclo pago:
+
+2 dias.
+
+NÃO confundir hold com carência.
+
+## CREDENCIAL SUPABASE
+
+SUPABASE_SERVICE_ROLE_KEY continua configurada localmente em .env.local com credencial válida.
+
+NUNCA:
+
+- imprimir;
+- enviar ao browser;
+- usar NEXT_PUBLIC_;
+- pedir para colar no chat;
+- versionar .env.local.
+
+## NÃO ALTERAR
+
+Não reconstruir:
+
+/agendar
+
+Não alterar:
+
+create_public_multi_appointment
+
+Não reconstruir integração existente dos benefícios de assinatura com agendamento.
+
+Não fabricar histórico financeiro da assinatura legada.
+
+Não reaplicar migrations já aplicadas.
+
+## FORMA DE TRABALHO
+
+Priorizar velocidade.
+
+Trabalhar em BLOCOS/LOTES MAIORES quando seguro.
+
+Quando o responsável precisar executar algo, fornecer UM comando PowerShell COMPLETO pronto para copiar e colar.
+
+Usar npm.cmd.
+
+Preferir Set-Content para código.
+
+Interromper para:
+
+- operação destrutiva;
+- decisão financeira não definida;
+- novas credenciais;
+- alteração relevante de banco não autorizada;
+- commit/push.
+

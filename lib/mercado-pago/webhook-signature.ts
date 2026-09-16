@@ -59,13 +59,12 @@ export function validateMercadoPagoWebhookSignature({
     return false;
   }
 
+  const manifest =
+    `id:${dataId};request-id:${requestId};ts:${parts.ts};`;
 
-  const manifest = `id:${dataId};request-id:${requestId};ts:${parts.ts};`;
   const expected = createHmac("sha256", secret)
     .update(manifest)
     .digest("hex");
 
   return safeEqualHex(expected, parts.v1);
 }
-
-

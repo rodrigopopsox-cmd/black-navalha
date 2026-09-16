@@ -1,4 +1,4 @@
-﻿import "server-only";
+import "server-only";
 
 import {
   isRecord,
@@ -6,175 +6,176 @@ import {
   requireString,
 } from "./client";
 
-export type MercadoPagoPlan = {
+export type MercadoPagoPixPayment = {
   id: string;
+  status: string;
+  statusDetail: string | null;
+  amount: number;
+  paidAmount: number | null;
+  paymentMethodId: string | null;
+  paymentMethodType: string | null;
+  ticketUrl: string | null;
+  qrCode: string | null;
+  qrCodeBase64: string | null;
   raw: Record<string, unknown>;
 };
 
-export type MercadoPagoPreapproval = {
+export type MercadoPagoOrder = {
   id: string;
-  status: string | null;
+  status: string;
+  statusDetail: string | null;
   externalReference: string | null;
-  initPoint: string | null;
+  currency: string | null;
+  totalAmount: number;
+  totalPaidAmount: number | null;
+  payments: MercadoPagoPixPayment[];
   raw: Record<string, unknown>;
 };
 
-export async function createPreapprovalPlan({
-  reason,
+function optionalString(value: unknown) {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function optionalNumber(value: unknown) {
+  if (value === null || value === undefined || value === "") {
+    return null;
+  }
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function parsePayment(value: unknown): MercadoPagoPixPayment {
+  if (!isRecord(value)) {
+    throw new Error("Resposta inválida do Mercado Pago: order payment.");
+  }
+
+  const paymentMethod = isRecord(value.payment_method)
+    ? value.payment_method
+    : null;
+
+  const amount = Number(value.amount);
+
+  if (!Number.isFinite(amount)) {
+    throw new Error("Resposta inválida do Mercado Pago: payment.amount.");
+  }
+
+  return {
+    id: requireString(value.id, "payment.id"),
+    status: requireString(value.status, "payment.status"),
+    statusDetail: optionalString(value.status_detail),
+    amount,
+    paidAmount: optionalNumber(value.paid_amount),
+    paymentMethodId: paymentMethod
+      ? optionalString(paymentMethod.id)
+      : null,
+    paymentMethodType: paymentMethod
+      ? optionalString(paymentMethod.type)
+      : null,
+    ticketUrl: paymentMethod
+      ? optionalString(paymentMethod.ticket_url)
+      : null,
+    qrCode: paymentMethod ? optionalString(paymentMethod.qr_code) : null,
+    qrCodeBase64: paymentMethod
+      ? optionalString(paymentMethod.qr_code_base64)
+      : null,
+    raw: value,
+  };
+}
+
+function parseOrder(response: unknown): MercadoPagoOrder {
+  if (!isRecord(response)) {
+    throw new Error("Resposta inválida da Order do Mercado Pago.");
+  }
+
+  const totalAmount = Number(response.total_amount);
+
+  if (!Number.isFinite(totalAmount)) {
+    throw new Error("Resposta inválida do Mercado Pago: total_amount.");
+  }
+
+  const transactions = isRecord(response.transactions)
+    ? response.transactions
+    : null;
+
+  const paymentValues =
+    transactions && Array.isArray(transactions.payments)
+      ? transactions.payments
+      : [];
+
+  return {
+    id: requireString(response.id, "order.id"),
+    status: requireString(response.status, "order.status"),
+    statusDetail: optionalString(response.status_detail),
+    externalReference: optionalString(response.external_reference),
+    currency: optionalString(response.currency) ?? optionalString(response.currency_id),
+    totalAmount,
+    totalPaidAmount: optionalNumber(response.total_paid_amount),
+    payments: paymentValues.map(parsePayment),
+    raw: response,
+  };
+}
+
+export async function createPixOrder({
   amount,
-  currency,
-  frequency,
+  payerEmail,
+  payerFirstName,
+  externalReference,
   idempotencyKey,
 }: {
-  reason: string;
   amount: number;
-  currency: string;
-  frequency: number;
+  payerEmail: string;
+  payerFirstName?: string;
+  externalReference: string;
   idempotencyKey: string;
 }) {
-  const response = await mercadoPagoRequest<unknown>("/preapproval_plan", {
+  const formattedAmount = amount.toFixed(2);
+
+  const response = await mercadoPagoRequest<unknown>("/v1/orders", {
     method: "POST",
     idempotencyKey,
     body: {
-      reason,
-      auto_recurring: {
-        frequency,
-        frequency_type: "months",
-        transaction_amount: amount,
-        currency_id: currency,
+      type: "online",
+      total_amount: formattedAmount,
+      external_reference: externalReference,
+      processing_mode: "automatic",
+      transactions: {
+        payments: [
+          {
+            amount: formattedAmount,
+            payment_method: {
+              id: "pix",
+              type: "bank_transfer",
+            },
+            expiration_time: "PT30M",
+          },
+        ],
+      },
+      payer: {
+        email: payerEmail,
+        ...(payerFirstName ? { first_name: payerFirstName } : {}),
       },
     },
   });
 
-  if (!isRecord(response)) {
-    throw new Error("Resposta inválida ao criar preapproval_plan.");
-  }
-
-  return {
-    id: requireString(response.id, "preapproval_plan.id"),
-    raw: response,
-  } satisfies MercadoPagoPlan;
+  return parseOrder(response);
 }
 
-export async function getPreapproval(id: string) {
-  const response = await mercadoPagoRequest<unknown>(
-    `/preapproval/${encodeURIComponent(id)}`
+export async function getOrder(id: string) {
+  return parseOrder(
+    await mercadoPagoRequest<unknown>(
+      `/v1/orders/${encodeURIComponent(id)}`
+    )
   );
-
-  if (!isRecord(response)) {
-    throw new Error("Resposta inválida do preapproval.");
-  }
-
-  return parsePreapproval(response);
 }
 
-export async function createPreapproval({
-  planId,
-  payerEmail,
-  externalReference,
-  idempotencyKey,
-}: {
-  planId: string;
-  payerEmail: string;
-  externalReference: string;
-  idempotencyKey: string;
-}) {
-  const response = await mercadoPagoRequest<unknown>("/preapproval", {
-    method: "POST",
-    idempotencyKey,
-    body: {
-      preapproval_plan_id: planId,
-      payer_email: payerEmail,
-      external_reference: externalReference,
-    },
-  });
-
-  if (!isRecord(response)) {
-    throw new Error("Resposta inválida ao criar preapproval.");
-  }
-
-  return parsePreapproval(response);
-}
-
-function parsePreapproval(
-  response: Record<string, unknown>
-): MercadoPagoPreapproval {
-  return {
-    id: requireString(response.id, "preapproval.id"),
-    status:
-      typeof response.status === "string" ? response.status : null,
-    externalReference:
-      typeof response.external_reference === "string"
-        ? response.external_reference
-        : null,
-    initPoint:
-      typeof response.init_point === "string" ? response.init_point : null,
-    raw: response,
-  };
-}
-export type MercadoPagoAuthorizedPayment = {
-  id: string;
-  preapprovalId: string;
-  externalReference: string | null;
-  currency: string;
-  transactionAmount: number;
-  paymentId: string | null;
-  paymentStatus: string | null;
-  raw: Record<string, unknown>;
-};
-
-export async function getAuthorizedPayment(
-  id: string
-): Promise<MercadoPagoAuthorizedPayment> {
-  const response = await mercadoPagoRequest<unknown>(
-    `/authorized_payments/${encodeURIComponent(id)}`
+export function getPixPayment(order: MercadoPagoOrder) {
+  return (
+    order.payments.find(
+      (payment) =>
+        payment.paymentMethodId === "pix" &&
+        payment.paymentMethodType === "bank_transfer"
+    ) ?? null
   );
-
-  if (!isRecord(response)) {
-    throw new Error("Resposta inválida do pagamento autorizado.");
-  }
-
-  const payment = isRecord(response.payment)
-    ? response.payment
-    : null;
-
-  const amount = Number(response.transaction_amount);
-
-  if (!Number.isFinite(amount)) {
-    throw new Error(
-      "Resposta inválida do Mercado Pago: transaction_amount."
-    );
-  }
-
-  const externalReference =
-    typeof response.external_reference === "string" ||
-    typeof response.external_reference === "number"
-      ? String(response.external_reference)
-      : null;
-
-  return {
-    id: String(response.id),
-    preapprovalId: requireString(
-      response.preapproval_id,
-      "authorized_payment.preapproval_id"
-    ),
-    externalReference,
-    currency: requireString(
-      response.currency_id,
-      "authorized_payment.currency_id"
-    ),
-    transactionAmount: amount,
-    paymentId:
-      payment &&
-      (typeof payment.id === "string" ||
-        typeof payment.id === "number")
-        ? String(payment.id)
-        : null,
-    paymentStatus:
-      payment && typeof payment.status === "string"
-        ? payment.status
-        : null,
-    raw: response,
-  };
 }
 

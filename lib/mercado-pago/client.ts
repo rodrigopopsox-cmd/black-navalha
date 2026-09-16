@@ -1,4 +1,4 @@
-﻿import "server-only";
+import "server-only";
 
 const MERCADO_PAGO_API_URL = "https://api.mercadopago.com";
 
@@ -44,13 +44,42 @@ export async function mercadoPagoRequest<T>(
     headers.set("X-Idempotency-Key", options.idempotencyKey);
   }
 
-  const response = await fetch(`${MERCADO_PAGO_API_URL}${path}`, {
-    method: options.method ?? "GET",
-    headers,
-    body:
-      options.body === undefined ? undefined : JSON.stringify(options.body),
-    cache: "no-store",
-  });
+  let response: Response;
+
+  try {
+    response = await fetch(`${MERCADO_PAGO_API_URL}${path}`, {
+      method: options.method ?? "GET",
+      headers,
+      body:
+        options.body === undefined ? undefined : JSON.stringify(options.body),
+      cache: "no-store",
+    });
+  } catch (error) {
+    const cause =
+      error instanceof Error &&
+      "cause" in error &&
+      error.cause &&
+      typeof error.cause === "object"
+        ? error.cause
+        : null;
+
+    const code =
+      cause && "code" in cause && typeof cause.code === "string"
+        ? cause.code
+        : null;
+
+    const causeMessage =
+      cause && "message" in cause && typeof cause.message === "string"
+        ? cause.message
+        : null;
+
+    throw new Error(
+      `Mercado Pago ${options.method ?? "GET"} ${path} falhou na rede` +
+        (code ? ` (${code})` : "") +
+        (causeMessage ? `: ${causeMessage}` : ""),
+      { cause: error }
+    );
+  }
 
   const text = await response.text();
   let body: unknown = null;

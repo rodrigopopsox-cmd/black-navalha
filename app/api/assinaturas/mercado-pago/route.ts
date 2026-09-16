@@ -1,14 +1,42 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-import { createAdminClient } from "@/lib/supabase/admin";
+import { MercadoPagoApiError } from "@/lib/mercado-pago/client";
 import {
-  createPreapproval,
-  createPreapprovalPlan,
-  getPreapproval,
+  createPixOrder,
+  getOrder,
+  getPixPayment,
 } from "@/lib/mercado-pago/subscriptions";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 const UUID_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{12}$/i;
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function pixResponse(
+  order: Awaited<ReturnType<typeof getOrder>>,
+  reservationExpiresAt: string
+) {
+  const payment = getPixPayment(order);
+
+  if (!payment) {
+    throw new Error("Order do Mercado Pago não contém pagamento Pix.");
+  }
+
+  if (!payment.qrCode || !payment.qrCodeBase64) {
+    throw new Error("Mercado Pago não retornou os dados do QR Code Pix.");
+  }
+
+  return {
+    ok: true,
+    orderId: order.id,
+    paymentId: payment.id,
+    status: order.status,
+    statusDetail: order.statusDetail,
+    qrCode: payment.qrCode,
+    qrCodeBase64: payment.qrCodeBase64,
+    ticketUrl: payment.ticketUrl,
+    reservationExpiresAt,
+  };
+}
 
 export async function POST(request: Request) {
   try {
@@ -57,10 +85,7 @@ export async function POST(request: Request) {
 
     if (!charge.customer_email) {
       return NextResponse.json(
-        {
-          error:
-            "Informe um e-mail para continuar ao pagamento da assinatura.",
-        },
+        { error: "Informe um e-mail para continuar ao pagamento." },
         { status: 400 }
       );
     }
@@ -85,9 +110,7 @@ export async function POST(request: Request) {
 
     const { data: plan, error: planError } = await supabase
       .from("subscription_plans")
-      .select(
-        "id, name, price, billing_interval_months, active, mercado_pago_preapproval_plan_id"
-      )
+      .select("id, price, active")
       .eq("id", charge.plan_id)
       .maybeSingle();
 
@@ -98,64 +121,17 @@ export async function POST(request: Request) {
       );
     }
 
+    const amount = Number(charge.amount);
+
     if (
-      Number(plan.price) !== Number(charge.amount) ||
+      !Number.isFinite(amount) ||
+      Number(plan.price) !== amount ||
       charge.currency !== "BRL"
     ) {
       return NextResponse.json(
         { error: "Os dados financeiros do checkout não conferem." },
         { status: 409 }
       );
-    }
-
-    let mercadoPagoPlanId = plan.mercado_pago_preapproval_plan_id;
-
-    if (!mercadoPagoPlanId) {
-      const mercadoPagoPlan = await createPreapprovalPlan({
-        reason: `Black Navalha - ${plan.name}`,
-        amount: Number(charge.amount),
-        currency: charge.currency,
-        frequency: Number(plan.billing_interval_months),
-        idempotencyKey: `subscription-plan-${plan.id}`,
-      });
-
-      const { data: updatedPlan, error: updatePlanError } = await supabase
-        .from("subscription_plans")
-        .update({
-          mercado_pago_preapproval_plan_id: mercadoPagoPlan.id,
-        })
-        .eq("id", plan.id)
-        .is("mercado_pago_preapproval_plan_id", null)
-        .select("mercado_pago_preapproval_plan_id")
-        .maybeSingle();
-
-      if (updatePlanError) {
-        throw updatePlanError;
-      }
-
-      if (updatedPlan?.mercado_pago_preapproval_plan_id) {
-        mercadoPagoPlanId =
-          updatedPlan.mercado_pago_preapproval_plan_id;
-      } else {
-        const { data: currentPlan, error: currentPlanError } =
-          await supabase
-            .from("subscription_plans")
-            .select("mercado_pago_preapproval_plan_id")
-            .eq("id", plan.id)
-            .single();
-
-        if (
-          currentPlanError ||
-          !currentPlan.mercado_pago_preapproval_plan_id
-        ) {
-          throw new Error(
-            "Não foi possível vincular o plano ao Mercado Pago."
-          );
-        }
-
-        mercadoPagoPlanId =
-          currentPlan.mercado_pago_preapproval_plan_id;
-      }
     }
 
     if (charge.provider_charge_id) {
@@ -166,55 +142,99 @@ export async function POST(request: Request) {
         );
       }
 
-      const existingPreapproval = await getPreapproval(
-        charge.provider_charge_id
-      );
+      const existingOrder = await getOrder(charge.provider_charge_id);
 
-      return NextResponse.json({
-        ok: true,
-        preapprovalId: existingPreapproval.id,
-        initPoint: existingPreapproval.initPoint,
-        reservationExpiresAt: reservation.expires_at,
-      });
+      if (existingOrder.externalReference !== charge.id) {
+        throw new Error("Order existente não pertence ao checkout.");
+      }
+
+      return NextResponse.json(
+        pixResponse(existingOrder, reservation.expires_at)
+      );
     }
 
-    const preapproval = await createPreapproval({
-      planId: mercadoPagoPlanId,
+    const order = await createPixOrder({
+      amount,
       payerEmail: charge.customer_email,
+      payerFirstName:
+        process.env.MERCADO_PAGO_TEST_MODE === "true" ? "APRO" : undefined,
       externalReference: charge.id,
-      idempotencyKey: `subscription-charge-${charge.id}`,
+      idempotencyKey: `subscription-charge-pix-${charge.id}`,
     });
 
-    const { error: updateChargeError } = await supabase
+    if (order.externalReference !== charge.id) {
+      throw new Error("Order criada sem a referência esperada.");
+    }
+
+    const payment = getPixPayment(order);
+
+    if (!payment) {
+      throw new Error("Order criada sem pagamento Pix.");
+    }
+
+    const { data: updatedCharge, error: updateChargeError } = await supabase
       .from("subscription_charges")
       .update({
         provider: "mercado_pago",
-        provider_charge_id: preapproval.id,
+        provider_charge_id: order.id,
       })
       .eq("id", charge.id)
       .eq("status", "pending")
-      .is("provider_charge_id", null);
+      .is("provider_charge_id", null)
+      .select("id")
+      .maybeSingle();
 
     if (updateChargeError) {
       throw updateChargeError;
     }
 
-    return NextResponse.json({
-      ok: true,
-      preapprovalId: preapproval.id,
-      initPoint: preapproval.initPoint,
-      reservationExpiresAt: reservation.expires_at,
-    });
-  } catch (error) {
-    console.error(
-      "mercado pago subscription creation error",
-      error instanceof Error ? error.message : "unknown error"
-    );
+    if (!updatedCharge) {
+      const { data: currentCharge, error: currentChargeError } =
+        await supabase
+          .from("subscription_charges")
+          .select("provider, provider_charge_id")
+          .eq("id", charge.id)
+          .single();
+
+      if (
+        currentChargeError ||
+        currentCharge.provider !== "mercado_pago" ||
+        !currentCharge.provider_charge_id
+      ) {
+        throw new Error("Não foi possível vincular a Order ao checkout.");
+      }
+
+      const existingOrder = await getOrder(
+        currentCharge.provider_charge_id
+      );
+
+      return NextResponse.json(
+        pixResponse(existingOrder, reservation.expires_at)
+      );
+    }
 
     return NextResponse.json(
-      { error: "Não foi possível iniciar o pagamento da assinatura." },
+      pixResponse(order, reservation.expires_at)
+    );
+  } catch (error) {
+    const safeError =
+      error instanceof MercadoPagoApiError
+        ? JSON.stringify({
+            message: error.message,
+            status: error.status,
+            body: error.body,
+          })
+        : error instanceof Error
+          ? error.message
+          : error && typeof error === "object"
+            ? JSON.stringify(error)
+            : String(error);
+
+    console.error(`mercado pago pix creation error: ${safeError}`);
+
+    return NextResponse.json(
+      { error: "Não foi possível gerar o Pix." },
       { status: 500 }
     );
   }
 }
-

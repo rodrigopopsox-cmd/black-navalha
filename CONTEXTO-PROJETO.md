@@ -11252,3 +11252,3577 @@ Staging somente com caminhos explícitos.
 Neste checkpoint deve ser versionado apenas o código/migration/contexto apropriados.
 
 # FIM DO CHECKPOINT — 2026-09-11
+
+---
+
+# CHECKPOINT FINAL DA SESSÃO — MERCADO PAGO / WEBHOOK DE TESTE E PRIMEIRA TENTATIVA DE PREAPPROVAL — 2026-09-12
+
+## PRIORIDADE ABSOLUTA
+
+Este é o checkpoint mais recente e deve ter PRIORIDADE ABSOLUTA na próxima sessão.
+
+ANTES DE QUALQUER AÇÃO:
+
+- ler INTEGRALMENTE CONTEXTO-PROJETO.md;
+- NÃO reiniciar a análise;
+- NÃO repetir inspeções ou diagnósticos já concluídos;
+- NÃO presumir APIs/SDKs antigos do Mercado Pago;
+- preservar todas as decisões e restrições do checkpoint de 2026-09-11;
+- usar npm.cmd;
+- fornecer UM comando PowerShell completo quando execução local for necessária;
+- nunca usar git add .;
+- commit/push somente com autorização;
+- nunca exibir .env.local ou qualquer segredo.
+
+## GIT DE REFERÊNCIA
+
+Estado informado no início da sessão:
+
+Branch:
+main
+
+HEAD/origin:
+741d528 Implementa base server-side do Mercado Pago
+
+Arquivos untracked esperados:
+
+?? ASSINATURAS-LOTE.txt
+?? CODIGO-COMPLETO.txt
+
+Esses arquivos NÃO devem ser versionados.
+
+Nenhum código, migration ou configuração versionada foi alterado nesta sessão antes desta atualização documental.
+
+.env.local foi alterado somente para armazenar o segredo do Webhook e NÃO deve ser exibido/versionado.
+
+## SERVIDOR LOCAL
+
+Next.js 16.3.4 foi iniciado e confirmado em:
+
+http://localhost:3000
+
+.env.local foi carregado pelo servidor.
+
+Ao final da sessão os processos locais podem ser encerrados normalmente.
+
+## LOCAL TUNNEL — DESCARTADO
+
+Foi tentado inicialmente:
+
+npx.cmd --yes localtunnel@2.0.2 --port 3000
+
+URLs obtidas incluíram:
+
+https://sad-wings-boil.loca.lt
+https://rude-dancers-smile.loca.lt
+
+As URLs eram criadas, mas requisições externas apresentavam timeout.
+
+O LocalTunnel foi abandonado para esta sessão.
+
+Não é necessário repetir o diagnóstico.
+
+## CLOUDFLARE QUICK TUNNEL — FUNCIONAL
+
+Foi utilizado:
+
+npx.cmd --yes cloudflared@latest tunnel --url http://localhost:3000
+
+URL temporária da sessão:
+
+https://engineer-lol-platform-citations.trycloudflare.com
+
+Os pre-checks do cloudflared passaram e o túnel registrou conexão.
+
+Foi validado externamente:
+
+GET https://engineer-lol-platform-citations.trycloudflare.com/api/mercado-pago/webhook
+
+Resultado:
+
+HTTP 405
+
+Esse é o resultado esperado porque a Route Handler do Webhook implementa POST.
+
+Portanto foi confirmado:
+
+internet
+→ Cloudflare
+→ localhost:3000
+→ /api/mercado-pago/webhook
+
+A URL é TEMPORÁRIA e não deve ser presumida válida na próxima sessão.
+
+Na próxima sessão será necessário abrir novo túnel e atualizar a URL de teste do Mercado Pago caso esta URL tenha expirado.
+
+## WEBHOOK MERCADO PAGO — CONFIGURADO EM TESTE
+
+No painel da aplicação:
+
+Black Navalha - Desenvolvimento
+
+Ambiente:
+
+Modo de teste
+
+Evento selecionado:
+
+Planos e assinaturas
+
+Não foram selecionados eventos legacy desnecessários.
+
+A URL temporária Cloudflare foi salva como URL de teste:
+
+https://engineer-lol-platform-citations.trycloudflare.com/api/mercado-pago/webhook
+
+O painel apresentou a assinatura secreta mascarada.
+
+O valor NÃO foi enviado ao chat.
+
+A assinatura secreta foi copiada diretamente do painel para a máquina local e armazenada em:
+
+MERCADO_PAGO_WEBHOOK_SECRET
+
+dentro de:
+
+.env.local
+
+O valor NÃO foi impresso.
+
+MERCADO_PAGO_ACCESS_TOKEN de TESTE continua em .env.local.
+
+SUPABASE_SERVICE_ROLE_KEY continua secreta.
+
+Nunca pedir/exibir esses valores.
+
+## SIMULAÇÃO DE WEBHOOK
+
+A tela "Simular notificações" foi aberta.
+
+Tipo selecionado:
+
+Planos e assinaturas
+
+O painel preencheu Data ID fictício:
+
+123456
+
+A simulação NÃO foi enviada.
+
+Motivo:
+
+o endpoint implementado consulta o recurso real no Mercado Pago após autenticar a notificação; usar 123456 não forneceria um recurso real adequado para a validação end-to-end.
+
+Nenhum webhook de pagamento foi processado nesta etapa.
+
+## PRIMEIRA CONTRATAÇÃO DE TESTE PREPARADA
+
+Foi aberta:
+
+http://localhost:3000/assinaturas
+
+Foi preparada UMA contratação de TESTE pela interface.
+
+Resultado visual confirmado:
+
+- Plano Mensal;
+- R$ 150,00;
+- serviços incluídos corretos;
+- vaga reservada temporariamente;
+- checkout interno preparado;
+- cronômetro iniciado em aproximadamente 15:00;
+- cronômetro baseado em reservation_expires_at;
+- botão CONTINUAR PARA O MERCADO PAGO disponível.
+
+Nenhum pagamento foi realizado.
+
+Nenhuma cobrança real foi realizada.
+
+## PRIMEIRA TENTATIVA DE CONTINUAR PARA O MERCADO PAGO
+
+Com hold ainda válido, foi clicado UMA vez:
+
+CONTINUAR PARA O MERCADO PAGO
+
+Resultado:
+
+a interface permaneceu em /assinaturas e exibiu:
+
+Checkout inválido.
+
+O cronômetro continuava ativo.
+
+Não houve redirecionamento ao Mercado Pago.
+
+Não clicar repetidamente e não criar novo checkout antes de diagnosticar esta tentativa.
+
+O diagnóstico do erro ainda NÃO foi realizado.
+
+A sessão foi encerrada imediatamente após o erro a pedido do responsável.
+
+## PRÓXIMO PASSO EXATO
+
+Na próxima sessão:
+
+1. ler integralmente CONTEXTO-PROJETO.md;
+2. priorizar este checkpoint e o checkpoint server-side de 2026-09-11;
+3. confirmar Git somente se necessário;
+4. iniciar localhost:3000;
+5. abrir novo Cloudflare Quick Tunnel;
+6. atualizar no Mercado Pago a URL de teste caso a URL anterior tenha expirado;
+7. NÃO criar outro checkout inicialmente;
+8. investigar especificamente por que /api/assinaturas/mercado-pago retornou "Checkout inválido.";
+9. começar pelo log server-side da tentativa e/ou pelo trecho mínimo da rota responsável pela validação;
+10. NÃO reinspecionar migrations 007–013, schema geral, AGENTS.md, package.json ou documentação já confirmada sem necessidade concreta;
+11. corrigir somente a causa comprovada;
+12. executar build se houver alteração de código;
+13. preparar nova contratação de TESTE somente depois da correção;
+14. criar/vincular preapproval_plan/preapproval somente em TESTE;
+15. validar Webhook antes do pagamento;
+16. somente depois utilizar conta/cartão de TESTE;
+17. auditar subscription_charge, payment_events, subscription, subscription_cycle e hold;
+18. confirmar idempotência;
+19. confirmar ausência de comissão.
+
+## REGRAS PRESERVADAS
+
+- capacidade: 30 assinantes por barbeiro;
+- hold: 15 minutos;
+- carência após ciclo pago: 2 dias;
+- não confundir hold com carência;
+- preservar SELECT ... FOR UPDATE;
+- browser NÃO confirma pagamento;
+- somente payment.status = approved pode avançar após todas as validações internas;
+- comissão continua sem percentual definido;
+- NÃO inventar comissão;
+- NÃO realizar cobrança real;
+- NÃO alterar /agendar;
+- NÃO alterar create_public_multi_appointment;
+- NÃO reconstruir integração existente dos benefícios das assinaturas;
+- migrations 007–013 já aplicadas e NÃO devem ser reaplicadas;
+- MERCADO_PAGO_WEBHOOK_SECRET, MERCADO_PAGO_ACCESS_TOKEN e SUPABASE_SERVICE_ROLE_KEY permanecem secretos.
+
+## ESTADO DE SEGURANÇA
+
+Não houve exposição no chat de:
+
+- MERCADO_PAGO_ACCESS_TOKEN;
+- MERCADO_PAGO_WEBHOOK_SECRET;
+- SUPABASE_SERVICE_ROLE_KEY.
+
+Nenhuma cobrança real foi realizada.
+
+# FIM DO CHECKPOINT — 2026-09-12
+
+---
+
+# CHECKPOINT INTERMEDIÁRIO — MERCADO PAGO / DIAGNÓSTICO DO PREAPPROVAL — 2026-09-12
+
+## PRIORIDADE
+
+Este checkpoint complementa o checkpoint final de 2026-09-12 e registra exatamente o avanço posterior.
+
+Preservar integralmente também:
+
+- CHECKPOINT FINAL DA SESSÃO — MERCADO PAGO / IMPLEMENTAÇÃO SERVER-SIDE E WEBHOOK — 2026-09-11;
+- CHECKPOINT FINAL DA SESSÃO — MERCADO PAGO / WEBHOOK DE TESTE E PRIMEIRA TENTATIVA DE PREAPPROVAL — 2026-09-12.
+
+NÃO reiniciar a integração inteira.
+
+A próxima abordagem deve priorizar testes isolados e conclusivos, evitando consumir novos checkouts para cada diagnóstico.
+
+## ERRO "CHECKOUT INVÁLIDO" — CAUSA COMPROVADA E CORRIGIDA
+
+Foi identificado que:
+
+app/api/assinaturas/mercado-pago/route.ts
+
+possuía UUID_PATTERN incorreto.
+
+A parte final estava:
+
+[89ab][0-9a-f]{12}
+
+e faltava:
+
+{3}-
+
+O padrão foi corrigido para o mesmo formato válido utilizado pela rota de pré-checkout:
+
+[89ab][0-9a-f]{3}-[0-9a-f]{12}
+
+Foram verificados os IDs reais da tentativa anterior:
+
+charge:
+d84c5d8d-ccc9-400f-a866-68730416558a
+
+checkout_token:
+90241a5f-05a2-4b91-882a-35ab0029dbc2
+
+Ambos são UUIDv4 válidos.
+
+Portanto o erro original:
+
+Checkout inválido.
+
+está diagnosticado e corrigido.
+
+Build após a correção:
+
+APROVADO.
+
+NÃO voltar a investigar essa causa sem nova evidência.
+
+## SEGUNDO ERRO — PREAPPROVAL_PLAN / BACK_URL
+
+Depois da correção do UUID, a requisição avançou até o Mercado Pago e houve resposta:
+
+HTTP 400
+invalid back_url
+
+Foi confirmado em:
+
+lib/mercado-pago/subscriptions.ts
+
+que createPreapprovalPlan não enviava back_url.
+
+Foi então implementado suporte a:
+
+back_url
+
+em createPreapprovalPlan.
+
+A rota:
+
+app/api/assinaturas/mercado-pago/route.ts
+
+passou a ler:
+
+MERCADO_PAGO_BACK_URL
+
+server-side.
+
+A URL é validada como HTTPS.
+
+Foi configurada localmente, sem exibir segredos, utilizando a URL do Cloudflare Quick Tunnel da sessão seguida de:
+
+/assinaturas
+
+Variável:
+
+MERCADO_PAGO_BACK_URL
+
+está em .env.local e NÃO deve ser versionada.
+
+Build após essa alteração:
+
+APROVADO.
+
+## CLOUDFLARE DA SESSÃO
+
+Quick Tunnel atual durante este checkpoint:
+
+https://ware-pairs-insider-rebel.trycloudflare.com
+
+Webhook:
+
+https://ware-pairs-insider-rebel.trycloudflare.com/api/mercado-pago/webhook
+
+Validação externa:
+
+HTTP 405
+
+Resultado esperado porque a rota implementa POST.
+
+A URL foi atualizada no painel Mercado Pago em:
+
+Modo de teste
+→ Webhooks
+→ Planos e assinaturas
+
+A URL é temporária e NÃO deve ser presumida válida em sessão futura.
+
+MERCADO_PAGO_WEBHOOK_SECRET já permanece salvo localmente e não foi alterado/exposto.
+
+## TERCEIRO ERRO — AUTHORIZATION HEADER
+
+Após novo checkout de TESTE e nova tentativa de continuar ao Mercado Pago, ocorreu:
+
+Mercado Pago POST /preapproval_plan falhou na rede (UND_ERR_INVALID_ARG): invalid Authorization header
+
+A requisição falhou no Node/Undici antes de obter resposta HTTP do Mercado Pago.
+
+Foi confirmado separadamente que a conectividade funciona:
+
+PowerShell:
+GET https://api.mercadopago.com
+→ HTTP 404
+
+Node fetch:
+fetch('https://api.mercadopago.com')
+→ HTTP 404
+
+Portanto:
+
+- DNS funciona;
+- TLS funciona;
+- acesso de rede ao host funciona;
+- fetch nativo do Node consegue alcançar api.mercadopago.com.
+
+O bloqueio atual está especificamente na construção/aceitação do header Authorization usado pela integração.
+
+## INSTRUMENTAÇÃO DE REDE
+
+Foi alterado:
+
+lib/mercado-pago/client.ts
+
+O fetch agora captura falhas de rede e preserva:
+
+- código da causa;
+- mensagem da causa;
+
+sem imprimir:
+
+- token;
+- Authorization;
+- headers;
+- payload secreto.
+
+Essa instrumentação revelou exatamente:
+
+UND_ERR_INVALID_ARG
+invalid Authorization header
+
+Build após essa alteração:
+
+APROVADO.
+
+## PREAPPROVAL_PLAN AINDA NÃO VINCULADO
+
+Consulta somente-leitura confirmou:
+
+subscription_plans.mercado_pago_preapproval_plan_id = null
+
+para:
+
+Plano Mensal
+
+Portanto nenhuma tentativa atual conseguiu persistir vínculo com preapproval_plan.
+
+Nenhum pagamento foi realizado.
+
+Nenhuma cobrança real foi realizada.
+
+## PRÓXIMA ESTRATÉGIA
+
+Evitar continuar consumindo novos holds/checkouts apenas para diagnosticar autenticação.
+
+Primeiro validar isoladamente a configuração/autenticação do Mercado Pago.
+
+Próximo teste previsto:
+
+verificar de forma SEGURA propriedades do valor local de:
+
+MERCADO_PAGO_ACCESS_TOKEN
+
+sem imprimir o token.
+
+Verificar somente:
+
+- variável presente;
+- comprimento;
+- espaços externos;
+- caracteres de controle;
+- aspas externas.
+
+NÃO pedir nem imprimir o Access Token no chat.
+
+Se esse teste não revelar imediatamente a causa, mudar a estratégia para validar autenticação Mercado Pago isoladamente com uma operação GET segura, sem:
+
+- criar preapproval_plan;
+- criar preapproval;
+- criar checkout;
+- consumir hold;
+- realizar pagamento.
+
+Não continuar repetindo o mesmo fluxo completo enquanto a autenticação isolada não estiver comprovadamente funcional.
+
+## ESTADO DOS PROCESSOS NA SESSÃO
+
+Foi identificado um next dev antigo no PID 16464 e ele foi encerrado.
+
+Depois foi iniciado um único:
+
+npm.cmd run dev
+
+visível em:
+
+http://localhost:3000
+
+O Cloudflare permaneceu apontando para localhost:3000.
+
+Antes de nova sessão, processos podem precisar ser iniciados novamente.
+
+## ALTERAÇÕES LOCAIS DE CÓDIGO DESTA ETAPA
+
+Alterados:
+
+- app/api/assinaturas/mercado-pago/route.ts
+- lib/mercado-pago/subscriptions.ts
+- lib/mercado-pago/client.ts
+- CONTEXTO-PROJETO.md
+
+.env.local também possui MERCADO_PAGO_BACK_URL, mas NÃO deve ser exibido/versionado.
+
+## BUILDS
+
+Foram executados builds após as correções.
+
+Último:
+
+npm.cmd run build
+
+APROVADO.
+
+- Compiled successfully;
+- TypeScript sem erros;
+- rotas geradas normalmente.
+
+## SEGURANÇA / FINANCEIRO
+
+Nenhum segredo foi exposto no chat nesta etapa.
+
+NÃO exibir:
+
+- MERCADO_PAGO_ACCESS_TOKEN;
+- MERCADO_PAGO_WEBHOOK_SECRET;
+- SUPABASE_SERVICE_ROLE_KEY;
+- .env.local.
+
+Nenhum pagamento foi realizado.
+
+Nenhuma cobrança real foi realizada.
+
+Percentual de comissão continua NÃO definido.
+
+Nenhuma comissão foi criada.
+
+## REGRAS PRESERVADAS
+
+- capacidade: 30 assinantes por barbeiro;
+- proteção concorrente: SELECT ... FOR UPDATE;
+- hold: 15 minutos;
+- carência após ciclo pago: 2 dias;
+- cronômetro baseado em reservation_expires_at;
+- browser não confirma pagamento;
+- somente payment.status = approved pode avançar após validações internas;
+- migrations 007–013 já aplicadas e não devem ser reaplicadas;
+- não alterar /agendar;
+- não alterar create_public_multi_appointment;
+- não reconstruir benefícios existentes das assinaturas.
+
+## GIT
+
+Referência versionada permanece:
+
+741d528 Implementa base server-side do Mercado Pago
+
+Existem alterações locais ainda NÃO commitadas.
+
+Não versionar:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt;
+- .env.local.
+
+Nunca usar:
+
+git add .
+
+Commit/push somente com autorização explícita.
+
+## PRÓXIMO PASSO EXATO
+
+1. NÃO criar novo checkout.
+2. NÃO chamar novamente POST /preapproval_plan ainda.
+3. Validar isoladamente a configuração de MERCADO_PAGO_ACCESS_TOKEN sem revelar seu valor.
+4. Se necessário, validar autenticação com GET seguro contra a API Mercado Pago.
+5. Somente após autenticação isolada funcionar, retomar criação de preapproval_plan.
+6. Evitar novos diagnósticos circulares ou repetição do fluxo completo.
+7. Corrigir somente causas comprovadas.
+8. Build após alteração de código.
+9. Pagamento somente com conta/cartão de TESTE depois de webhook e preapproval funcionais.
+10. Nenhuma cobrança real.
+
+# FIM DO CHECKPOINT INTERMEDIÁRIO — 2026-09-12
+
+---
+
+# CHECKPOINT INTERMEDIÁRIO — MERCADO PAGO / CREDENCIAL CORRIGIDA E CHECKOUT HOSPEDADO VALIDADO — 2026-09-13
+
+## PRIORIDADE ABSOLUTA
+
+Este checkpoint é o estado mais recente da integração Mercado Pago.
+
+Preservar também integralmente:
+
+- CHECKPOINT FINAL DA SESSÃO — MERCADO PAGO / IMPLEMENTAÇÃO SERVER-SIDE E WEBHOOK — 2026-09-11;
+- CHECKPOINT FINAL DA SESSÃO — MERCADO PAGO / WEBHOOK DE TESTE E PRIMEIRA TENTATIVA DE PREAPPROVAL — 2026-09-12;
+- CHECKPOINT INTERMEDIÁRIO — MERCADO PAGO / DIAGNÓSTICO DO PREAPPROVAL — 2026-09-12.
+
+NÃO reiniciar a integração inteira.
+
+NÃO repetir diagnósticos já concluídos.
+
+Priorizar testes isolados e conclusivos.
+
+## ERRO ORIGINAL "CHECKOUT INVÁLIDO"
+
+CAUSA COMPROVADA E CORRIGIDA.
+
+app/api/assinaturas/mercado-pago/route.ts possuía UUID_PATTERN incorreto.
+
+Foi corrigido para aceitar corretamente UUIDs válidos.
+
+Build após correção:
+
+APROVADO.
+
+Não voltar a investigar essa causa sem nova evidência.
+
+## BACK_URL DO PREAPPROVAL_PLAN
+
+Depois da correção do UUID, Mercado Pago respondeu:
+
+HTTP 400
+invalid back_url
+
+Foi confirmado que createPreapprovalPlan não enviava back_url.
+
+Foi implementado:
+
+- suporte a backUrl em lib/mercado-pago/subscriptions.ts;
+- envio de back_url no POST /preapproval_plan;
+- MERCADO_PAGO_BACK_URL server-side;
+- validação de URL HTTPS na rota.
+
+MERCADO_PAGO_BACK_URL foi configurada localmente em .env.local apontando para a URL temporária Cloudflare + /assinaturas.
+
+Build:
+
+APROVADO.
+
+## ACCESS TOKEN — CAUSA DO INVALID AUTHORIZATION HEADER
+
+Posteriormente o Node/Undici retornou:
+
+UND_ERR_INVALID_ARG
+invalid Authorization header
+
+Foi realizado diagnóstico seguro sem imprimir segredo.
+
+A variável MERCADO_PAGO_ACCESS_TOKEN estava inicialmente com comprimento 1 e caractere de controle.
+
+Na tentativa de corrigir, foi colocado por engano o segredo do Webhook no lugar de MERCADO_PAGO_ACCESS_TOKEN.
+
+Isso produziu:
+
+HTTP 403
+
+em chamadas autenticadas.
+
+A causa foi identificada pelo responsável.
+
+O Access Token correto de TESTE foi então copiado especificamente de:
+
+Black Navalha - Desenvolvimento
+→ Credenciais de teste
+→ Access Token
+
+e salvo em .env.local sem ser exibido no chat.
+
+Validação isolada posterior:
+
+GET https://api.mercadopago.com/preapproval/search?limit=1
+
+Resultado:
+
+HTTP 200
+
+Portanto:
+
+MERCADO_PAGO_ACCESS_TOKEN DE TESTE ESTÁ AGORA CORRETO E FUNCIONAL.
+
+Não repetir diagnóstico de credencial sem nova evidência.
+
+Nunca exibir:
+- Access Token;
+- webhook secret;
+- service role;
+- .env.local.
+
+## CLIENTE MERCADO PAGO — LOG DE REDE
+
+lib/mercado-pago/client.ts foi instrumentado para preservar causa de falhas de fetch:
+
+- código;
+- mensagem;
+
+sem imprimir:
+- token;
+- Authorization;
+- headers secretos.
+
+Build após instrumentação:
+
+APROVADO.
+
+## PLANO MERCADO PAGO CRIADO ISOLADAMENTE
+
+Foi explicitamente autorizada a criação isolada de um preapproval_plan no ambiente de TESTE.
+
+POST:
+
+https://api.mercadopago.com/preapproval_plan
+
+Resultado:
+
+HTTP 201
+
+Plano criado:
+
+id:
+5347a37a3e894606ac86542a5d402acb
+
+reason:
+Black Navalha - Plano Mensal
+
+status:
+active
+
+valor:
+R$ 150,00
+
+moeda:
+BRL
+
+frequência:
+1 month
+
+back_url:
+URL Cloudflare temporária da sessão + /assinaturas
+
+Nenhum pagamento foi realizado.
+
+Nenhuma cobrança real foi realizada.
+
+## VÍNCULO DO PLANO INTERNO
+
+Foi explicitamente autorizada a vinculação do plano Mercado Pago ao plano interno.
+
+Plano interno:
+
+id:
+27fcd639-ddb5-43ab-8ddc-3fd141424fb5
+
+name:
+Plano Mensal
+
+price:
+150.00
+
+Foi atualizado:
+
+subscription_plans.mercado_pago_preapproval_plan_id
+
+para:
+
+5347a37a3e894606ac86542a5d402acb
+
+UPDATE retornou exatamente uma linha.
+
+A migration 012 já previa essa coluna.
+
+Nenhuma migration nova foi criada para esse vínculo.
+
+## PREAPPROVAL — HTTP 400
+
+Depois do vínculo do plano, nova tentativa da aplicação avançou para:
+
+POST /preapproval
+
+Mercado Pago respondeu:
+
+HTTP 400
+
+A rota foi instrumentada para registrar MercadoPagoApiError com:
+
+- message;
+- status;
+- body;
+
+sem segredos.
+
+Build:
+
+APROVADO.
+
+O hold utilizado posteriormente expirou normalmente.
+
+Não forçar/reabrir hold expirado.
+
+## TESTES ISOLADOS DE PREAPPROVAL
+
+Com autorização existente para testes de preapproval em TESTE, foram realizados testes isolados sem criar novos holds internos.
+
+Payloads incompletos/minimamente ampliados para /preapproval retornaram:
+
+HTTP 400
+
+Um retorno capturado foi:
+
+{"message":"Parameters passed are invalid","status":400}
+
+Nenhum pagamento foi realizado.
+
+## DOCUMENTAÇÃO ATUAL INSPECIONADA
+
+Foi consultada diretamente a referência atual do Mercado Pago para:
+
+POST https://api.mercadopago.com/preapproval
+
+A documentação mostrou:
+
+preapproval_plan_id:
+identificador do plano associado.
+
+external_reference:
+referência para sincronização com o sistema.
+A documentação informa que é obrigatória para assinaturas sem plano associado.
+
+payer_email:
+OBRIGATÓRIO.
+
+card_token_id:
+aparece marcado como obrigatório na referência exibida.
+
+auto_recurring:
+configuração recorrente.
+
+back_url:
+OBRIGATÓRIO na referência exibida.
+
+status:
+pode ser pending ou authorized.
+
+Definição exibida:
+
+pending:
+assinatura sem método de pagamento, aguardando por um meio de pagamento até que o cliente acesse o checkout.
+
+authorized:
+assinatura com método de pagamento.
+
+A documentação apresenta aparente tensão entre card_token_id marcado como obrigatório e a descrição de status pending sem método de pagamento.
+
+NÃO inventar comportamento além do confirmado.
+
+## TESTE DE INTEGRAÇÃO — DOCUMENTAÇÃO
+
+Foi aberta:
+
+Assinaturas
+→ Teste de integração
+→ Teste de compra
+
+Orientação atual exibida pelo Mercado Pago:
+
+1. acessar o próprio site e buscar o produto/serviço;
+2. realizar o fluxo de compra;
+3. no pagamento inserir cartão de crédito de teste;
+4. inserir os dados do usuário de teste;
+5. confirmar a compra.
+
+Nenhum pagamento de teste foi realizado ainda.
+
+## CONTAS DE TESTE
+
+As contas:
+
+Black Navalha - Vendedor
+Black Navalha - Comprador
+
+continuam existentes.
+
+O painel atual das contas de teste mostra:
+
+- User ID;
+- Usuário TESTUSER...;
+- senha;
+- código de verificação.
+
+Não apresenta um campo de e-mail da conta.
+
+A edição da conta de teste também não apresentou e-mail.
+
+Não inventar e-mail associado à conta de teste.
+
+Não enviar senha ao chat.
+
+## CHECKOUT HOSPEDADO DO PREAPPROVAL_PLAN — VALIDADO
+
+O POST /preapproval_plan bem-sucedido retornou init_point oficial:
+
+https://www.mercadopago.com.br/subscriptions/checkout?preapproval_plan_id=5347a37a3e894606ac86542a5d402acb
+
+Esse init_point foi aberto manualmente, SEM pagamento.
+
+Resultado visual confirmado:
+
+- checkout oficial Mercado Pago;
+- Black Navalha - Plano Mensal;
+- R$ 150;
+- cobrança mensal;
+- botão Escolher meio de pagamento.
+
+A tela exibiu o comprador logado e informou que nome/e-mail seriam compartilhados com o vendedor.
+
+Nenhum meio de pagamento foi escolhido.
+
+Nenhum cartão foi informado.
+
+Nenhum pagamento foi confirmado.
+
+Portanto está comprovado que:
+
+preapproval_plan.init_point
+
+abre corretamente o checkout hospedado da assinatura.
+
+## DECISÃO AINDA NÃO TOMADA
+
+Ainda NÃO alterar a aplicação para simplesmente redirecionar ao init_point do plano.
+
+Motivo:
+
+a arquitetura interna exige correlação segura entre:
+
+subscription_charge.id
+
+e o preapproval/pagamento criado pelo Mercado Pago.
+
+O init_point atual contém apenas:
+
+preapproval_plan_id
+
+e não está comprovado que aceite/preserve:
+
+external_reference = subscription_charge.id
+
+Não aceitar correlação frágil apenas por e-mail.
+
+Precisamos preservar:
+
+- idempotência;
+- concorrência;
+- charge correta;
+- barbeiro correto;
+- plano correto;
+- hold correto;
+- webhook correto.
+
+## PRÓXIMO PASSO EXATO
+
+Antes de alterar código ou realizar pagamento:
+
+investigar SOMENTE como correlacionar com segurança o preapproval criado através do checkout hospedado de:
+
+preapproval_plan.init_point
+
+com nosso:
+
+subscription_charge.id
+
+Verificar na documentação atual:
+
+- se o checkout do preapproval_plan aceita external_reference;
+- se existe parâmetro oficial de referência na URL;
+- se o preapproval criado pelo checkout preserva alguma referência configurável;
+- quais campos podem ser usados para correlação determinística.
+
+Não aceitar apenas e-mail como correlação.
+
+Não criar novo checkout interno durante essa investigação.
+
+Não realizar novo POST de preapproval por tentativa e erro.
+
+Não realizar pagamento ainda.
+
+## ARQUITETURA QUE CONTINUA OBRIGATÓRIA
+
+cliente
+→ plano interno
+→ barbeiro
+→ capacidade
+→ SELECT ... FOR UPDATE
+→ hold 15 minutos
+→ subscription_charge pending
+→ Mercado Pago TESTE
+→ webhook autenticado
+→ consulta server-side ao Mercado Pago
+→ correlação segura com charge interna
+→ payment.status = approved
+→ RPC transacional/idempotente
+→ assinatura/ciclo
+→ comissão apenas futuramente.
+
+Browser NÃO confirma pagamento.
+
+Redirect NÃO confirma pagamento.
+
+## WEBHOOK
+
+Quick Tunnel utilizado nesta sessão:
+
+https://ware-pairs-insider-rebel.trycloudflare.com
+
+Webhook de teste configurado:
+
+https://ware-pairs-insider-rebel.trycloudflare.com/api/mercado-pago/webhook
+
+GET externo:
+
+HTTP 405
+
+esperado.
+
+Evento:
+
+Planos e assinaturas.
+
+A URL é temporária e NÃO deve ser presumida válida em nova sessão.
+
+MERCADO_PAGO_WEBHOOK_SECRET permanece salvo localmente.
+
+Não exibir.
+
+## REGRAS FINANCEIRAS PRESERVADAS
+
+Capacidade:
+
+30 assinantes por barbeiro.
+
+Hold:
+
+15 minutos.
+
+Carência após ciclo pago:
+
+2 dias.
+
+Não confundir hold com carência.
+
+Cronômetro:
+
+baseado em reservation_expires_at.
+
+Comissão:
+
+percentual NÃO definido.
+
+Não criar comissão.
+
+## BANCO
+
+Migrations 007–013 já aplicadas.
+
+NÃO reaplicar.
+
+RPC:
+
+confirm_mercado_pago_subscription_payment
+
+permanece responsável pelo processamento transacional/idempotente após confirmação server-side válida.
+
+Ela NÃO cria comissão.
+
+## CÓDIGO LOCAL ALTERADO E AINDA NÃO VERSIONADO NESTA CONTINUIDADE
+
+Alterados pelo trabalho atual:
+
+- app/api/assinaturas/mercado-pago/route.ts
+- lib/mercado-pago/subscriptions.ts
+- lib/mercado-pago/client.ts
+- CONTEXTO-PROJETO.md
+
+.env.local também foi atualizado localmente, mas nunca deve ser versionado.
+
+## BUILD
+
+Últimos builds após alterações:
+
+APROVADOS.
+
+Next.js:
+16.3.4
+
+TypeScript:
+sem erros.
+
+## GIT / SEGURANÇA
+
+Referência versionada:
+
+741d528 Implementa base server-side do Mercado Pago
+
+CONTEXTO-PROJETO.md já possuía alteração local e continua não commitado.
+
+Não versionar:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt;
+- .env.local.
+
+Nunca usar:
+
+git add .
+
+Commit/push somente com autorização explícita.
+
+## FORMA DE TRABALHO
+
+Evitar andar em círculos.
+
+Não consumir novos holds/checkouts para cada diagnóstico.
+
+Preferir testes isolados quando seguros.
+
+Corrigir apenas causas comprovadas.
+
+Interromper para:
+- operação destrutiva;
+- decisão financeira;
+- nova credencial;
+- alteração relevante de banco;
+- commit/push.
+
+# FIM DO CHECKPOINT INTERMEDIÁRIO — 2026-09-13
+
+---
+
+# CHECKPOINT DE DIREÇÃO PRIORITÁRIA — MERCADO PAGO / PAGAMENTO MENSAL AVULSO VIA PIX — 2026-09-13
+
+## PRIORIDADE ABSOLUTA
+
+ESTE CHECKPOINT ALTERA A DIREÇÃO DE PRODUTO DO PAGAMENTO E TEM PRIORIDADE SOBRE OS CHECKPOINTS ANTERIORES ONDE HOUVER CONFLITO.
+
+Preservar integralmente tudo que continua válido nos checkpoints anteriores, especialmente:
+
+- capacidade e concorrência;
+- hold;
+- carência;
+- estruturas financeiras internas;
+- webhook autenticado/idempotente;
+- integração de benefícios com /agendar;
+- segurança;
+- Git;
+- migrations já aplicadas.
+
+NÃO reiniciar o projeto.
+
+NÃO repetir diagnósticos já concluídos.
+
+## CORREÇÃO FUNDAMENTAL DE PRODUTO
+
+Foi esclarecido pelo responsável que:
+
+"Plano Mensal" NÃO significa que o Mercado Pago deve cobrar automaticamente todos os meses.
+
+O produto desejado é:
+
+PAGAMENTO MENSAL AVULSO COM RENOVAÇÃO VOLUNTÁRIA.
+
+Fluxo comercial correto:
+
+cliente
+→ escolhe Plano Mensal
+→ escolhe barbeiro
+→ reserva capacidade
+→ realiza UM pagamento de R$ 150
+→ Mercado Pago confirma server-side
+→ Black Navalha libera os benefícios pelo ciclo mensal pago
+→ ao final do ciclo o cliente decide se quer comprar/renovar outro mês.
+
+NÃO deve existir débito recorrente automático como requisito do produto atual.
+
+O cliente NÃO deve ser obrigado a manter renovação automática.
+
+A renovação futura será uma NOVA contratação/cobrança voluntária.
+
+## CONSEQUÊNCIA PARA O MERCADO PAGO
+
+A API de Assinaturas recorrentes baseada em:
+
+- preapproval_plan;
+- preapproval;
+- card_token_id;
+- cobrança automática;
+
+NÃO é mais a direção principal da integração.
+
+O trabalho anterior não foi inútil porque confirmou API, autenticação, webhook, infraestrutura, idempotência e comportamento do Mercado Pago, mas o fluxo recorrente não atende à regra comercial agora esclarecida.
+
+O novo objetivo é:
+
+PAGAMENTO AVULSO MERCADO PAGO
+
+começando por:
+
+PIX.
+
+A integração deve utilizar a API/produto ATUAL do Mercado Pago apropriado para pagamento PIX avulso.
+
+Antes de implementar, confirmar na documentação oficial atual o endpoint e contrato vigentes.
+
+NÃO presumir endpoint/SDK antigo.
+
+## PIX — OBJETIVO
+
+Primeira forma de pagamento a ser implementada:
+
+PIX.
+
+Fluxo esperado:
+
+/assinaturas
+→ pré-checkout interno
+→ subscription_charge pending
+→ hold de 15 minutos
+→ criação de pagamento PIX Mercado Pago
+→ QR Code / copia e cola disponibilizado ao cliente
+→ cliente paga em ambiente de TESTE
+→ Mercado Pago envia notificação
+→ backend autentica webhook
+→ backend consulta pagamento diretamente no Mercado Pago
+→ somente pagamento approved avança
+→ valida external_reference, valor e moeda
+→ processamento transacional/idempotente
+→ assinatura active
+→ subscription_cycle paid
+→ hold consumed
+→ benefícios liberados.
+
+O navegador NÃO confirma pagamento.
+
+QR Code exibido ou retorno visual NÃO confirma pagamento.
+
+## RENOVAÇÃO
+
+Ao encerrar o ciclo pago:
+
+- não cobrar automaticamente;
+- cliente escolhe se deseja renovar;
+- renovação gera nova cobrança avulsa;
+- pagamento confirmado gera novo ciclo;
+- regras de capacidade/barbeiro já definidas continuam aplicáveis.
+
+A carência existente de 2 dias continua sendo regra INTERNA de capacidade após ciclo pago.
+
+Ela não representa tolerância de pagamento do Mercado Pago e não cria cobrança automática.
+
+## CAPACIDADE
+
+Preservar:
+
+30 assinantes por barbeiro.
+
+Preservar obrigatoriamente:
+
+SELECT ... FOR UPDATE
+
+nas operações de capacidade.
+
+Hold:
+
+15 minutos.
+
+Carência após ciclo pago:
+
+2 dias.
+
+NÃO confundir hold e carência.
+
+## PREÇO
+
+Plano Mensal:
+
+R$ 150,00
+
+O banco interno continua sendo autoridade sobre o preço comercial através de subscription_plans.
+
+Não confiar no valor enviado pelo navegador.
+
+services.price = 0 nos serviços subscriber_service continua significando benefício incluído no plano, não gratuidade pública.
+
+## ESTRUTURA FINANCEIRA INTERNA
+
+Preservar:
+
+subscription_charges
+subscription_cycles
+payment_events
+subscription_capacity_reservations
+subscriptions
+subscription_services
+
+Essas estruturas foram desenhadas de forma suficientemente genérica para pagamento por gateway.
+
+subscription_charges já possui campos como:
+
+provider
+provider_charge_id
+external/idempotency concepts já implementados no fluxo
+
+e deve continuar sendo a cobrança interna autoritativa.
+
+Estados financeiros existentes permanecem:
+
+pending
+paid
+failed
+cancelled
+expired
+refunded
+partially_refunded
+
+Não colocar estado financeiro inadequadamente em subscriptions.status.
+
+## RPC DE CONFIRMAÇÃO
+
+Existe:
+
+confirm_mercado_pago_subscription_payment
+
+Ela implementa processamento transacional/idempotente da confirmação já validada server-side.
+
+Ela:
+
+- bloqueia charge;
+- protege capacidade;
+- cria/localiza customer;
+- cria/reutiliza assinatura;
+- cria ciclo paid;
+- ativa assinatura;
+- copia benefícios;
+- consome hold;
+- marca charge paid;
+- não cria comissão.
+
+Antes de reutilizá-la para PIX, verificar SOMENTE o contrato necessário para saber se ela depende semanticamente de preapproval_id ou se aceita provider_charge_id genérico do Mercado Pago.
+
+NÃO reinspecionar schema geral/migrations sem necessidade.
+
+Se adaptação for necessária para pagamento PIX, fazer a menor alteração possível e versionar SQL.
+
+## COMISSÃO
+
+Continua NÃO DEFINIDA.
+
+NÃO inventar percentual.
+
+PIX aprovado também NÃO deve criar comissão enquanto a regra financeira não estiver definida.
+
+## WEBHOOK
+
+Webhook server-side já existe:
+
+/api/mercado-pago/webhook
+
+A infraestrutura existente de:
+
+- x-signature;
+- x-request-id;
+- HMAC SHA-256;
+- payment_events;
+- idempotência;
+
+deve ser reaproveitada quando compatível com o evento de PAGAMENTO PIX atual.
+
+O webhook atual foi escrito inicialmente para:
+
+subscription_preapproval
+subscription_authorized_payment
+
+e precisará ser estendido/adaptado para o tópico de pagamento atual do Mercado Pago, SOMENTE depois de confirmar a documentação vigente para pagamentos PIX.
+
+Não remover a segurança existente.
+
+Para PIX, após notificação:
+
+consultar o recurso de pagamento diretamente na API Mercado Pago.
+
+Somente:
+
+status = approved
+
+pode liberar o ciclo, após validação interna de:
+
+- external_reference;
+- provider/payment id;
+- currency;
+- transaction_amount;
+- charge interna correta.
+
+## CORRELAÇÃO
+
+Para a nova cobrança PIX, usar sempre que suportado oficialmente:
+
+external_reference = subscription_charge.id
+
+Isso fornece correlação determinística entre pagamento Mercado Pago e cobrança interna.
+
+Não correlacionar apenas por:
+
+- e-mail;
+- nome;
+- telefone.
+
+Idempotência deve continuar obrigatória.
+
+## CRONÔMETRO
+
+Preservar:
+
+15:00 → 00:00
+
+baseado exclusivamente em:
+
+reservation_expires_at
+
+retornado pelo servidor.
+
+O pagamento deve respeitar a estratégia de capacidade/hold.
+
+Não criar timer independente.
+
+## AUTENTICAÇÃO MERCADO PAGO — RESOLVIDA
+
+MERCADO_PAGO_ACCESS_TOKEN de TESTE está correto em .env.local.
+
+Teste isolado confirmado:
+
+GET /preapproval/search?limit=1
+→ HTTP 200
+
+Não repetir diagnóstico da credencial sem nova evidência.
+
+O erro anterior:
+
+UND_ERR_INVALID_ARG invalid Authorization header
+
+ocorreu porque inicialmente havia valor incorreto na variável.
+
+Depois houve HTTP 403 porque o segredo de Webhook havia sido colocado por engano como Access Token.
+
+Isso foi corrigido.
+
+NÃO voltar a investigar esse ponto sem nova evidência.
+
+## PREAPPROVAL_PLAN CRIADO DURANTE INVESTIGAÇÃO
+
+Foi criado em TESTE:
+
+preapproval_plan_id:
+5347a37a3e894606ac86542a5d402acb
+
+Plano:
+
+Black Navalha - Plano Mensal
+R$ 150
+mensal
+
+Foi vinculado ao plano interno em:
+
+subscription_plans.mercado_pago_preapproval_plan_id
+
+Esse recurso não será usado como base do novo fluxo PIX enquanto a direção for pagamento mensal avulso.
+
+NÃO é necessário apagá-lo agora.
+
+Não realizar operação destrutiva apenas para limpeza.
+
+A coluna criada pela migration 012 também pode permanecer.
+
+## DESCOBERTA SOBRE /preapproval
+
+Teste isolado atual confirmou:
+
+POST /preapproval
+com status pending e sem cartão
+
+→ HTTP 400
+
+Mensagem exata:
+
+card_token_id is required
+
+Portanto não insistir em /preapproval sem cartão.
+
+Checkout hospedado do preapproval_plan também foi validado visualmente, mas deixou problema de correlação com external_reference e, principalmente, corresponde à direção de assinatura recorrente que não é mais requisito do produto.
+
+Não continuar investigando preapproval enquanto estivermos implementando PIX avulso.
+
+## NENHUM PAGAMENTO REALIZADO
+
+Até este checkpoint:
+
+- nenhum pagamento de teste foi concluído;
+- nenhuma cobrança real foi realizada;
+- nenhum cartão foi informado;
+- nenhum PIX foi pago;
+- nenhuma assinatura foi ativada pela integração Mercado Pago;
+- nenhum ciclo paid foi criado por pagamento Mercado Pago;
+- nenhuma comissão foi criada.
+
+## CLOUDFLARE / WEBHOOK
+
+Último Quick Tunnel usado:
+
+https://ware-pairs-insider-rebel.trycloudflare.com
+
+Webhook:
+
+https://ware-pairs-insider-rebel.trycloudflare.com/api/mercado-pago/webhook
+
+GET externo:
+
+HTTP 405
+
+esperado.
+
+URL TEMPORÁRIA.
+
+Não presumir válida em sessão futura.
+
+No próximo chat, criar novo Quick Tunnel somente quando realmente necessário para teste de webhook.
+
+## VARIÁVEIS LOCAIS
+
+.env.local contém configuração server-side necessária, incluindo credenciais secretas.
+
+NUNCA exibir ou versionar.
+
+MERCADO_PAGO_ACCESS_TOKEN:
+válido atualmente.
+
+MERCADO_PAGO_WEBHOOK_SECRET:
+armazenado localmente.
+
+SUPABASE_SERVICE_ROLE_KEY:
+permanece secreta.
+
+MERCADO_PAGO_BACK_URL:
+foi adicionada para o fluxo de preapproval e pode não ser necessária no futuro fluxo PIX.
+
+Não removê-la precipitadamente; revisar somente quando a implementação PIX estiver definida.
+
+## CÓDIGO LOCAL MODIFICADO E AINDA NÃO VERSIONADO
+
+Estado antes deste checkpoint:
+
+M CONTEXTO-PROJETO.md
+M app/api/assinaturas/mercado-pago/route.ts
+M lib/mercado-pago/client.ts
+M lib/mercado-pago/subscriptions.ts
+?? ASSINATURAS-LOTE.txt
+?? CODIGO-COMPLETO.txt
+
+As alterações atuais incluem:
+
+- correção UUID_PATTERN;
+- suporte a back_url no preapproval_plan;
+- diagnóstico seguro de fetch;
+- logging detalhado de MercadoPagoApiError.
+
+NÃO descartar automaticamente essas alterações.
+
+Ao migrar para PIX, revisar quais continuam úteis e quais ficaram específicas do fluxo recorrente antes do commit.
+
+## GIT
+
+Referência versionada:
+
+741d528 Implementa base server-side do Mercado Pago
+
+Não versionar:
+
+ASSINATURAS-LOTE.txt
+CODIGO-COMPLETO.txt
+.env.local
+
+Nunca usar:
+
+git add .
+
+Staging somente com caminhos explícitos.
+
+COMMIT/PUSH CONTINUAM EXIGINDO AUTORIZAÇÃO EXPLÍCITA.
+
+## Migrations
+
+007–013 já aplicadas.
+
+NÃO reaplicar.
+
+Nova alteração REAL de banco deve ser versionada no próximo número disponível.
+
+Não alterar banco por conveniência sem necessidade técnica comprovada.
+
+## /AGENDAR
+
+NÃO ALTERAR:
+
+/agendar
+create_public_multi_appointment
+integração existente de benefício das assinaturas.
+
+Quando assinatura/ciclo forem ativados corretamente pelo pagamento, a integração existente deve continuar concedendo os benefícios como já funciona hoje.
+
+## AUTORIZAÇÃO OPERACIONAL AMPLIADA — 2026-09-13
+
+O responsável autorizou maior autonomia técnica para acelerar o desenvolvimento e evitar microinterrupções.
+
+Está autorizado, quando tecnicamente necessário e seguro:
+
+- investigar documentação oficial atual;
+- criar/alterar arquivos de aplicação;
+- criar Route Handlers;
+- criar utilitários server-side;
+- refatorar código relacionado à integração;
+- adicionar validações;
+- adicionar logs seguros;
+- adicionar testes;
+- utilizar fetch/API REST;
+- instalar/adicionar dependência técnica realmente necessária quando trouxer benefício concreto;
+- utilizar ferramentas locais de desenvolvimento;
+- utilizar túnel HTTPS temporário;
+- trabalhar em blocos maiores;
+- escolher detalhes técnicos reversíveis;
+- remover código local recém-criado que tenha ficado obsoleto pela mudança PIX, desde que não envolva dado/banco e seja claramente parte da integração em andamento.
+
+Continuam exigindo interrupção/autorização específica:
+
+- operação destrutiva sobre dados reais;
+- nova credencial/segredo;
+- cobrança real;
+- decisão financeira não definida;
+- alteração de banco de risco ou não claramente necessária;
+- commit;
+- push.
+
+Nenhuma autorização genérica deve ser interpretada como autorização para expor segredos ou realizar cobrança real.
+
+## FORMA DE TRABALHO
+
+Priorizar resultado funcional.
+
+Evitar microdiagnósticos quando um teste isolado conclusivo puder responder.
+
+Evitar consumir checkout/hold repetidamente para investigar problemas externos.
+
+Quando execução local for necessária:
+
+- fornecer UM comando PowerShell completo;
+- indicar claramente se é Terminal VS Code ou PowerShell do Windows;
+- usar npm.cmd;
+- preferir Set-Content para arquivos completos quando apropriado.
+
+Trabalhar em blocos/lotes maiores quando seguro.
+
+## PRÓXIMO PASSO EXATO — NOVO CHAT
+
+1. Ler integralmente CONTEXTO-PROJETO.md.
+2. Priorizar este checkpoint.
+3. NÃO retomar preapproval/recorrência automática.
+4. NÃO criar novo checkout inicialmente.
+5. Consultar somente a documentação oficial ATUAL necessária do Mercado Pago para PAGAMENTO PIX AVULSO.
+6. Confirmar endpoint/API vigente, payload e resposta para PIX.
+7. Confirmar tópico atual de Webhook de pagamento e consulta server-side do payment.
+8. Planejar o menor reaproveitamento da infraestrutura existente.
+9. Usar:
+   external_reference = subscription_charge.id
+   quando oficialmente suportado.
+10. Reaproveitar hold, cronômetro, capacidade e subscription_charge pending.
+11. Verificar apenas o contrato mínimo da RPC confirm_mercado_pago_subscription_payment antes de reutilizá-la.
+12. Implementar PIX server-side.
+13. Exibir QR Code e PIX copia e cola no fluxo público.
+14. Implementar/ajustar webhook de payment antes de qualquer pagamento.
+15. npm.cmd run build.
+16. Criar novo Cloudflare Quick Tunnel somente quando chegar ao teste do webhook.
+17. Configurar evento de pagamento no Webhook de TESTE conforme painel/documentação atual.
+18. Criar UMA nova contratação de TESTE.
+19. Criar PIX de TESTE.
+20. Validar QR/copia e cola.
+21. Somente depois realizar pagamento de TESTE, nunca real.
+22. Auditar:
+    subscription_charge;
+    payment_events;
+    subscription;
+    subscription_cycle;
+    hold.
+23. Confirmar idempotência.
+24. Confirmar ausência de comissão.
+
+## NOVO FLUXO-ALVO
+
+Plano Mensal interno
+→ R$ 150
+→ escolha do barbeiro
+→ capacidade protegida com FOR UPDATE
+→ hold 15 minutos
+→ subscription_charge pending
+→ pagamento PIX avulso Mercado Pago
+→ external_reference = charge.id
+→ QR Code / copia e cola
+→ webhook autenticado
+→ GET payment server-side
+→ validar approved + referência + valor + moeda
+→ RPC transacional/idempotente
+→ assinatura ativa pelo ciclo mensal pago
+→ benefícios existentes em /agendar
+→ fim do ciclo
+→ cliente escolhe voluntariamente se deseja renovar.
+
+SEM RENOVAÇÃO AUTOMÁTICA DO MERCADO PAGO.
+
+# FIM DO CHECKPOINT DE DIREÇÃO PRIORITÁRIA — 2026-09-13
+---
+# CHECKPOINT FINAL DA SESSÃO — MERCADO PAGO / PIX AVULSO VIA ORDERS API — 2026-09-13
+PRIORIDADE ABSOLUTA: este é o checkpoint mais recente. Plano Mensal continua sendo pagamento avulso de R$ 150 via PIX, sem recorrência automática.
+Documentação oficial atual confirmada: Orders API. Criar PIX: POST /v1/orders. Consultar server-side: GET /v1/orders/{id}. Webhook: Order (Mercado Pago). external_reference = subscription_charge.id.
+PIX confirmado na documentação com payment_method.id=pix, type=bank_transfer, ticket_url, qr_code e qr_code_base64. Estado inicial documentado: action_required/waiting_transfer. Exemplo concluído: processed/accredited.
+Implementação local migrada de preapproval para Orders PIX. provider_charge_id representa Order ID ORD. UI preparada para QR Code/Copia e Cola. Webhook valida assinatura, faz GET da Order e só depois pode chamar a RPC transacional/idempotente.
+RPC confirm_mercado_pago_subscription_payment verificada: provider_charge_id é texto genérico e pode receber Order ID. RPC continua sem comissão.
+Hold alterado de 15 para 30 minutos para alinhar ao mínimo do PIX. Order usa expiration_time=PT30M. Carência pós-ciclo continua 2 dias. SELECT ... FOR UPDATE preservado.
+Migration 014-align-pix-checkout-hold.sql criada e APLICADA: Success. No rows returned. NÃO reaplicar.
+Migration 015-service-role-subscription-charges-update.sql criada após erro 42501 de UPDATE e APLICADA: Success. No rows returned. NÃO reaplicar.
+Builds da implementação PIX: APROVADOS.
+Webhook TESTE configurado no Mercado Pago com Order (Mercado Pago). Planos e assinaturas e Pagamentos legacy ficaram desmarcados.
+Quick Tunnel da sessão: https://seasons-edward-lover-bottle.trycloudflare.com . É TEMPORÁRIO e não deve ser reutilizado automaticamente amanhã.
+Primeiro erro PIX comprovado: HTTP 400 invalid_email_for_sandbox. Mercado Pago exige email contendo @testuser.com no sandbox.
+Teste seguinte utilizou Teste Black Navalha / (41) 99999-9999 / blacknavalha@testuser.com.
+Após migration 015 foi feita nova tentativa de GERAR PIX e a UI ainda retornou: Não foi possível gerar o Pix. O erro server-side DESSA ÚLTIMA tentativa NÃO foi coletado.
+PRÓXIMO PASSO EXATO: amanhã NÃO criar checkout e NÃO clicar GERAR PIX inicialmente. Primeiro ler a linha mais recente de .next/dev/logs/next-development.log contendo mercado pago pix creation error. Diagnosticar somente a falha pós-015.
+Depois corrigir somente a causa comprovada, buildar e continuar com uma tentativa controlada. Antes de pagar auditar charge pending, provider, ORD, GET Order, external_reference, R, BRL, PAY, status, QR e hold.
+Nenhum PIX foi pago. Nenhum pagamento de teste foi concluído. Nenhuma cobrança real. Nenhuma ativação/ciclo Mercado Pago. Nenhuma comissão.
+Migrations 007–015 estão aplicadas e NÃO devem ser reaplicadas.
+MERCADO_PAGO_ACCESS_TOKEN de TESTE está válido. Nunca pedir/imprimir Access Token, webhook secret, service role ou .env.local.
+Não alterar /agendar, create_public_multi_appointment ou integração existente de benefícios.
+Não versionar ASSINATURAS-LOTE.txt, CODIGO-COMPLETO.txt ou .env.local. Nunca usar git add . Commit/push somente com autorização explícita.
+Referência Git versionada: 741d528 Implementa base server-side do Mercado Pago.
+GIT STATUS AO ENCERRAR:  M CONTEXTO-PROJETO.md;  M app/api/assinaturas/mercado-pago/route.ts;  M app/api/mercado-pago/webhook/route.ts;  M app/assinaturas/subscription-checkout-form.tsx;  M lib/mercado-pago/client.ts;  M lib/mercado-pago/subscriptions.ts; ?? ASSINATURAS-LOTE.txt; ?? CODIGO-COMPLETO.txt; ?? supabase/sql/014-align-pix-checkout-hold.sql; ?? supabase/sql/015-service-role-subscription-charges-update.sql
+# FIM DO CHECKPOINT — 2026-09-13
+
+
+---
+
+# CHECKPOINT INTERMEDIÁRIO — MERCADO PAGO / PIX ORDERS APROVADO NO SANDBOX / WEBHOOK 401 — 2026-09-15
+
+## PRIORIDADE
+
+Este é o checkpoint mais recente da integração Mercado Pago e deve ter PRIORIDADE ABSOLUTA quando houver conflito com checkpoints anteriores.
+
+A direção de produto permanece:
+
+Plano Mensal = pagamento mensal AVULSO de R$ 150 via PIX.
+
+SEM renovação automática.
+
+NÃO retomar preapproval/preapproval_plan como fluxo principal.
+
+NÃO insistir em card_token_id.
+
+## FLUXO MERCADO PAGO ATUAL
+
+Integração atual:
+
+Checkout API via Orders API.
+
+Criação:
+
+POST /v1/orders
+
+Consulta server-side:
+
+GET /v1/orders/{id}
+
+PIX:
+
+payment_method.id = pix
+payment_method.type = bank_transfer
+
+Correlação:
+
+external_reference = subscription_charge.id
+
+provider_charge_id representa o Order ID ORD...
+
+Payment ID utiliza PAY...
+
+O navegador NÃO confirma pagamento.
+
+## CORREÇÃO DO ERRO PÓS-MIGRATION 015
+
+Foi finalmente correlacionada a última tentativa registrada após a migration 015.
+
+Charge:
+
+32425d24-1368-4f30-a6f4-73afef358347
+
+Foi confirmado por consulta somente-leitura que o e-mail gravado nessa charge possuía domínio:
+
+gmail.com
+
+A Orders API em sandbox retornou:
+
+HTTP 400
+invalid_email_for_sandbox
+
+Mensagem do Mercado Pago indicou que o sandbox exige e-mail contendo:
+
+@testuser.com
+
+Portanto a causa pós-015 foi comprovada:
+
+a tentativa utilizou e-mail incompatível com o sandbox.
+
+NÃO rediagnosticar Access Token.
+
+MERCADO_PAGO_ACCESS_TOKEN de TESTE continua válido.
+
+## PRIMEIRA ORDER PIX VALIDADA
+
+Foi criada posteriormente uma Order PIX com e-mail de teste válido.
+
+A auditoria server-side confirmou:
+
+- subscription_charge pending;
+- amount = 150;
+- currency = BRL;
+- provider = mercado_pago;
+- provider_charge_id = ORDTST...;
+- GET /v1/orders/{id} = HTTP 200;
+- external_reference = subscription_charge.id;
+- Payment PAY...;
+- Order action_required / waiting_transfer;
+- Payment action_required / waiting_transfer;
+- payment_method.id = pix;
+- payment_method.type = bank_transfer;
+- QR Code presente;
+- qr_code_base64 presente;
+- ticket_url presente;
+- hold = held;
+- hold exatamente 30 minutos;
+- subscription_id = null;
+- cycle_id = null;
+- paid_at = null.
+
+Nenhum pagamento real foi realizado.
+
+## CORREÇÃO DO PARSER DE MOEDA
+
+A resposta REAL da Orders API mostrou:
+
+currency = BRL
+
+e não:
+
+currency_id = BRL
+
+O parser local lia somente:
+
+response.currency_id
+
+e produzia currency = null.
+
+Isso faria o webhook rejeitar uma Order válida depois do pagamento.
+
+Foi corrigido em:
+
+lib/mercado-pago/subscriptions.ts
+
+para usar:
+
+response.currency
+
+com fallback para:
+
+response.currency_id
+
+Build após a correção:
+
+APROVADO.
+
+## MIGRATION 016 — PAYMENT_EVENTS
+
+Durante a auditoria foi comprovado:
+
+42501
+permission denied for table payment_events
+
+ao utilizar service_role para SELECT.
+
+A migration 007 havia criado payment_events e habilitado RLS, mas não havia concedido explicitamente os privilégios necessários ao service_role.
+
+Foi autorizada, criada e APLICADA:
+
+supabase/sql/016-service-role-payment-events.sql
+
+Conteúdo funcional:
+
+GRANT SELECT, INSERT, UPDATE
+ON public.payment_events
+TO service_role;
+
+Não foi concedido DELETE.
+
+Não foi concedido acesso adicional para anon/authenticated.
+
+Validação após aplicação:
+
+PAYMENT_EVENTS_SELECT=OK
+
+NÃO reaplicar a migration 016.
+
+Migrations 007–016 estão aplicadas.
+
+NÃO reaplicar nenhuma delas.
+
+## CLOUDFLARE / WEBHOOK DE TESTE
+
+Quick Tunnel funcional atual:
+
+https://pentium-florists-char-blanket.trycloudflare.com
+
+Webhook:
+
+https://pentium-florists-char-blanket.trycloudflare.com/api/mercado-pago/webhook
+
+Validação externa:
+
+HTTP 405
+
+esperado para GET porque a Route Handler implementa POST.
+
+O painel Mercado Pago foi atualizado em Modo de teste para essa URL.
+
+Evento mantido:
+
+Order (Mercado Pago)
+
+Planos e assinaturas:
+
+desmarcado.
+
+Pagamentos legacy:
+
+desmarcado.
+
+A URL é TEMPORÁRIA.
+
+Não presumir que continuará válida em sessão futura.
+
+MERCADO_PAGO_WEBHOOK_SECRET continua existente localmente.
+
+Não regenerar sem necessidade.
+
+Nunca exibir seu valor.
+
+## TESTE PIX OFICIAL — APRO
+
+Foi localizada na documentação oficial atual do Mercado Pago a seção:
+
+Realizar compra de teste com Pix
+
+A documentação informa que o teste de Pix via Orders deve utilizar valores predefinidos.
+
+Para cenário de aprovação:
+
+payer.first_name = "APRO"
+
+A documentação informa que a Order inicialmente retorna:
+
+action_required / waiting_transfer
+
+e depois o pagamento é atualizado automaticamente para aprovado.
+
+Portanto NÃO é necessário e NÃO se deve utilizar banco real para pagar o QR de sandbox.
+
+## IMPLEMENTAÇÃO DO MODO DE TESTE
+
+Foi implementado suporte opcional a:
+
+payerFirstName
+
+em:
+
+lib/mercado-pago/subscriptions.ts
+
+A criação da Order envia first_name somente quando fornecido.
+
+Em:
+
+app/api/assinaturas/mercado-pago/route.ts
+
+foi implementado:
+
+MERCADO_PAGO_TEST_MODE === "true"
+→ payerFirstName = "APRO"
+
+Caso contrário:
+
+first_name não é enviado.
+
+Foi adicionada localmente em .env.local:
+
+MERCADO_PAGO_TEST_MODE=true
+
+Essa variável não é segredo, mas .env.local inteiro continua proibido de exibição/versionamento.
+
+O objetivo é impedir que APRO seja enviado acidentalmente em produção.
+
+Build após essa implementação:
+
+APROVADO.
+
+next dev foi reiniciado para carregar a variável.
+
+## ORDER APRO — RESULTADO
+
+Foi criada UMA nova contratação/Order de TESTE usando o cenário oficial APRO.
+
+Charge:
+
+d4235514-6fa8-4106-be1d-448f377a6853
+
+Order:
+
+ORDTST01M2HZ39TZ187852ED7YM3BD4G
+
+Payment:
+
+PAY01M2HZ39VQC7KHXPM1SDN3WJJX
+
+Após aguardar sem pagar nada e sem utilizar banco real, GET server-side confirmou:
+
+Order:
+processed / accredited
+
+Payment:
+processed / accredited
+
+amount:
+150.00
+
+paid_amount:
+150.00
+
+currency:
+BRL
+
+external_reference:
+d4235514-6fa8-4106-be1d-448f377a6853
+
+Portanto o sandbox APRO funcionou corretamente.
+
+Nenhuma transferência bancária real foi realizada.
+
+## ESTADO INTERNO APÓS APRO
+
+Apesar da Order Mercado Pago estar:
+
+processed / accredited
+
+o estado interno permaneceu:
+
+subscription_charge = pending
+subscription_id = null
+cycle_id = null
+paid_at = null
+hold = held
+
+payment_events:
+
+vazio para essa tentativa.
+
+Portanto a confirmação financeira interna NÃO ocorreu.
+
+Isso é correto enquanto o webhook não for autenticado/processado.
+
+NÃO chamar a RPC manualmente apenas para contornar o webhook.
+
+## WEBHOOK AUTOMÁTICO
+
+Após a atualização automática APRO, não foi encontrado POST do Mercado Pago nos logs locais.
+
+Nenhum payment_event foi criado.
+
+Para testar o endpoint foi utilizada a ferramenta oficial:
+
+Webhooks
+→ Simular notificação
+
+Evento:
+
+Order (Mercado Pago)
+
+Data ID utilizado:
+
+ORDTST01M2HZ39TZ187852ED7YM3BD4G
+
+O simulador enviou:
+
+type = order
+action = order.processed
+
+A resposta do nosso endpoint foi:
+
+401 Unauthorized
+
+Descrição do painel:
+
+faltam credenciais válidas de autenticação.
+
+Portanto a requisição chegou ao endpoint, mas foi rejeitada pela validação de x-signature antes do processamento financeiro.
+
+Nenhum estado financeiro interno foi alterado pela simulação.
+
+## WEBHOOK — IMPLEMENTAÇÃO ATUAL
+
+Arquivo:
+
+app/api/mercado-pago/webhook/route.ts
+
+O webhook:
+
+- lê x-signature;
+- lê x-request-id;
+- obtém data.id;
+- valida assinatura antes de processar;
+- aceita somente type = order;
+- grava payment_events;
+- consulta GET /v1/orders/{id};
+- ignora o body como autoridade financeira;
+- exige Order processed/accredited;
+- exige Payment processed/accredited;
+- valida external_reference;
+- valida provider/order;
+- valida valor;
+- valida moeda;
+- valida PIX/bank_transfer;
+- chama confirm_mercado_pago_subscription_payment;
+- atualiza payment_events.
+
+A arquitetura permanece correta:
+
+o navegador e o body do webhook NÃO são autoridade financeira.
+
+## BLOQUEIO ATUAL — X-SIGNATURE
+
+Arquivo:
+
+lib/mercado-pago/webhook-signature.ts
+
+Implementação atual confirmada antes da última proposta de alteração:
+
+manifest:
+
+id:${dataId};request-id:${requestId};ts:${parts.ts};
+
+HMAC SHA-256 com:
+
+MERCADO_PAGO_WEBHOOK_SECRET
+
+comparação timing-safe.
+
+A simulação oficial retornou 401.
+
+Precisamos diagnosticar especificamente a validação de assinatura.
+
+Hipóteses atuais incluem:
+
+- canonicalização de data.id;
+- correspondência do segredo local com a configuração de Webhook atual;
+- formato real dos headers enviados pelo simulador.
+
+IMPORTANTE:
+
+Foi PROPOSTO alterar dataId para lowercase na construção do manifesto porque Orders utiliza ID alfanumérico em maiúsculas e a documentação do Mercado Pago possui regras de canonicalização.
+
+Porém, no momento deste checkpoint, NÃO foi confirmado que esse comando tenha sido executado.
+
+Portanto, antes de qualquer nova alteração, verificar o estado real de:
+
+lib/mercado-pago/webhook-signature.ts
+
+e NÃO presumir que dataId.toLowerCase() já esteja aplicado.
+
+Não regenerar o Webhook secret sem evidência.
+
+Não exibir:
+
+x-signature completo;
+MERCADO_PAGO_WEBHOOK_SECRET;
+MERCADO_PAGO_ACCESS_TOKEN;
+SUPABASE_SERVICE_ROLE_KEY;
+.env.local.
+
+## NÃO CRIAR NOVA ORDER
+
+A Order de sandbox:
+
+ORDTST01M2HZ39TZ187852ED7YM3BD4G
+
+já está processed/accredited e serve como recurso real para continuar testando o webhook.
+
+NÃO criar novo checkout/hold/PIX para diagnosticar x-signature.
+
+Usar a ferramenta de simulação com essa mesma Order somente depois de corrigir/validar a autenticação.
+
+## CAPACIDADE / REGRAS PRESERVADAS
+
+Capacidade:
+
+30 assinantes por barbeiro.
+
+Preservar obrigatoriamente:
+
+SELECT ... FOR UPDATE
+
+Hold PIX:
+
+30 minutos.
+
+Order:
+
+expiration_time = PT30M
+
+Carência pós-ciclo:
+
+2 dias.
+
+Não confundir hold com carência.
+
+## RPC
+
+confirm_mercado_pago_subscription_payment
+
+continua sendo a confirmação transacional/idempotente após validação server-side.
+
+provider_charge_id aceita Order ID textual.
+
+A RPC NÃO cria comissão.
+
+Não chamar manualmente para mascarar falha do webhook.
+
+## COMISSÃO
+
+Percentual NÃO definido.
+
+NÃO inventar percentual.
+
+Nenhuma comissão foi criada.
+
+## BANCO
+
+Migrations aplicadas:
+
+007–016.
+
+NÃO reaplicar nenhuma.
+
+Migration 014:
+hold PIX de 30 minutos.
+
+Migration 015:
+UPDATE de subscription_charges para service_role.
+
+Migration 016:
+SELECT/INSERT/UPDATE de payment_events para service_role.
+
+## BUILD
+
+Builds após:
+
+- correção de moeda;
+- implementação de MERCADO_PAGO_TEST_MODE / APRO;
+
+foram APROVADOS.
+
+Next.js:
+
+16.3.4
+
+TypeScript:
+
+sem erros.
+
+## GIT
+
+Referência versionada continua:
+
+741d528 Implementa base server-side do Mercado Pago
+
+Existem alterações locais NÃO commitadas.
+
+Não descartar automaticamente.
+
+Arquivos relacionados atualmente incluem alterações em:
+
+- CONTEXTO-PROJETO.md
+- app/api/assinaturas/mercado-pago/route.ts
+- app/api/mercado-pago/webhook/route.ts
+- app/assinaturas/subscription-checkout-form.tsx
+- lib/mercado-pago/client.ts
+- lib/mercado-pago/subscriptions.ts
+- possivelmente lib/mercado-pago/webhook-signature.ts, dependendo de a proposta de lowercase ter sido executada ou não
+- supabase/sql/014-align-pix-checkout-hold.sql
+- supabase/sql/015-service-role-subscription-charges-update.sql
+- supabase/sql/016-service-role-payment-events.sql
+
+Nunca versionar:
+
+ASSINATURAS-LOTE.txt
+CODIGO-COMPLETO.txt
+.env.local
+
+Nunca usar:
+
+git add .
+
+Commit/push somente com autorização explícita.
+
+## PRÓXIMO PASSO EXATO
+
+1. NÃO criar novo checkout.
+2. NÃO criar nova Order.
+3. NÃO realizar pagamento real.
+4. NÃO chamar manualmente a RPC de confirmação.
+5. Verificar primeiro o estado atual de:
+   lib/mercado-pago/webhook-signature.ts
+6. Confirmar se a alteração proposta:
+   dataId.toLowerCase()
+   foi ou não aplicada.
+7. Diagnosticar especificamente o 401 da simulação oficial.
+8. Preferir instrumentação segura que revele apenas presença/formato dos componentes necessários, nunca segredo ou assinatura completa.
+9. Corrigir somente a causa comprovada.
+10. Build após alteração.
+11. Reiniciar next dev se necessário.
+12. Manter/recriar Quick Tunnel somente se necessário.
+13. Reutilizar:
+    ORDTST01M2HZ39TZ187852ED7YM3BD4G
+14. Reenviar UMA simulação Order.
+15. Esperar HTTP 200/201.
+16. Auditar:
+    payment_events;
+    subscription_charge paid;
+    subscription active;
+    subscription_cycle paid;
+    hold consumed;
+    idempotência;
+    ausência de comissão.
+17. Depois testar evento duplicado/idempotência sem criar nova cobrança.
+18. Nenhuma cobrança real.
+
+# FIM DO CHECKPOINT INTERMEDIÁRIO — 2026-09-15
+
+---
+
+# CHECKPOINT INTERMEDIÁRIO — MERCADO PAGO / PIX APRO + HMAC RESOLVIDO / WEBHOOK AVANÇOU PARA 500 — 2026-09-15
+
+## PRIORIDADE ABSOLUTA
+
+Este é o checkpoint mais recente da integração Mercado Pago.
+
+Quando houver conflito com checkpoints anteriores, este prevalece.
+
+Produto:
+
+Plano Mensal = pagamento mensal AVULSO de R$ 150 via PIX.
+
+SEM renovação automática.
+
+NÃO retomar preapproval/preapproval_plan como fluxo principal.
+
+NÃO insistir em card_token_id.
+
+## ESTADO CONSOLIDADO DO PIX
+
+Integração:
+
+Mercado Pago Checkout API via Orders API.
+
+Criação:
+
+POST /v1/orders
+
+Consulta autoritativa server-side:
+
+GET /v1/orders/{id}
+
+PIX:
+
+payment_method.id = pix
+payment_method.type = bank_transfer
+
+Correlação:
+
+external_reference = subscription_charge.id
+
+provider_charge_id:
+
+Order ID ORD...
+
+Payment:
+
+PAY...
+
+O navegador NÃO confirma pagamento.
+
+## ORDER DE TESTE ATUAL
+
+Foi criada em sandbox a Order:
+
+ORDTST01M2HZ39TZ187852ED7YM3BD4G
+
+Charge interna:
+
+d4235514-6fa8-4106-be1d-448f377a6853
+
+Payment:
+
+PAY01M2HZ39VQC7KHXPM1SDN3WJJX
+
+O cenário oficial de teste do Mercado Pago utiliza:
+
+payer.first_name = APRO
+
+Isso é enviado SOMENTE quando:
+
+MERCADO_PAGO_TEST_MODE=true
+
+A variável está configurada localmente em .env.local.
+
+APRO NÃO deve ser enviado em produção.
+
+Nenhum banco/app real foi utilizado.
+
+Nenhuma transferência real foi realizada.
+
+## RESULTADO DO SANDBOX APRO
+
+GET server-side da Order confirmou:
+
+Order:
+processed / accredited
+
+Payment:
+processed / accredited
+
+amount:
+150.00
+
+paid_amount:
+150.00
+
+currency:
+BRL
+
+external_reference:
+d4235514-6fa8-4106-be1d-448f377a6853
+
+Portanto o cenário oficial APRO funcionou e simulou aprovação sem movimentação financeira real.
+
+## CORREÇÃO DO PARSER DA ORDERS API
+
+Foi confirmado na resposta real:
+
+order.currency = BRL
+
+enquanto:
+
+currency_id
+
+não era o campo correto dessa resposta.
+
+lib/mercado-pago/subscriptions.ts foi corrigido para usar:
+
+response.currency
+
+com fallback para:
+
+response.currency_id
+
+Build:
+
+APROVADO.
+
+## MIGRATION 016
+
+Foi criada e APLICADA:
+
+supabase/sql/016-service-role-payment-events.sql
+
+Ela concede exclusivamente ao service_role:
+
+SELECT
+INSERT
+UPDATE
+
+em:
+
+public.payment_events
+
+Não concede DELETE.
+
+Não concede novos privilégios a anon/authenticated.
+
+Validação após aplicação:
+
+PAYMENT_EVENTS_SELECT=OK
+
+Migrations 007–016 estão aplicadas.
+
+NÃO reaplicar nenhuma.
+
+## WEBHOOK DE TESTE
+
+Evento configurado no Mercado Pago:
+
+Order (Mercado Pago)
+
+Planos e assinaturas:
+
+desmarcado.
+
+Pagamentos legacy:
+
+desmarcado.
+
+Quick Tunnel mais recente:
+
+https://take-massachusetts-respect-reflections.trycloudflare.com
+
+Webhook:
+
+https://take-massachusetts-respect-reflections.trycloudflare.com/api/mercado-pago/webhook
+
+O Quick Tunnel é TEMPORÁRIO.
+
+Não presumir que continuará válido em outra sessão.
+
+GET externo retornou:
+
+HTTP 405
+
+esperado.
+
+## SEGREDO DO WEBHOOK — PROBLEMA ENCONTRADO E CORRIGIDO
+
+Durante o diagnóstico do HTTP 401 foi verificado de forma segura o formato local de:
+
+MERCADO_PAGO_WEBHOOK_SECRET
+
+O valor local estava incorreto:
+
+length = 2003
+endsWithQuote = true
+
+Isso comprovou que a variável estava malformada.
+
+O segredo correto foi novamente copiado diretamente do painel Mercado Pago sem ser enviado ao chat.
+
+.env.local foi atualizado sem imprimir seu conteúdo.
+
+Validação posterior:
+
+present = true
+length = 64
+leadingOrTrailingWhitespace = false
+hasCR = false
+hasLF = false
+hasTab = false
+startsWithQuote = false
+endsWithQuote = false
+
+Não regenerar o segredo sem necessidade.
+
+Nunca imprimir ou enviar ao chat:
+
+MERCADO_PAGO_WEBHOOK_SECRET
+MERCADO_PAGO_ACCESS_TOKEN
+SUPABASE_SERVICE_ROLE_KEY
+.env.local
+
+## HMAC / DATA.ID — CAUSA DO 401 COMPROVADA
+
+Mesmo com o segredo corrigido, o webhook ainda retornava 401.
+
+Foi criada instrumentação temporária segura.
+
+Confirmado que a requisição real do simulador enviava:
+
+- x-signature presente;
+- ts presente;
+- v1 presente;
+- x-request-id presente;
+- data.id presente na URL;
+- data.id presente no body;
+- URL e body com exatamente o mesmo data.id;
+- segredo presente no processo.
+
+Foi testado internamente, sem imprimir HMAC/segredo/header, o manifesto com:
+
+dataId.toLowerCase()
+
+e com:
+
+dataId original.
+
+Resultado conclusivo:
+
+lowerMatches = false
+originalMatches = true
+
+Portanto, para o webhook atual:
+
+Order (Mercado Pago)
+
+o manifesto válido utiliza o Order ID exatamente como recebido, preservando maiúsculas.
+
+A alteração anterior de lowercase foi revertida.
+
+## VALIDADOR HMAC DEFINITIVO
+
+lib/mercado-pago/webhook-signature.ts voltou ao formato limpo:
+
+id:${dataId};request-id:${requestId};ts:${parts.ts};
+
+HMAC:
+
+SHA-256
+
+com:
+
+MERCADO_PAGO_WEBHOOK_SECRET
+
+e comparação timing-safe.
+
+As instrumentações temporárias de diagnóstico HMAC/auth foram removidas.
+
+Build depois da limpeza:
+
+APROVADO.
+
+## RESULTADO MAIS RECENTE DO SIMULADOR
+
+Após:
+
+- segredo correto;
+- data.id original;
+- build;
+- reinício do next dev;
+- túnel funcional;
+
+foi enviada UMA nova simulação oficial usando:
+
+Tipo:
+Order (Mercado Pago)
+
+Data ID:
+ORDTST01M2HZ39TZ187852ED7YM3BD4G
+
+Resultado:
+
+HTTP 500 Internal Server Error
+
+IMPORTANTE:
+
+Anteriormente a mesma simulação retornava:
+
+401 Unauthorized
+
+Portanto o HTTP 401 FOI RESOLVIDO.
+
+A autenticação HMAC agora passou e o webhook avançou para uma etapa posterior do processamento.
+
+## BLOQUEIO ATUAL EXATO
+
+O bloqueio atual é:
+
+HTTP 500 após autenticação bem-sucedida do webhook.
+
+A causa server-side específica desse 500 AINDA NÃO FOI LIDA.
+
+NÃO simular novamente antes de ler o log.
+
+NÃO criar nova Order.
+
+NÃO criar novo checkout.
+
+NÃO gerar novo PIX.
+
+NÃO chamar manualmente a RPC.
+
+Próximo passo deve ser exclusivamente consultar os logs da última simulação procurando:
+
+mercado pago webhook
+event insert
+duplicate lookup
+processing error
+payment confirmation
+permission denied
+42501
+500
+
+Diagnosticar SOMENTE a causa concreta encontrada.
+
+## ESTADO INTERNO ANTES DO 500
+
+Antes da simulação que avançou para 500, a auditoria havia mostrado:
+
+subscription_charge:
+pending
+
+subscription_id:
+null
+
+cycle_id:
+null
+
+paid_at:
+null
+
+hold:
+held
+
+payment_events:
+nenhum evento relevante naquele momento.
+
+Como o webhook agora passou da autenticação, esse estado pode ter mudado parcialmente.
+
+Portanto, depois de ler o erro do log, auditar o estado antes de tentar novamente.
+
+Não presumir que nada foi gravado.
+
+## SEGURANÇA DO BODY DO SIMULADOR
+
+O body exibido pelo simulador do Mercado Pago contém dados fictícios que não correspondem ao PIX real, incluindo exemplo de cartão/valores.
+
+Isso NÃO deve ser usado como autoridade financeira.
+
+O webhook implementado consulta obrigatoriamente:
+
+GET /v1/orders/{id}
+
+usando o data.id autenticado.
+
+Somente o recurso consultado server-side no Mercado Pago pode avançar para confirmação financeira.
+
+Essa arquitetura deve ser preservada.
+
+## CAPACIDADE
+
+Capacidade:
+
+30 assinantes por barbeiro.
+
+Preservar obrigatoriamente:
+
+SELECT ... FOR UPDATE
+
+Hold PIX:
+
+30 minutos.
+
+Order:
+
+expiration_time = PT30M
+
+Carência pós-ciclo:
+
+2 dias.
+
+Não confundir hold com carência.
+
+## RPC
+
+RPC existente:
+
+confirm_mercado_pago_subscription_payment
+
+Aceita provider_charge_id textual genérico e pode receber Order ID.
+
+É responsável pelo processamento transacional/idempotente depois da validação server-side.
+
+Ela NÃO cria comissão.
+
+Não chamá-la manualmente para contornar o webhook.
+
+## COMISSÃO
+
+Percentual ainda NÃO definido.
+
+NÃO inventar percentual.
+
+Nenhuma comissão deve ser criada.
+
+## BUILD
+
+Builds recentes:
+
+APROVADOS.
+
+Incluem:
+
+- parser currency;
+- sandbox APRO;
+- instrumentações temporárias;
+- remoção das instrumentações;
+- validador HMAC definitivo com data.id original.
+
+Next.js:
+
+16.3.4
+
+TypeScript:
+
+sem erros.
+
+## GIT
+
+Referência versionada:
+
+741d528 Implementa base server-side do Mercado Pago
+
+Existem alterações locais NÃO commitadas.
+
+NÃO descartar automaticamente.
+
+Arquivos relacionados incluem:
+
+- CONTEXTO-PROJETO.md
+- app/api/assinaturas/mercado-pago/route.ts
+- app/api/mercado-pago/webhook/route.ts
+- app/assinaturas/subscription-checkout-form.tsx
+- lib/mercado-pago/client.ts
+- lib/mercado-pago/subscriptions.ts
+- lib/mercado-pago/webhook-signature.ts
+- supabase/sql/014-align-pix-checkout-hold.sql
+- supabase/sql/015-service-role-subscription-charges-update.sql
+- supabase/sql/016-service-role-payment-events.sql
+
+Nunca versionar:
+
+ASSINATURAS-LOTE.txt
+CODIGO-COMPLETO.txt
+.env.local
+
+Nunca usar:
+
+git add .
+
+Commit/push somente com autorização explícita.
+
+## NÃO ALTERAR
+
+Não alterar:
+
+/agendar
+create_public_multi_appointment
+integração existente dos benefícios da assinatura.
+
+Não retomar fluxo recorrente automático Mercado Pago.
+
+Não criar comissão.
+
+## PRÓXIMO PASSO EXATO
+
+1. NÃO simular novamente.
+2. NÃO criar checkout.
+3. NÃO criar Order.
+4. NÃO gerar PIX.
+5. NÃO chamar a RPC manualmente.
+6. Ler o erro server-side da ÚLTIMA simulação que retornou HTTP 500.
+7. Procurar no log:
+   mercado pago webhook
+   event insert
+   duplicate lookup
+   processing error
+   payment confirmation
+   permission denied
+   42501
+   500
+8. Auditar se payment_events ou outros registros foram parcialmente alterados.
+9. Corrigir SOMENTE a causa comprovada.
+10. Build após alteração.
+11. Reutilizar a mesma Order:
+    ORDTST01M2HZ39TZ187852ED7YM3BD4G
+12. Repetir UMA simulação somente depois da correção.
+13. Esperar HTTP 200/201.
+14. Auditar:
+    payment_events;
+    subscription_charge paid;
+    subscription active;
+    subscription_cycle paid;
+    hold consumed;
+    idempotência;
+    ausência de comissão.
+15. Testar duplicidade somente depois de processamento bem-sucedido.
+16. Nenhuma cobrança real.
+
+# FIM DO CHECKPOINT INTERMEDIÁRIO — 2026-09-15
+
+---
+
+# CHECKPOINT FINAL — MERCADO PAGO / PIX ORDERS END-TO-END APROVADO E IDEMPOTENTE — 2026-09-15
+
+## PRIORIDADE ABSOLUTA
+
+Este é o checkpoint mais recente da integração Mercado Pago e prevalece sobre checkpoints anteriores quando houver conflito.
+
+Regra de produto:
+
+Plano Mensal NÃO é assinatura recorrente automática do Mercado Pago.
+
+Fluxo comercial:
+
+cliente escolhe plano + barbeiro
+→ reserva capacidade
+→ paga UMA mensalidade avulsa de R$ 150 via PIX
+→ Mercado Pago confirma server-side
+→ sistema libera um ciclo mensal
+→ ao final o cliente decide voluntariamente se deseja comprar outro mês.
+
+SEM renovação automática.
+
+NÃO retomar preapproval/preapproval_plan como fluxo principal.
+
+NÃO insistir em card_token_id.
+
+## MERCADO PAGO — INTEGRAÇÃO VALIDADA
+
+Integração escolhida:
+
+Checkout API via Orders API.
+
+Criação:
+
+POST /v1/orders
+
+Consulta autoritativa:
+
+GET /v1/orders/{id}
+
+PIX:
+
+payment_method.id = pix
+payment_method.type = bank_transfer
+
+Correlação:
+
+external_reference = subscription_charge.id
+
+provider_charge_id:
+
+Order ID ORD...
+
+Payment ID:
+
+PAY...
+
+QR Code, qr_code_base64 e ticket_url já foram validados anteriormente.
+
+O navegador NÃO confirma pagamento.
+
+O body recebido pelo simulador também NÃO é autoridade financeira.
+
+## ORDER SANDBOX UTILIZADA
+
+Order:
+
+ORDTST01M2HZ39TZ187852ED7YM3BD4G
+
+Charge:
+
+d4235514-6fa8-4106-be1d-448f377a6853
+
+Payment:
+
+PAY01M2HZ39VQC7KHXPM1SDN3WJJX
+
+Foi utilizado o cenário oficial Mercado Pago para teste PIX:
+
+payer.first_name = APRO
+
+Esse comportamento somente é ativado quando:
+
+MERCADO_PAGO_TEST_MODE=true
+
+configurado localmente.
+
+Nenhum banco/app PIX real foi utilizado.
+
+Nenhum dinheiro real foi movimentado.
+
+GET server-side confirmou anteriormente:
+
+Order = processed / accredited
+Payment = processed / accredited
+amount = 150.00
+paid_amount = 150.00
+currency = BRL
+external_reference = d4235514-6fa8-4106-be1d-448f377a6853
+
+## PARSER DA ORDERS API
+
+A resposta real da Orders API utiliza:
+
+order.currency = BRL
+
+O parser foi corrigido para usar:
+
+response.currency
+
+com fallback para:
+
+response.currency_id
+
+Build aprovado.
+
+## HMAC DO WEBHOOK — RESOLVIDO
+
+O erro HTTP 401 está definitivamente resolvido.
+
+Primeira causa comprovada:
+
+MERCADO_PAGO_WEBHOOK_SECRET estava malformado localmente.
+
+Após correção, sua estrutura foi validada sem imprimir o segredo:
+
+length = 64
+sem whitespace externo
+sem CR/LF/tab
+sem aspas externas.
+
+Segunda descoberta comprovada:
+
+para o webhook atual Order (Mercado Pago), o manifesto válido utiliza o Order ID ORIGINAL preservando maiúsculas.
+
+Teste experimental:
+
+lowerMatches = false
+originalMatches = true
+
+Validador definitivo:
+
+id:${dataId};request-id:${requestId};ts:${parts.ts};
+
+NÃO aplicar dataId.toLowerCase() sem nova evidência.
+
+Instrumentações temporárias de HMAC/auth foram removidas.
+
+## WEBHOOK
+
+Route Handler:
+
+/api/mercado-pago/webhook
+
+Evento de teste:
+
+Order (Mercado Pago)
+
+Fluxo validado:
+
+x-signature + x-request-id
+→ HMAC válido
+→ data.id autenticado
+→ GET /v1/orders/{id}
+→ body ignorado como autoridade financeira
+→ validação da Order
+→ validação do Payment
+→ validação de processed/accredited
+→ validação de external_reference
+→ validação de valor
+→ validação de BRL
+→ validação PIX/bank_transfer
+→ confirm_mercado_pago_subscription_payment
+→ atualização de payment_events.
+
+O simulador envia body fictício contendo outros valores/meios de pagamento, inclusive cartão.
+
+Esses dados NÃO foram aceitos como autoridade financeira.
+
+A confirmação utilizou a Order real consultada server-side.
+
+## HTTP 500 — CAUSA COMPROVADA
+
+Depois da resolução do HMAC, a primeira simulação avançou de:
+
+401 Unauthorized
+
+para:
+
+500 Internal Server Error
+
+Log server-side:
+
+mercado pago webhook processing error "payment confirmation failed: column reference \"subscription_id\" is ambiguous"
+
+Foi comprovado que a falha ocorria dentro da RPC:
+
+confirm_mercado_pago_subscription_payment
+
+A função é RETURNS TABLE e possui variável de saída chamada:
+
+subscription_id
+
+Ao mesmo tempo utilizava:
+
+ON CONFLICT (subscription_id, service_id) DO NOTHING
+
+no INSERT de subscription_services.
+
+Essa referência era ambígua no PL/pgSQL.
+
+## AUDITORIA ANTES DA CORREÇÃO
+
+Após o HTTP 500 foi confirmado:
+
+subscription_charge:
+pending
+
+subscription_id:
+null
+
+cycle_id:
+null
+
+paid_at:
+null
+
+hold:
+held
+
+O webhook havia criado um payment_event não processado com:
+
+processed_at = null
+
+processing_error:
+payment confirmation failed: column reference "subscription_id" is ambiguous
+
+Portanto não houve ativação financeira parcial da RPC.
+
+O evento com erro foi preservado como trilha de auditoria e NÃO deve ser apagado apenas para limpeza.
+
+## MIGRATION 017
+
+Foi criada:
+
+supabase/sql/017-fix-mercado-pago-payment-confirmation-ambiguity.sql
+
+A migration deriva da definição versionada da RPC na migration 013 e altera exclusivamente:
+
+ON CONFLICT (subscription_id, service_id) DO NOTHING
+
+para:
+
+ON CONFLICT DO NOTHING
+
+Isso elimina a referência ambígua mantendo a idempotência pretendida ao copiar subscription_services.
+
+Migration 017 aplicada no Supabase em 2026-09-15.
+
+Resultado:
+
+Success. No rows returned
+
+NÃO reaplicar.
+
+Migrations 007–017 estão aplicadas.
+
+NÃO reaplicar nenhuma.
+
+## BUILD APÓS CORREÇÃO
+
+Executado:
+
+npm.cmd run build
+
+Resultado:
+
+APROVADO.
+
+- Compiled successfully;
+- TypeScript sem erros;
+- rotas geradas normalmente;
+- /api/mercado-pago/webhook reconhecida.
+
+## NEXT DEV / CLOUDFLARE
+
+Foi encontrado um processo antigo de next dev que não respondia.
+
+Ele foi encerrado e um novo next dev foi iniciado corretamente em:
+
+http://localhost:3000
+
+Quick Tunnel utilizado na validação final:
+
+https://rangers-forests-readings-looks.trycloudflare.com
+
+Webhook de teste:
+
+https://rangers-forests-readings-looks.trycloudflare.com/api/mercado-pago/webhook
+
+Essa URL é TEMPORÁRIA.
+
+Não presumir válida em sessão futura.
+
+O painel Mercado Pago foi atualizado somente na URL de TESTE.
+
+O segredo HMAC NÃO foi regenerado.
+
+## PRIMEIRO PROCESSAMENTO BEM-SUCEDIDO
+
+Depois da migration 017, foi realizada UMA simulação oficial usando a MESMA Order:
+
+ORDTST01M2HZ39TZ187852ED7YM3BD4G
+
+Resultado:
+
+HTTP 200 OK
+
+Auditoria posterior confirmou:
+
+subscription_charge:
+paid
+
+provider:
+mercado_pago
+
+provider_charge_id:
+ORDTST01M2HZ39TZ187852ED7YM3BD4G
+
+subscription_id:
+e7973ff4-9601-4a28-9050-23a7328e78fd
+
+cycle_id:
+06b90ddd-f4ff-47f4-9d0d-e2d1cda2d849
+
+paid_at preenchido.
+
+## PAYMENT_EVENTS
+
+Evento bem-sucedido:
+
+event_type:
+order.processed
+
+charge_id:
+d4235514-6fa8-4106-be1d-448f377a6853
+
+processed_at:
+preenchido
+
+processing_error:
+null
+
+O evento antigo da tentativa que falhou com HTTP 500 permanece:
+
+processed_at:
+null
+
+processing_error:
+payment confirmation failed: column reference "subscription_id" is ambiguous
+
+Isso é histórico de auditoria e pode permanecer.
+
+## HOLD
+
+Hold da contratação:
+
+id:
+7dbfc757-247a-417c-8716-43f5fc130638
+
+Após processamento:
+
+status:
+consumed
+
+subscription_id:
+e7973ff4-9601-4a28-9050-23a7328e78fd
+
+cycle_id:
+06b90ddd-f4ff-47f4-9d0d-e2d1cda2d849
+
+Portanto a reserva de capacidade foi consumida corretamente.
+
+## ASSINATURA
+
+Validação visual realizada em:
+
+/admin/assinantes
+
+Assinatura criada:
+
+Teste Black Navalha
+
+Status:
+
+ATIVO
+
+Plano:
+
+Plano Mensal
+
+Início:
+
+15/09/2026
+
+Validade:
+
+14/10/2026
+
+Serviços incluídos confirmados:
+
+- Cabelo Assinante Mensal;
+- Barba Assinante Mensal;
+- Cabelo + Barba Assinante Mensal;
+- Raspado + Barba Assinante Mensal.
+
+A integração existente dos benefícios foi preservada.
+
+## CICLO
+
+Ciclo criado:
+
+06b90ddd-f4ff-47f4-9d0d-e2d1cda2d849
+
+status:
+
+paid
+
+period_start:
+
+2026-09-15
+
+period_end:
+
+2026-10-14
+
+price_amount:
+
+150
+
+grace_until:
+
+2026-10-17T03:00:00+00:00
+
+A carência continua sendo 2 dias após o encerramento do ciclo.
+
+Não confundir com o hold PIX.
+
+## CAPACIDADE
+
+Capacidade:
+
+30 assinantes por barbeiro.
+
+Preservar obrigatoriamente:
+
+SELECT ... FOR UPDATE
+
+Hold PIX:
+
+30 minutos.
+
+Order expiration_time:
+
+PT30M
+
+Carência pós-ciclo:
+
+2 dias.
+
+## IDEMPOTÊNCIA — VALIDADA END-TO-END
+
+Depois do primeiro processamento bem-sucedido foi realizada UMA segunda simulação oficial para a mesma Order.
+
+Resultado:
+
+HTTP 200 OK
+
+O simulador forneceu novo x-request-id e, portanto, um novo provider_event_id foi registrado.
+
+Auditoria confirmou:
+
+- charge continuou a mesma;
+- charge continuou paid;
+- subscription_id continuou o mesmo;
+- cycle_id continuou o mesmo;
+- exatamente 1 subscription_cycle existe para essa assinatura;
+- nenhum novo ciclo foi criado;
+- período permaneceu 15/09/2026 → 14/10/2026;
+- valor permaneceu R$ 150;
+- segundo payment_event foi processado com sucesso;
+- nenhuma duplicação financeira ocorreu;
+- nenhuma comissão foi criada.
+
+Portanto a idempotência foi comprovada mesmo com múltiplas entregas da mesma Order possuindo x-request-id diferentes.
+
+## COMISSÃO
+
+Percentual/regra continuam NÃO definidos.
+
+NÃO inventar percentual.
+
+Auditoria final:
+
+commissions = []
+
+A RPC NÃO cria comissão.
+
+Isso deve permanecer assim até decisão financeira específica.
+
+## SEGURANÇA
+
+Nunca pedir, imprimir, registrar ou versionar:
+
+MERCADO_PAGO_ACCESS_TOKEN
+MERCADO_PAGO_WEBHOOK_SECRET
+SUPABASE_SERVICE_ROLE_KEY
+.env.local
+
+Nenhum segredo foi necessário para documentar este checkpoint.
+
+Nenhuma cobrança real foi realizada.
+
+O cenário APRO foi exclusivamente sandbox oficial Mercado Pago.
+
+## NÃO ALTERAR
+
+Não alterar:
+
+/agendar
+create_public_multi_appointment
+integração existente dos benefícios da assinatura.
+
+Não retomar recorrência automática Mercado Pago.
+
+Plano Mensal permanece como compra mensal avulsa e voluntária.
+
+## MIGRATIONS
+
+Aplicadas:
+
+007–017.
+
+Em especial:
+
+014:
+hold PIX alterado para 30 minutos.
+
+015:
+UPDATE de subscription_charges para service_role.
+
+016:
+SELECT/INSERT/UPDATE de payment_events para service_role.
+
+017:
+corrige ambiguidade subscription_id na RPC de confirmação.
+
+NÃO reaplicar nenhuma migration já aplicada.
+
+## GIT
+
+Referência versionada anterior:
+
+741d528 Implementa base server-side do Mercado Pago
+
+Existem alterações locais da integração Mercado Pago ainda NÃO commitadas.
+
+NÃO descartar automaticamente.
+
+Nunca versionar:
+
+ASSINATURAS-LOTE.txt
+CODIGO-COMPLETO.txt
+.env.local
+
+Nunca usar:
+
+git add .
+
+Staging somente com caminhos explícitos.
+
+Commit/push somente com autorização explícita.
+
+## ESTADO FINAL DESTA ETAPA
+
+PIX Orders sandbox:
+
+APROVADO END-TO-END.
+
+Webhook HMAC:
+
+APROVADO.
+
+Consulta server-side da Order:
+
+APROVADA.
+
+Confirmação transacional:
+
+APROVADA.
+
+subscription_charge paid:
+
+APROVADO.
+
+subscription active:
+
+APROVADO.
+
+subscription_cycle paid:
+
+APROVADO.
+
+hold consumed:
+
+APROVADO.
+
+Idempotência:
+
+APROVADA.
+
+Ausência de comissão:
+
+CONFIRMADA.
+
+Nenhum dinheiro real foi movimentado.
+
+## PRÓXIMO PASSO
+
+Antes de iniciar nova evolução funcional:
+
+1. verificar git status;
+2. revisar somente os arquivos alterados relacionados ao Mercado Pago;
+3. não descartar alterações locais úteis;
+4. manter arquivos auxiliares e .env.local fora do staging;
+5. decidir conscientemente o checkpoint Git;
+6. commit/push somente com autorização explícita.
+
+Não é necessário criar nova Order ou repetir o teste PIX já aprovado para continuar o desenvolvimento.
+
+# FIM DO CHECKPOINT FINAL — 2026-09-15

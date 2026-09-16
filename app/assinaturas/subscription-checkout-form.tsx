@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { FormEvent, useEffect, useRef, useState } from "react";
 
@@ -24,6 +24,14 @@ type PreparedCheckout = {
   amount: number;
   currency: string;
   reservationExpiresAt: string;
+};
+
+type PixData = {
+  orderId: string;
+  paymentId: string;
+  qrCode: string;
+  qrCodeBase64: string;
+  ticketUrl: string | null;
 };
 
 function formatPrice(value: number) {
@@ -76,7 +84,9 @@ export default function SubscriptionCheckoutForm({
   const [loading, setLoading] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [error, setError] = useState("");
+  const [copyMessage, setCopyMessage] = useState("");
   const [prepared, setPrepared] = useState<PreparedCheckout | null>(null);
+  const [pix, setPix] = useState<PixData | null>(null);
   const [remainingSeconds, setRemainingSeconds] = useState(0);
 
   const checkoutTokenRef = useRef<string | null>(null);
@@ -171,10 +181,11 @@ export default function SubscriptionCheckoutForm({
     }
   }
 
-  async function handleMercadoPago() {
+  async function handleGeneratePix() {
     if (!prepared || remainingSeconds <= 0) return;
 
     setError("");
+    setCopyMessage("");
     setPaymentLoading(true);
 
     try {
@@ -193,21 +204,44 @@ export default function SubscriptionCheckoutForm({
         setError(
           typeof result.error === "string"
             ? result.error
-            : "Não foi possível iniciar o pagamento."
+            : "Não foi possível gerar o Pix."
         );
         return;
       }
 
-      if (typeof result.initPoint !== "string" || !result.initPoint) {
-        setError("O Mercado Pago não retornou a página de pagamento.");
+      if (
+        typeof result.orderId !== "string" ||
+        typeof result.paymentId !== "string" ||
+        typeof result.qrCode !== "string" ||
+        typeof result.qrCodeBase64 !== "string"
+      ) {
+        setError("O Mercado Pago não retornou os dados completos do Pix.");
         return;
       }
 
-      window.location.assign(result.initPoint);
+      setPix({
+        orderId: result.orderId,
+        paymentId: result.paymentId,
+        qrCode: result.qrCode,
+        qrCodeBase64: result.qrCodeBase64,
+        ticketUrl:
+          typeof result.ticketUrl === "string" ? result.ticketUrl : null,
+      });
     } catch {
-      setError("Não foi possível iniciar o pagamento. Tente novamente.");
+      setError("Não foi possível gerar o Pix. Tente novamente.");
     } finally {
       setPaymentLoading(false);
+    }
+  }
+
+  async function handleCopyPix() {
+    if (!pix) return;
+
+    try {
+      await navigator.clipboard.writeText(pix.qrCode);
+      setCopyMessage("Código Pix copiado.");
+    } catch {
+      setCopyMessage("Não foi possível copiar automaticamente.");
     }
   }
 
@@ -219,7 +253,7 @@ export default function SubscriptionCheckoutForm({
         <strong>Vaga reservada temporariamente.</strong>
 
         <p>
-          O checkout de {formatPrice(prepared.amount)} foi preparado.
+          Pagamento de {formatPrice(prepared.amount)} via Pix.
         </p>
 
         <div
@@ -237,26 +271,76 @@ export default function SubscriptionCheckoutForm({
 
         <p>
           {expired
-            ? "A reserva expirou. Inicie a contratação novamente para verificar a disponibilidade."
+            ? "A reserva de capacidade expirou. O pagamento não garante mais a vaga sem nova validação do servidor."
             : "Este tempo acompanha a expiração real da reserva no servidor."}
         </p>
+
+        {pix ? (
+          <>
+            <img
+              src={`data:image/jpeg;base64,${pix.qrCodeBase64}`}
+              alt="QR Code para pagamento via Pix"
+              style={{
+                width: "min(320px, 100%)",
+                height: "auto",
+                display: "block",
+                margin: "1rem auto",
+                background: "#fff",
+                padding: "0.75rem",
+              }}
+            />
+
+            <label style={{ display: "grid", gap: "0.5rem", width: "100%" }}>
+              <span>Pix Copia e Cola</span>
+              <textarea
+                value={pix.qrCode}
+                readOnly
+                rows={5}
+                style={{ width: "100%", resize: "vertical" }}
+              />
+            </label>
+
+            <button
+              type="button"
+              className={styles.checkoutButton}
+              onClick={handleCopyPix}
+            >
+              COPIAR CÓDIGO PIX
+            </button>
+
+            {copyMessage && <p>{copyMessage}</p>}
+
+            {pix.ticketUrl && (
+              <a
+                href={pix.ticketUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Abrir instruções do Pix no Mercado Pago
+              </a>
+            )}
+
+            <p>
+              Após o pagamento, aguarde a confirmação automática. Esta tela não
+              ativa a assinatura.
+            </p>
+          </>
+        ) : (
+          <button
+            type="button"
+            className={styles.checkoutButton}
+            disabled={expired || paymentLoading}
+            onClick={handleGeneratePix}
+          >
+            {paymentLoading ? "GERANDO PIX..." : "GERAR PIX"}
+          </button>
+        )}
 
         {error && (
           <p className={styles.checkoutError} role="alert">
             {error}
           </p>
         )}
-
-        <button
-          type="button"
-          className={styles.checkoutButton}
-          disabled={expired || paymentLoading}
-          onClick={handleMercadoPago}
-        >
-          {paymentLoading
-            ? "ABRINDO MERCADO PAGO..."
-            : "CONTINUAR PARA O MERCADO PAGO"}
-        </button>
 
         <small className={styles.checkoutFootnote}>
           Sua assinatura só será ativada após confirmação segura do pagamento
@@ -376,7 +460,7 @@ export default function SubscriptionCheckoutForm({
       </button>
 
       <small className={styles.checkoutFootnote}>
-        Esta etapa reserva a vaga por 15 minutos. A assinatura só será ativada
+        Esta etapa reserva a vaga por 30 minutos. A assinatura só será ativada
         após confirmação segura do pagamento.
       </small>
     </form>

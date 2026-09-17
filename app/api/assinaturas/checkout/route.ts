@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -88,6 +88,25 @@ export async function POST(request: Request) {
     if (error) {
       const message = error.message?.toLowerCase() ?? "";
 
+      if (message.includes("subscription renewal not available before")) {
+        const match = error.message?.match(
+          /subscription renewal not available before (\d{4}-\d{2}-\d{2})/i
+        );
+
+        const availableOn = match?.[1];
+        const formattedDate = availableOn
+          ? availableOn.split("-").reverse().join("/")
+          : null;
+
+        return NextResponse.json(
+          {
+            error: formattedDate
+              ? `Sua renovação estará disponível a partir de ${formattedDate}.`
+              : "Sua renovação ainda não está disponível.",
+          },
+          { status: 409 }
+        );
+      }
       if (
         message.includes("capacity") ||
         message.includes("no available") ||

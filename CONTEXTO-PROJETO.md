@@ -15429,3 +15429,384 @@ Confirmado:
 O estado específico "Esta reserva expirou" permanece implementado e coberto por build, mas não foi forçado com nova espera de 30 minutos apenas para validação visual.
 
 Não criar novo PIX somente para esse teste sem necessidade funcional.
+
+---
+
+# CHECKPOINT FINAL — RENOVAÇÃO VOLUNTÁRIA DE ASSINATURA — 2026-09-17
+
+## PRIORIDADE
+
+Este checkpoint complementa os checkpoints recentes de Mercado Pago PIX e acompanhamento automático.
+
+Regra de produto permanece:
+
+Plano Mensal = pagamento mensal AVULSO de R$ 150 via PIX.
+
+SEM cobrança recorrente automática.
+
+Cada novo mês depende de decisão voluntária do cliente e de novo pagamento confirmado server-side.
+
+## REGRA DE RENOVAÇÃO DEFINIDA
+
+A renovação voluntária passa a ser permitida:
+
+- a partir de 7 dias antes do encerramento do ciclo pago atual;
+- durante os 2 dias de carência já configurados.
+
+Antes dessa janela, uma nova tentativa para a mesma assinatura/plano é recusada.
+
+Depois de encerrada a carência, a vaga antiga já não é garantida e uma nova contratação depende da capacidade disponível.
+
+## CAPACIDADE
+
+Capacidade permanece:
+
+30 assinantes por barbeiro.
+
+SELECT ... FOR UPDATE permanece obrigatório e foi preservado.
+
+Foi identificada e corrigida uma situação importante:
+
+uma renovação com o MESMO barbeiro não pode consumir uma segunda vaga temporariamente.
+
+A assinatura já ocupa uma das vagas do profissional.
+
+A função de reserva agora reconhece essa situação através de subscription_id.
+
+Em lotação 30/30:
+
+- assinante que já ocupa aquele barbeiro pode renovar a própria vaga;
+- nova ocupação continua recusada.
+
+## TROCA DE BARBEIRO
+
+Na renovação o cliente pode escolher outro barbeiro.
+
+Quando escolhe outro profissional:
+
+- o hold no novo barbeiro é tratado como nova ocupação;
+- o novo barbeiro precisa possuir capacidade real;
+- a vaga do barbeiro anterior não é liberada antecipadamente apenas porque existe tentativa pendente;
+- pagamento pendente/falhado não transfere a vaga.
+
+O vínculo histórico do novo ciclo continua sendo determinado pelo barber_id da cobrança confirmada.
+
+## CONFIRMAÇÃO APÓS EXPIRAÇÃO DO HOLD
+
+Também foi corrigido o caso de confirmação financeira posterior aos 30 minutos do hold.
+
+Se a renovação é para o MESMO barbeiro e a própria assinatura continua ocupando uma vaga válida, a confirmação não é rejeitada apenas porque o profissional está 30/30.
+
+Para:
+
+- contratação inicial;
+- troca de barbeiro;
+
+a capacidade continua sendo revalidada normalmente após a expiração do hold.
+
+Nenhuma 31ª ocupação deve ser aceita.
+
+## MIGRATION 018
+
+Criada:
+
+supabase/sql/018-subscription-voluntary-renewal.sql
+
+Aplicada no Supabase em 2026-09-17.
+
+Resultado:
+
+Success. No rows returned
+
+NÃO reaplicar.
+
+Migrations 007–018 estão aplicadas.
+
+A migration 018 atualiza:
+
+- reserve_subscription_checkout_capacity;
+- create_subscription_checkout;
+- confirm_mercado_pago_subscription_payment.
+
+## RESERVE_SUBSCRIPTION_CHECKOUT_CAPACITY
+
+A função continua:
+
+- validando checkout token;
+- validando expiração futura;
+- validando assinatura quando informada;
+- bloqueando a linha do barbeiro com SELECT ... FOR UPDATE;
+- serializando checkouts concorrentes do mesmo profissional;
+- preservando idempotência por checkout_token;
+- expirando holds vencidos antes da contagem;
+- contando ocupação por assinatura/checkout;
+- recusando nova ocupação quando capacidade foi atingida.
+
+Novo comportamento:
+
+se p_subscription_id já possui ciclo paid/grace ocupando o mesmo barbeiro, o hold representa a mesma vaga existente e não uma vaga adicional.
+
+## CREATE_SUBSCRIPTION_CHECKOUT
+
+Continua com:
+
+hold de 30 minutos;
+preço autoritativo do subscription_plans;
+charge pending;
+nenhuma ativação;
+nenhum ciclo paid;
+nenhuma comissão.
+
+Passou a:
+
+- normalizar WhatsApp server-side;
+- localizar customer existente pelo telefone normalizado;
+- localizar assinatura comercial do mesmo plano;
+- localizar ciclo paid/grace vigente;
+- determinar janela de renovação;
+- rejeitar renovação antecipada;
+- reconhecer renovação com mesmo barbeiro;
+- exigir nova capacidade quando barbeiro escolhido é diferente;
+- vincular subscription_id à charge de renovação para rastreabilidade.
+
+Nenhum dado privado da assinatura é exposto publicamente por essa lógica.
+
+## CONFIRM_MERCADO_PAGO_SUBSCRIPTION_PAYMENT
+
+A RPC transacional/idempotente continua sendo a autoridade de confirmação após validação server-side do Mercado Pago.
+
+Permanece:
+
+- FOR UPDATE na charge;
+- FOR UPDATE no barbeiro;
+- validação de provider/provider_charge_id;
+- capacidade;
+- customer;
+- assinatura;
+- ciclo;
+- benefícios;
+- hold;
+- charge paid;
+- idempotência;
+- ausência deliberada de comissão.
+
+Foi acrescentada somente a consideração da ocupação existente da própria assinatura ao revalidar hold expirado para renovação no mesmo barbeiro.
+
+## ROTA DE PRÉ-CHECKOUT
+
+Alterado:
+
+app/api/assinaturas/checkout/route.ts
+
+A rota reconhece a exceção:
+
+subscription renewal not available before YYYY-MM-DD
+
+e responde:
+
+HTTP 409
+
+com mensagem amigável:
+
+Sua renovação estará disponível a partir de DD/MM/AAAA.
+
+## TESTE REAL — RENOVAÇÃO ANTECIPADA
+
+Foi utilizada a assinatura sandbox/teste existente:
+
+Teste Black Navalha
+
+Ciclo atual:
+
+15/09/2026 → 14/10/2026
+
+Janela de renovação:
+
+07/10/2026
+
+Em 17/09/2026 foi realizada UMA tentativa controlada somente de pré-checkout.
+
+Resultado:
+
+HTTP 409
+
+Mensagem:
+
+Sua renovação estará disponível a partir de 07/10/2026.
+
+Auditoria pelo mesmo checkout_token confirmou:
+
+chargesCreated = 0
+holdsCreated = 0
+
+Portanto a rejeição acontece antes de:
+
+- criar charge;
+- criar hold;
+- consumir capacidade;
+- criar Order;
+- gerar PIX.
+
+Nenhuma operação Mercado Pago foi iniciada nesse teste.
+
+## CENÁRIOS NÃO FORÇADOS
+
+Não foram adulterados:
+
+- datas do ciclo;
+- relógio do banco;
+- capacidade;
+- assinatura validada;
+- dados financeiros;
+
+apenas para testar artificialmente os demais cenários.
+
+Portanto ainda NÃO foram exercitados end-to-end nesta data:
+
+- renovação permitida dentro dos 7 dias;
+- renovação com mesmo barbeiro em lotação exatamente 30/30;
+- troca de barbeiro durante renovação;
+- confirmação tardia de renovação após hold expirado.
+
+Esses cenários foram cobertos pela lógica da migration 018 e devem ser testados naturalmente quando houver janela/dados adequados, ou futuramente com fixture isolada conscientemente criada.
+
+Não confundir revisão lógica com teste end-to-end executado.
+
+## SEGURANÇA / PRIVACIDADE
+
+Não foi criada página pública de consulta de assinatura por telefone.
+
+Motivo:
+
+não expor informações de assinatura a qualquer pessoa que conheça o WhatsApp do cliente.
+
+A identificação por WhatsApp ocorre server-side apenas para aplicação das regras de renovação.
+
+O formulário público continua sem revelar:
+
+- assinatura existente;
+- barbeiro histórico;
+- ciclo;
+- validade privada;
+
+por uma API de consulta aberta.
+
+## MERCADO PAGO
+
+Nenhuma alteração no fluxo financeiro validado.
+
+Renovação continua gerando uma NOVA cobrança PIX avulsa quando permitida.
+
+O navegador não confirma pagamento.
+
+Fluxo permanece:
+
+pré-checkout
+→ hold
+→ charge pending
+→ Order PIX
+→ webhook HMAC
+→ GET Order server-side
+→ validações financeiras
+→ RPC transacional/idempotente
+→ novo ciclo paid.
+
+SEM renovação automática Mercado Pago.
+
+## HOLD E CARÊNCIA
+
+Hold PIX:
+
+30 minutos.
+
+Carência pós-ciclo:
+
+2 dias.
+
+Janela de renovação antecipada:
+
+7 dias antes do period_end.
+
+Não confundir essas três regras.
+
+## COMISSÃO
+
+Percentual continua NÃO definido.
+
+NÃO inventar percentual.
+
+Migration 018 não cria comissão.
+
+## NÃO ALTERAR
+
+Não alterar:
+
+/agendar
+create_public_multi_appointment
+integração existente dos benefícios da assinatura.
+
+## BUILD
+
+Após a adaptação da Route Handler:
+
+npm.cmd run build
+
+APROVADO.
+
+TypeScript sem erros.
+
+## GIT
+
+Checkpoint anterior:
+
+fd9f4dc Adiciona acompanhamento do pagamento PIX
+
+Arquivos desta etapa:
+
+- app/api/assinaturas/checkout/route.ts
+- supabase/sql/018-subscription-voluntary-renewal.sql
+- CONTEXTO-PROJETO.md
+
+Não versionar:
+
+ASSINATURAS-LOTE.txt
+CODIGO-COMPLETO.txt
+.env.local
+
+Nunca usar:
+
+git add .
+
+## ESTADO
+
+Renovação automática:
+
+INEXISTENTE, conforme produto.
+
+Renovação voluntária:
+
+REGRA IMPLEMENTADA.
+
+Janela de 7 dias:
+
+IMPLEMENTADA.
+
+Carência de 2 dias:
+
+PRESERVADA.
+
+Mesmo barbeiro sem dupla vaga:
+
+IMPLEMENTADO.
+
+Troca de barbeiro exige capacidade:
+
+IMPLEMENTADO.
+
+Rejeição antecipada:
+
+TESTADA E APROVADA.
+
+Nenhuma cobrança real realizada.
+
+# FIM DO CHECKPOINT — 2026-09-17

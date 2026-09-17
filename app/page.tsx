@@ -161,6 +161,7 @@ export default async function Home() {
             <a href="#trabalhos">Trabalhos</a>
             <a href="#servicos">Serviços</a>
             <a href="#contato">Contato</a>
+            <Link href="/minha-assinatura" className={styles.mySubscriptionLink}>Minha assinatura</Link>
 
             <Link href="/agendar" className={styles.navCta}>
               Agendar horário
@@ -561,6 +562,7 @@ export default async function Home() {
 
       <footer className={styles.footer}>
         <span>{businessName} · Barbearia</span>
+        <Link href="/minha-assinatura">Minha assinatura</Link>
         <Link href="/agendar">Agendar horário</Link>
       </footer>
     </main>

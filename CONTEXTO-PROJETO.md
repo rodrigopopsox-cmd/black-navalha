@@ -16497,3 +16497,245 @@ Banco:
 INALTERADO.
 
 # FIM DO CHECKPOINT — 2026-09-17
+
+---
+
+# CHECKPOINT — ADMIN DE BARBEIROS / CAPACIDADE DE ASSINANTES — 2026-09-17
+
+## OBJETIVO
+
+A página:
+
+/admin/barbeiros
+
+foi evoluída para fornecer visão operacional da capacidade de assinantes por profissional.
+
+A implementação é somente leitura.
+
+Nenhuma capacidade foi alterada pelo Admin.
+
+## ARQUIVO FUNCIONAL
+
+Alterado:
+
+- app/admin/barbeiros/page.tsx
+
+## IMPLEMENTAÇÃO
+
+Cada barbeiro passa a apresentar:
+
+- capacidade total de assinantes;
+- quantidade de vagas ocupadas;
+- quantidade de vagas disponíveis;
+- percentual de ocupação;
+- barra visual de ocupação;
+- assinantes que atualmente ocupam vaga;
+- período do ciclo;
+- indicação de ciclo pago ou carência.
+
+As ações administrativas existentes foram preservadas:
+
+- Editar;
+- Horários;
+- Serviços.
+
+## REGRA DE OCUPAÇÃO
+
+A visualização segue a regra operacional já consolidada no backend.
+
+São considerados ciclos que:
+
+- pertencem ao barbeiro;
+- possuem status paid ou grace;
+- possuem grace_until no futuro.
+
+Cada subscription_id é contado no máximo uma vez por barbeiro.
+
+Isso evita dupla contagem da mesma assinatura.
+
+A assinatura legada sem ciclo comercial não ocupa vaga artificialmente.
+
+A interface diferencia:
+
+- Ciclo pago;
+- Carência.
+
+A condição de carência é determinada temporalmente quando period_end já passou e grace_until ainda está no futuro.
+
+## LEITURA DOS DADOS
+
+barbers é carregado pelo client administrativo autenticado existente, incluindo:
+
+subscriber_capacity.
+
+subscription_cycles é carregado server-side através de createAdminClient.
+
+Os nomes dos assinantes são resolvidos através de subscriptions/customers utilizando o client administrativo autenticado.
+
+Nenhuma consulta ao Mercado Pago foi adicionada.
+
+Nenhuma leitura de payment_events foi necessária.
+
+## VALIDAÇÃO REAL
+
+Rota validada visualmente:
+
+/admin/barbeiros
+
+Profissional:
+
+Rodrigo Alves Correa
+
+Resultado:
+
+- capacidade: 30;
+- ocupadas: 1;
+- disponíveis: 29;
+- ocupação: 3%.
+
+Assinante ocupando vaga:
+
+Teste Black Navalha
+
+Ciclo apresentado:
+
+15/09/2026 até 14/10/2026
+
+Situação:
+
+CICLO PAGO
+
+A assinatura legada sem ciclo comercial não apareceu como ocupação.
+
+Acentuação validada visualmente, incluindo:
+
+- disponíveis;
+- ocupação;
+- horários;
+- serviços.
+
+## BUILD
+
+Executado:
+
+npm.cmd run build
+
+Resultado:
+
+APROVADO.
+
+- compilação concluída;
+- TypeScript sem erros;
+- /admin/barbeiros permanece rota dinâmica.
+
+## DIFF CHECK
+
+Executado:
+
+git diff --check
+
+Resultado:
+
+APROVADO.
+
+Existe somente aviso conhecido LF/CRLF no arquivo funcional.
+
+## BANCO
+
+Nenhuma alteração.
+
+Nenhuma migration criada ou aplicada.
+
+Migrations 007-018 permanecem aplicadas e NÃO devem ser reaplicadas.
+
+## REGRAS PRESERVADAS
+
+Capacidade real:
+
+30 assinantes por barbeiro no estado atual.
+
+A proteção autoritativa de capacidade continua no backend.
+
+SELECT ... FOR UPDATE permanece preservado.
+
+A visualização administrativa NÃO substitui a proteção transacional.
+
+Hold PIX:
+
+30 minutos.
+
+Carência pós-ciclo:
+
+2 dias.
+
+Renovação voluntária:
+
+preservada.
+
+Mesmo barbeiro não consome segunda vaga em renovação.
+
+Troca de barbeiro exige capacidade no novo profissional.
+
+## NÃO ALTERADO
+
+Não foi alterado:
+
+- /agendar;
+- create_public_multi_appointment;
+- Mercado Pago;
+- PIX;
+- webhook;
+- HMAC;
+- polling;
+- RPCs;
+- capacidade no banco;
+- renovação voluntária;
+- comissão.
+
+## GIT
+
+Checkpoint versionado anterior:
+
+413beb1 Adiciona resumo operacional de assinantes
+
+Arquivo funcional desta etapa ainda não commitado:
+
+- app/admin/barbeiros/page.tsx
+
+app/admin/assinantes/page.tsx pode aparecer como M no working tree por normalização EOL/stat do Windows, porém git diff para esse arquivo está vazio e ele NÃO deve ser incluído no staging desta etapa.
+
+Após este checkpoint:
+
+- CONTEXTO-PROJETO.md ficará modificado.
+
+Devem permanecer fora do Git:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt;
+- .env.local.
+
+Nunca usar:
+
+git add .
+
+Commit/push somente com autorização explícita.
+
+## ESTADO
+
+Visão de capacidade por barbeiro:
+
+IMPLEMENTADA E VALIDADA.
+
+Dados reais:
+
+VALIDADOS.
+
+Build:
+
+APROVADO.
+
+Banco:
+
+INALTERADO.
+
+# FIM DO CHECKPOINT — 2026-09-17

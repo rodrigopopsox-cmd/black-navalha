@@ -16232,3 +16232,268 @@ APROVADO.
 Nenhuma alteração de banco realizada.
 
 # FIM DO CHECKPOINT — 2026-09-17
+
+---
+
+# CHECKPOINT — ADMIN DE ASSINANTES / RESUMO OPERACIONAL NA LISTAGEM — 2026-09-17
+
+## PRIORIDADE
+
+Este checkpoint complementa o checkpoint imediatamente anterior:
+
+ADMIN DE ASSINANTES / HISTÓRICO FINANCEIRO E OPERACIONAL — 2026-09-17.
+
+As regras consolidadas de PIX Orders, acompanhamento do pagamento e renovação voluntária permanecem inalteradas.
+
+## OBJETIVO
+
+A listagem:
+
+/admin/assinantes
+
+foi evoluída para permitir que o proprietário visualize a situação operacional e financeira principal sem precisar abrir individualmente cada assinatura.
+
+O histórico detalhado continua disponível em:
+
+/admin/assinantes/[id]
+
+## IMPLEMENTAÇÃO
+
+Arquivo alterado:
+
+- app/admin/assinantes/page.tsx
+
+Cada card passou a apresentar, quando existem dados reais:
+
+- barbeiro do ciclo;
+- período do ciclo;
+- carência;
+- situação financeira;
+- data/hora do pagamento.
+
+Foram preservados:
+
+- cliente;
+- WhatsApp;
+- plano;
+- status da assinatura;
+- início;
+- validade;
+- serviços incluídos;
+- busca;
+- filtro;
+- edição da assinatura.
+
+## LEITURA EM LOTE
+
+Não foram criadas consultas financeiras individuais por card.
+
+A listagem carrega em lote:
+
+- subscription_cycles;
+- subscription_charges.
+
+As estruturas financeiras são lidas server-side através de createAdminClient.
+
+Os barbeiros necessários são carregados pelo client administrativo autenticado já existente, seguindo a solução validada na etapa anterior.
+
+Não foi criada migration para ampliar acesso de service_role a barbers.
+
+Não existe consulta ao Mercado Pago nessa página.
+
+Não existe leitura de payment_events nessa página.
+
+O estado financeiro apresentado utiliza subscription_charges, que já contém o resultado financeiro interno consolidado pelo fluxo server-side validado.
+
+## ASSINATURA SANDBOX — VALIDAÇÃO VISUAL
+
+A assinatura real de sandbox:
+
+Teste Black Navalha
+
+foi validada visualmente na própria listagem.
+
+Apresentado corretamente:
+
+Barbeiro:
+
+Rodrigo Alves Correa
+
+Ciclo:
+
+15/09/2026 até 14/10/2026
+
+Carência:
+
+até 17/10/2026 00:00
+
+Financeiro:
+
+Pago
+
+Pagamento:
+
+15/09/2026 16:53
+
+Os quatro serviços incluídos permaneceram visíveis.
+
+Status ATIVO e botão EDITAR ASSINATURA permaneceram preservados.
+
+## ASSINATURA LEGADA — VALIDAÇÃO VISUAL
+
+A assinatura legada existente também foi validada.
+
+Ela continua preservada sem fabricação de histórico.
+
+Como não possui ciclo/cobrança comercial registrada, a listagem apresenta:
+
+Barbeiro:
+
+Sem ciclo
+
+Ciclo:
+
+Sem histórico
+
+Carência:
+
+-
+
+Financeiro:
+
+Sem cobrança
+
+Os serviços existentes, status e edição da assinatura legada permaneceram preservados.
+
+## BUILD
+
+Executado:
+
+npm.cmd run build
+
+Resultado:
+
+APROVADO.
+
+- Compiled successfully;
+- TypeScript sem erros;
+- páginas geradas;
+- /admin/assinantes permanece rota dinâmica.
+
+## DIFF CHECK
+
+Executado:
+
+git diff --check
+
+Resultado:
+
+APROVADO.
+
+Somente aviso conhecido LF/CRLF, sem erro funcional ou de whitespace.
+
+## BANCO
+
+Nenhuma alteração.
+
+Nenhuma migration criada ou aplicada.
+
+Migrations 007-018 permanecem aplicadas e NÃO devem ser reaplicadas.
+
+## REGRAS PRESERVADAS
+
+Plano Mensal continua sendo pagamento mensal avulso via PIX.
+
+SEM renovação automática Mercado Pago.
+
+Renovação permanece voluntária.
+
+Capacidade:
+
+30 assinantes por barbeiro.
+
+Hold PIX:
+
+30 minutos.
+
+Carência pós-ciclo:
+
+2 dias.
+
+Janela de renovação:
+
+7 dias antes do fim do ciclo.
+
+SELECT ... FOR UPDATE permanece preservado.
+
+Nenhuma comissão foi criada.
+
+Percentual/regra de comissão continuam não definidos.
+
+## NÃO ALTERADO
+
+Não foi alterado:
+
+- /agendar;
+- create_public_multi_appointment;
+- Mercado Pago;
+- PIX;
+- webhook;
+- HMAC;
+- polling;
+- RPC de confirmação;
+- capacidade;
+- renovação voluntária;
+- integração dos benefícios.
+
+Nenhuma cobrança ou PIX foi criado para validar esta etapa.
+
+## GIT
+
+Checkpoint anterior versionado:
+
+9b8ef18 Adiciona historico financeiro de assinaturas
+
+Arquivo funcional desta etapa ainda não commitado:
+
+- app/admin/assinantes/page.tsx
+
+Após esta atualização:
+
+- CONTEXTO-PROJETO.md também ficará modificado.
+
+Devem permanecer fora do Git:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt;
+- .env.local.
+
+Nunca usar:
+
+git add .
+
+Commit/push somente com autorização explícita.
+
+## ESTADO
+
+Resumo operacional na listagem:
+
+IMPLEMENTADO E VALIDADO.
+
+Assinatura sandbox:
+
+VALIDADA.
+
+Assinatura legada:
+
+VALIDADA.
+
+Build:
+
+APROVADO.
+
+Banco:
+
+INALTERADO.
+
+# FIM DO CHECKPOINT — 2026-09-17

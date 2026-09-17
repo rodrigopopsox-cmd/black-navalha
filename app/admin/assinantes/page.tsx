@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 
 import {
   BadgeCheck,
@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 type AssinantesPageProps = {
   searchParams: Promise<{
@@ -85,6 +86,128 @@ export default async function AssinantesPage({
     });
 
   const allSubscriptions = subscriptions ?? [];
+  const subscriptionIds = allSubscriptions.map(
+    (subscription) => subscription.id
+  );
+
+  type CycleSummary = {
+    id: string;
+    subscription_id: string;
+    barber_id: string;
+    period_start: string;
+    period_end: string;
+    grace_until: string;
+    status: string;
+  };
+
+  type ChargeSummary = {
+    id: string;
+    subscription_id: string | null;
+    cycle_id: string | null;
+    status: string;
+    paid_at: string | null;
+  };
+
+  type BarberSummary = {
+    id: string;
+    name: string;
+  };
+
+  let cycles: CycleSummary[] = [];
+  let charges: ChargeSummary[] = [];
+  let barbers: BarberSummary[] = [];
+
+  if (!error && subscriptionIds.length > 0) {
+    const adminSupabase = createAdminClient();
+
+    const [
+      cyclesResult,
+      chargesResult,
+    ] = await Promise.all([
+      adminSupabase
+        .from("subscription_cycles")
+        .select(`
+          id,
+          subscription_id,
+          barber_id,
+          period_start,
+          period_end,
+          grace_until,
+          status
+        `)
+        .in("subscription_id", subscriptionIds)
+        .order("period_start", {
+          ascending: false,
+        }),
+
+      adminSupabase
+        .from("subscription_charges")
+        .select(`
+          id,
+          subscription_id,
+          cycle_id,
+          status,
+          paid_at
+        `)
+        .in("subscription_id", subscriptionIds)
+        .order("created_at", {
+          ascending: false,
+        }),
+    ]);
+
+    if (cyclesResult.error) {
+      console.error(
+        "Erro ao carregar ciclos dos assinantes",
+        cyclesResult.error.message
+      );
+    } else {
+      cycles =
+        (cyclesResult.data ?? []) as CycleSummary[];
+    }
+
+    if (chargesResult.error) {
+      console.error(
+        "Erro ao carregar cobranças dos assinantes",
+        chargesResult.error.message
+      );
+    } else {
+      charges =
+        (chargesResult.data ?? []) as ChargeSummary[];
+    }
+
+    const barberIds = Array.from(
+      new Set(
+        cycles
+          .map((cycle) => cycle.barber_id)
+          .filter(Boolean)
+      )
+    );
+
+    if (barberIds.length > 0) {
+      const barbersResult = await supabase
+        .from("barbers")
+        .select("id, name")
+        .in("id", barberIds);
+
+      if (barbersResult.error) {
+        console.error(
+          "Erro ao carregar barbeiros dos assinantes",
+          barbersResult.error.message
+        );
+      } else {
+        barbers =
+          (barbersResult.data ?? []) as BarberSummary[];
+      }
+    }
+  }
+
+  const barberNames = new Map(
+    barbers.map((barber) => [
+      barber.id,
+      barber.name,
+    ])
+  );
+
   const normalizedSearch = normalizeSearch(search);
 
   const filteredSubscriptions =
@@ -346,6 +469,38 @@ export default async function AssinantesPage({
                   )
                   .filter(Boolean);
 
+              const subscriptionCycles =
+                cycles.filter(
+                  (cycle) =>
+                    cycle.subscription_id ===
+                    subscription.id
+                );
+
+              const currentCycle =
+                subscriptionCycles.find(
+                  (cycle) =>
+                    cycle.status === "paid" ||
+                    cycle.status === "grace"
+                ) ??
+                subscriptionCycles[0] ??
+                null;
+
+              const subscriptionCharges =
+                charges.filter(
+                  (charge) =>
+                    charge.subscription_id ===
+                    subscription.id
+                );
+
+              const currentCharge =
+                currentCycle
+                  ? subscriptionCharges.find(
+                      (charge) =>
+                        charge.cycle_id ===
+                        currentCycle.id
+                    ) ?? null
+                  : subscriptionCharges[0] ?? null;
+
               return (
                 <article
                   className="subscription-card"
@@ -408,6 +563,74 @@ export default async function AssinantesPage({
                     </span>
                   </div>
 
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns:
+                        "repeat(auto-fit, minmax(130px, 1fr))",
+                      gap: "10px",
+                      marginTop: "16px",
+                      padding: "14px",
+                      background: "#0b0b0b",
+                      border: "1px solid #252525",
+                      borderRadius: "7px",
+                    }}
+                  >
+                    <OperationalData
+                      label="BARBEIRO"
+                      value={
+                        currentCycle
+                          ? barberNames.get(
+                              currentCycle.barber_id
+                            ) ??
+                            "Não identificado"
+                          : "Sem ciclo"
+                      }
+                    />
+
+                    <OperationalData
+                      label="CICLO"
+                      value={
+                        currentCycle
+                          ? `${formatDate(
+                              currentCycle.period_start
+                            )} até ${formatDate(
+                              currentCycle.period_end
+                            )}`
+                          : "Sem histórico"
+                      }
+                    />
+
+                    <OperationalData
+                      label="CARÊNCIA"
+                      value={
+                        currentCycle
+                          ? `Até ${formatDateTime(
+                              currentCycle.grace_until
+                            )}`
+                          : "-"
+                      }
+                    />
+
+                    <OperationalData
+                      label="FINANCEIRO"
+                      value={
+                        currentCharge
+                          ? formatChargeStatus(
+                              currentCharge.status
+                            )
+                          : "Sem cobrança"
+                      }
+                      detail={
+                        currentCharge?.paid_at
+                          ? `Pago em ${formatDateTime(
+                              currentCharge.paid_at
+                            )}`
+                          : undefined
+                      }
+                    />
+                  </div>
+
                   <div className="subscription-services">
                     <small>
                       SERVIÇOS INCLUÍDOS
@@ -451,6 +674,62 @@ export default async function AssinantesPage({
   );
 }
 
+function OperationalData({
+  label,
+  value,
+  detail,
+}: {
+  label: string;
+  value: string;
+  detail?: string;
+}) {
+  return (
+    <div
+      style={{
+        minWidth: 0,
+      }}
+    >
+      <small
+        style={{
+          display: "block",
+          marginBottom: "5px",
+          color: "#777",
+          fontSize: "9px",
+          fontWeight: 800,
+          letterSpacing: "0.1em",
+        }}
+      >
+        {label}
+      </small>
+
+      <strong
+        style={{
+          display: "block",
+          color: "#e8e8e8",
+          fontSize: "12px",
+          lineHeight: 1.45,
+        }}
+      >
+        {value}
+      </strong>
+
+      {detail && (
+        <span
+          style={{
+            display: "block",
+            marginTop: "3px",
+            color: "#777",
+            fontSize: "10px",
+            lineHeight: 1.4,
+          }}
+        >
+          {detail}
+        </span>
+      )}
+    </div>
+  );
+}
+
 function Status({
   status,
 }: {
@@ -486,6 +765,31 @@ function formatDate(value: string) {
       day
     )
   );
+}
+
+function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat(
+    "pt-BR",
+    {
+      timeZone: "America/Sao_Paulo",
+      dateStyle: "short",
+      timeStyle: "short",
+    }
+  ).format(new Date(value));
+}
+
+function formatChargeStatus(status: string) {
+  const labels: Record<string, string> = {
+    pending: "Pendente",
+    paid: "Pago",
+    failed: "Falhou",
+    cancelled: "Cancelado",
+    expired: "Expirado",
+    refunded: "Estornado",
+    partially_refunded: "Estorno parcial",
+  };
+
+  return labels[status] ?? status;
 }
 
 function getRelation<T>(

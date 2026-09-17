@@ -16946,3 +16946,657 @@ Banco:
 INALTERADO.
 
 # FIM DO CHECKPOINT — 2026-09-17
+
+---
+
+# CHECKPOINT — MINHA ASSINATURA / IDENTIDADE SEGURA E BASE DA RENOVAÇÃO AUTENTICADA — 2026-09-17
+
+## PRIORIDADE
+
+Este é o checkpoint funcional mais recente e complementa:
+
+- CHECKPOINT FINAL — MERCADO PAGO / PIX ORDERS END-TO-END APROVADO E IDEMPOTENTE — 2026-09-15;
+- CHECKPOINT — ASSINATURAS / ACOMPANHAMENTO AUTOMÁTICO DO PIX — 2026-09-17;
+- CHECKPOINT FINAL — RENOVAÇÃO VOLUNTÁRIA DE ASSINATURA — 2026-09-17;
+- CHECKPOINT — ADMIN DE ASSINANTES / ACOMPANHAMENTO DE RENOVAÇÃO — 2026-09-17.
+
+As regras financeiras, capacidade e renovação server-side anteriores permanecem válidas.
+
+## OBJETIVO
+
+Foi criada a fundação segura da área:
+
+/minha-assinatura
+
+para que dados privados da assinatura não sejam revelados somente pelo conhecimento do WhatsApp do cliente.
+
+WhatsApp continua sendo utilizado operacionalmente onde já existia, mas NÃO é prova de identidade para a área privada.
+
+## IDENTIDADE
+
+Foi adotado:
+
+Supabase Auth por e-mail + senha.
+
+A área administrativa existente permanece separada em:
+
+/login
+
+A área do cliente utiliza:
+
+/minha-assinatura/entrar
+
+O fluxo real de um novo usuário confirmou envio de e-mail pelo Supabase com confirmação obrigatória.
+
+Callback configurado no Supabase para desenvolvimento:
+
+http://localhost:3000/minha-assinatura/auth/callback
+
+Site URL permanece:
+
+http://localhost:3000
+
+Produção deverá receber URL HTTPS própria futuramente.
+
+## MIGRATION 019
+
+Criada, aplicada e registrada localmente:
+
+supabase/sql/019-customer-auth-identity.sql
+
+Adiciona:
+
+customers.auth_user_id uuid NULL
+
+com FK para:
+
+auth.users(id)
+
+ON DELETE SET NULL.
+
+Também cria unicidade para auth_user_id preenchido.
+
+Foi criada policy SELECT para permitir ao cliente autenticado visualizar somente o próprio customer:
+
+auth_user_id = auth.uid()
+
+Clientes legados continuam compatíveis porque auth_user_id é nullable.
+
+NÃO reaplicar.
+
+## MIGRATION 020
+
+Criada, aplicada e registrada:
+
+supabase/sql/020-customer-identity-claim.sql
+
+Cria:
+
+public.claim_customer_identity()
+
+A função:
+
+- usa auth.uid();
+- consulta identidade real em auth.users;
+- exige email_confirmed_at;
+- não recebe customer_id;
+- não recebe telefone;
+- não recebe e-mail do browser;
+- vincula somente quando existe exatamente um customer com o mesmo e-mail;
+- recusa correspondência zero ou múltipla;
+- recusa customer já vinculado a outra identidade;
+- é idempotente para o mesmo usuário;
+- não retorna dados privados.
+
+EXECUTE:
+
+authenticated.
+
+anon/public:
+
+sem acesso.
+
+Não foi concedido SELECT geral de customers ao service_role apenas por conveniência.
+
+NÃO reaplicar.
+
+## ÁREA DO CLIENTE
+
+Criados:
+
+- app/minha-assinatura/page.tsx
+- app/minha-assinatura/page.module.css
+- app/minha-assinatura/actions.ts
+- app/minha-assinatura/link-customer-button.tsx
+- app/minha-assinatura/entrar/page.tsx
+- app/minha-assinatura/entrar/customer-auth-form.tsx
+- app/minha-assinatura/auth/callback/route.ts
+- lib/customer-auth/identity.ts
+
+Funcionalidades:
+
+- criar acesso;
+- login;
+- confirmação de e-mail;
+- callback;
+- vinculação explícita do customer;
+- logout;
+- persistência do vínculo entre sessões;
+- proteção server-side;
+- nenhuma consulta privada por WhatsApp.
+
+## TESTES DE IDENTIDADE
+
+Foi criado customer específico para teste de identidade sem assinatura.
+
+Foi criada nova conta Auth com e-mail real ainda não utilizado.
+
+Confirmação de e-mail foi recebida de fato.
+
+Após confirmação:
+
+- callback funcionou;
+- vínculo funcionou;
+- área apresentou o customer correto.
+
+Logout + novo login:
+
+APROVADO.
+
+O sistema voltou diretamente ao customer previamente vinculado, sem exigir novo claim.
+
+## ISOLAMENTO ENTRE CLIENTES
+
+Com uma identidade vinculada a um customer sem assinatura:
+
+/minha-assinatura
+
+apresentou:
+
+Você ainda não possui uma assinatura comercial.
+
+Nenhum dado da assinatura sandbox pertencente a outro customer foi revelado.
+
+Isso validou o isolamento básico da área privada.
+
+## MIGRATION 021
+
+Criada, aplicada e registrada:
+
+supabase/sql/021-my-subscription-read.sql
+
+Cria:
+
+public.get_my_subscription()
+
+RPC somente leitura.
+
+Ela:
+
+- não recebe customer_id;
+- não recebe subscription_id;
+- deriva o customer exclusivamente de auth.uid();
+- retorna DTO privado mínimo;
+- não retorna telefone;
+- não retorna notas;
+- não retorna Charge ID;
+- não retorna Cycle ID;
+- não retorna Mercado Pago Order ID;
+- não fabrica histórico para assinatura legada.
+
+Retorna somente informações necessárias da assinatura comercial:
+
+- plano;
+- status;
+- ciclo;
+- período;
+- carência;
+- barbeiro;
+- serviços.
+
+NÃO reaplicar.
+
+## VALIDAÇÃO COM ASSINATURA SANDBOX
+
+Para permitir teste real da identidade da assinatura sandbox, foi alterado SOMENTE o e-mail do customer:
+
+Teste Black Navalha
+
+para um endereço real controlado durante o teste.
+
+O customers.id foi preservado.
+
+Não foram alterados:
+
+- nome;
+- WhatsApp;
+- assinatura;
+- ciclo;
+- charge;
+- Order ID;
+- histórico financeiro;
+- benefícios.
+
+Foi criada e confirmada uma identidade Auth correspondente.
+
+O vínculo foi realizado com sucesso.
+
+Resultado visual em /minha-assinatura:
+
+Cliente:
+
+Teste Black Navalha
+
+Plano:
+
+Plano Mensal
+
+Valor:
+
+R$ 150,00 por mês
+
+Status:
+
+Ativa
+
+Ciclo:
+
+15/09/2026 até 14/10/2026
+
+Barbeiro:
+
+Rodrigo Alves Correa
+
+Renovação:
+
+Abre em 07/10/2026
+
+Carência:
+
+até 17/10/2026 00:00
+
+Serviços:
+
+- Barba Assinante Mensal;
+- Cabelo + Barba Assinante Mensal;
+- Cabelo Assinante Mensal;
+- Raspado + Barba Assinante Mensal.
+
+Nenhum Order ID ou histórico financeiro foi exposto ao cliente.
+
+## MIGRATION 022
+
+Criada, aplicada e registrada:
+
+supabase/sql/022-authenticated-subscription-renewal-checkout.sql
+
+Cria:
+
+public.create_my_subscription_renewal_checkout(
+  p_barber_id uuid,
+  p_checkout_token uuid
+)
+
+Objetivo:
+
+fronteira segura entre a identidade autenticada e o motor existente de renovação.
+
+A função:
+
+- exige auth.uid();
+- exige email_confirmed_at;
+- deriva customer por customers.auth_user_id;
+- deriva a assinatura comercial do próprio customer;
+- deriva plan_id do banco;
+- utiliza nome/telefone/e-mail autoritativos do customer;
+- não recebe customer_id do browser;
+- não recebe subscription_id do browser;
+- não recebe plan_id do browser;
+- delega para create_subscription_checkout.
+
+Portanto NÃO reconstrói:
+
+- janela de 7 dias;
+- capacidade;
+- mesmo barbeiro;
+- troca de barbeiro;
+- hold;
+- charge.
+
+Essas regras continuam na infraestrutura existente/migration 018.
+
+NÃO reaplicar.
+
+## ROTA AUTENTICADA DE RENOVAÇÃO
+
+Criada:
+
+app/api/minha-assinatura/renovacao/route.ts
+
+Entrada pública limitada a:
+
+- barberId;
+- checkoutToken.
+
+A rota:
+
+- revalida sessão com supabase.auth.getUser();
+- exige e-mail confirmado;
+- chama create_my_subscription_renewal_checkout;
+- trata renovação antecipada;
+- trata capacidade;
+- não recebe nome/WhatsApp/e-mail/plano do browser.
+
+Build reconheceu:
+
+/api/minha-assinatura/renovacao
+
+como rota dinâmica.
+
+## MIGRATION 023
+
+Criada, aplicada e registrada:
+
+supabase/sql/023-my-subscription-barber-id.sql
+
+Atualiza somente:
+
+get_my_subscription()
+
+para também retornar:
+
+cycle.barber_id
+
+O ID é necessário para identificar com segurança o barbeiro atual na futura escolha de renovação.
+
+Nenhuma regra ou nova permissão foi adicionada.
+
+NÃO reaplicar.
+
+## UX DE RENOVAÇÃO AUTENTICADA
+
+Criado:
+
+app/minha-assinatura/renewal-checkout.tsx
+
+O componente está conectado condicionalmente à área privada.
+
+Ele somente é renderizado quando a janela informativa local indica renovação disponível.
+
+Antes da janela:
+
+- não mostra seletor de barbeiro;
+- não mostra PREPARAR RENOVAÇÃO;
+- não mostra GERAR PIX DA RENOVAÇÃO.
+
+Validação em 17/09/2026:
+
+Ciclo:
+
+15/09/2026 → 14/10/2026
+
+Resultado:
+
+Abre em 07/10/2026
+
+Sem controles de renovação.
+
+APROVADO visualmente.
+
+A migration 018 continua sendo a autoridade real, independentemente da UI.
+
+## ESCOLHA DE BARBEIRO
+
+Quando a janela estiver aberta, a UX preparada permite:
+
+- manter barbeiro atual;
+- escolher outro profissional disponível.
+
+Usa:
+
+get_public_subscription_barbers()
+
+O barbeiro atual é considerado selecionável mesmo se a disponibilidade pública numérica for zero, pois a migration 018 preserva a própria vaga em renovação com o mesmo profissional.
+
+Outro barbeiro exige disponibilidade.
+
+A autoridade final continua no backend com SELECT ... FOR UPDATE.
+
+## REUTILIZAÇÃO DO PIX
+
+A renovação autenticada foi preparada para reutilizar:
+
+/api/assinaturas/mercado-pago
+
+e:
+
+/api/assinaturas/status
+
+Portanto NÃO foi criado segundo motor PIX.
+
+Fluxo-alvo permanece:
+
+identidade autenticada
+→ assinatura correta
+→ janela server-side
+→ barbeiro
+→ create_subscription_checkout
+→ hold 30 minutos
+→ nova subscription_charge pending
+→ nova Order PIX
+→ webhook HMAC
+→ GET Order server-side
+→ RPC transacional/idempotente
+→ novo ciclo.
+
+O browser NÃO confirma pagamento.
+
+## PENDÊNCIAS CONHECIDAS / NÃO FABRICAR TESTE
+
+Em 17/09/2026 a assinatura sandbox ainda NÃO está na janela real de renovação.
+
+Portanto NÃO foram adulterados:
+
+- datas;
+- relógio;
+- ciclo;
+- capacidade;
+
+para fabricar teste.
+
+Ainda NÃO foi validado end-to-end pela nova área autenticada:
+
+- abertura real da janela em 07/10/2026;
+- seletor de barbeiro dentro da janela;
+- renovação com mesmo barbeiro pela nova área;
+- troca de barbeiro pela nova área;
+- criação do novo PIX pela área autenticada;
+- pagamento sandbox da renovação autenticada;
+- novo ciclo após esse pagamento.
+
+A regra server-side de renovação antecipada já havia sido validada anteriormente pela migration 018 com HTTP 409 e zero charge/hold.
+
+## PENDÊNCIA UX ESPECÍFICA
+
+O componente público de checkout já possui consulta final de status quando o cronômetro chega a zero.
+
+O novo componente:
+
+app/minha-assinatura/renewal-checkout.tsx
+
+ainda deve receber futuramente o mesmo refinamento:
+
+00:00
+→ consulta final /api/assinaturas/status
+→ somente depois declarar expiração.
+
+Também é desejável após confirmação:
+
+router.refresh()
+
+para mostrar automaticamente o novo ciclo.
+
+Essas duas melhorias não alteram a autoridade financeira e podem ser feitas antes do teste end-to-end da janela real.
+
+## BUILDS
+
+Foram executados builds durante toda a implementação.
+
+Último build após conexão condicional da UX:
+
+npm.cmd run build
+
+APROVADO.
+
+- compilação concluída;
+- TypeScript sem erros;
+- /minha-assinatura dinâmica;
+- /minha-assinatura/entrar dinâmica;
+- /minha-assinatura/auth/callback dinâmica;
+- /api/minha-assinatura/renovacao dinâmica.
+
+## BANCO
+
+Migrations agora aplicadas:
+
+007–023.
+
+NÃO reaplicar nenhuma.
+
+Novas desta frente:
+
+019:
+vínculo auth user → customer.
+
+020:
+claim seguro por identidade/e-mail confirmado.
+
+021:
+leitura privada da própria assinatura.
+
+022:
+wrapper autenticado de renovação.
+
+023:
+barber_id no DTO privado da assinatura.
+
+## MERCADO PAGO
+
+NÃO alterado nesta frente.
+
+Permanece:
+
+Orders API;
+PIX avulso;
+external_reference = subscription_charge.id;
+webhook HMAC;
+data.id ORIGINAL preservando maiúsculas;
+GET Order server-side;
+polling observacional;
+RPC transacional/idempotente.
+
+Nenhuma cobrança real foi realizada.
+
+Nenhum PIX novo foi criado nesta frente.
+
+## CAPACIDADE / RENOVAÇÃO
+
+Permanecem:
+
+30 assinantes por barbeiro.
+
+SELECT ... FOR UPDATE obrigatório.
+
+Hold PIX:
+
+30 minutos.
+
+Order expiration_time:
+
+PT30M.
+
+Janela antecipada:
+
+7 dias.
+
+Carência pós-ciclo:
+
+2 dias.
+
+Mesmo barbeiro não consome segunda vaga.
+
+Troca de barbeiro exige capacidade real.
+
+Pagamento pendente não transfere/libera antecipadamente a vaga anterior.
+
+## COMISSÃO
+
+Percentual/regra continuam NÃO definidos.
+
+NÃO inventar percentual.
+
+Nenhuma comissão foi criada.
+
+## NÃO ALTERADO
+
+Não foi alterado:
+
+- /agendar;
+- create_public_multi_appointment;
+- integração dos benefícios;
+- Mercado Pago Orders;
+- webhook;
+- HMAC;
+- polling público;
+- Admin financeiro;
+- Admin de capacidade.
+
+## GIT
+
+Estado oficial antes desta frente:
+
+main
+
+HEAD/origin informado:
+
+4a84590 Adiciona acompanhamento de renovacao no admin
+
+Devem continuar fora do Git:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt;
+- .env.local.
+
+Nunca usar:
+
+git add .
+
+Commit/push somente com autorização explícita.
+
+Nenhum commit/push foi autorizado nesta frente até este checkpoint.
+
+## PRÓXIMO CHAT
+
+Antes de qualquer ação:
+
+1. ler integralmente CONTEXTO-PROJETO.md;
+2. priorizar este checkpoint e os checkpoints financeiros recentes;
+3. confirmar Git;
+4. NÃO refazer identidade;
+5. NÃO refazer PIX;
+6. NÃO refazer renovação server-side;
+7. NÃO refazer Admin.
+
+Próxima evolução recomendada:
+
+- revisar estado atual de renewal-checkout.tsx;
+- acrescentar consulta final no 00:00;
+- acrescentar refresh automático depois de paid + activated;
+- validar build;
+- validar mobile/desktop da área Minha assinatura;
+- considerar adicionar entrada clara para Minha assinatura na experiência pública;
+- testar renovação end-to-end quando houver janela real ou fixture isolada conscientemente autorizada.
+
+Não alterar datas reais apenas para forçar a janela.
+
+# FIM DO CHECKPOINT — 2026-09-17

@@ -88,6 +88,8 @@ export default function SubscriptionCheckoutForm({
   const [prepared, setPrepared] = useState<PreparedCheckout | null>(null);
   const [pix, setPix] = useState<PixData | null>(null);
   const [remainingSeconds, setRemainingSeconds] = useState(0);
+  const [paymentConfirmed, setPaymentConfirmed] = useState(false);
+  const [expirationChecked, setExpirationChecked] = useState(false);
 
   const checkoutTokenRef = useRef<string | null>(null);
 
@@ -114,6 +116,62 @@ export default function SubscriptionCheckoutForm({
     return () => window.clearInterval(timer);
   }, [prepared]);
 
+  useEffect(() => {
+    if (!prepared || !pix || paymentConfirmed) {
+      return;
+    }
+
+    let cancelled = false;
+    let checking = false;
+
+    async function checkPaymentStatus() {
+      if (
+        cancelled ||
+        checking ||
+        getRemainingSeconds(prepared!.reservationExpiresAt) <= 0
+      ) {
+        return;
+      }
+
+      checking = true;
+
+      try {
+        const response = await fetch("/api/assinaturas/status", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          cache: "no-store",
+          body: JSON.stringify({
+            chargeId: prepared!.chargeId,
+            checkoutToken: prepared!.checkoutToken,
+          }),
+        });
+
+        if (!response.ok) return;
+
+        const result = await response.json();
+
+        if (!cancelled && result.paid === true && result.activated === true) {
+          setPaymentConfirmed(true);
+          setError("");
+        }
+      } catch {
+        // Falhas transitórias de consulta não alteram o estado financeiro.
+      } finally {
+        checking = false;
+      }
+    }
+
+    void checkPaymentStatus();
+
+    const timer = window.setInterval(() => {
+      void checkPaymentStatus();
+    }, 3000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [prepared, pix, paymentConfirmed]);
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
@@ -219,6 +277,7 @@ export default function SubscriptionCheckoutForm({
         return;
       }
 
+      setExpirationChecked(false);
       setPix({
         orderId: result.orderId,
         paymentId: result.paymentId,
@@ -234,6 +293,17 @@ export default function SubscriptionCheckoutForm({
     }
   }
 
+  function handleRestartCheckout() {
+    setPrepared(null);
+    setPix(null);
+    setPaymentConfirmed(false);
+    setExpirationChecked(false);
+    setRemainingSeconds(0);
+    setError("");
+    setCopyMessage("");
+    setPaymentLoading(false);
+    checkoutTokenRef.current = null;
+  }
   async function handleCopyPix() {
     if (!pix) return;
 
@@ -245,8 +315,118 @@ export default function SubscriptionCheckoutForm({
     }
   }
 
+  useEffect(() => {
+    if (
+      !prepared ||
+      !pix ||
+      paymentConfirmed ||
+      remainingSeconds > 0 ||
+      expirationChecked
+    ) {
+      return;
+    }
+
+    let cancelled = false;
+
+    async function finalPaymentCheck() {
+      try {
+        const response = await fetch("/api/assinaturas/status", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          cache: "no-store",
+          body: JSON.stringify({
+            chargeId: prepared!.chargeId,
+            checkoutToken: prepared!.checkoutToken,
+          }),
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+
+          if (
+            !cancelled &&
+            result.paid === true &&
+            result.activated === true
+          ) {
+            setPaymentConfirmed(true);
+            setError("");
+            return;
+          }
+        }
+      } catch {
+        // A falha desta consulta não confirma pagamento.
+      } finally {
+        if (!cancelled) {
+          setExpirationChecked(true);
+        }
+      }
+    }
+
+    void finalPaymentCheck();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    prepared,
+    pix,
+    paymentConfirmed,
+    remainingSeconds,
+    expirationChecked,
+  ]);
   if (prepared) {
     const expired = remainingSeconds <= 0;
+
+    if (paymentConfirmed) {
+      return (
+        <div className={styles.checkoutSuccess} role="status" aria-live="polite">
+          <strong>Pagamento confirmado.</strong>
+          <p>
+            Seu Plano Mensal está ativo. O pagamento foi confirmado com
+            segurança pelo servidor.
+          </p>
+          <p>
+            Os benefícios da assinatura já estão liberados para o ciclo pago.
+          </p>
+          <a className={styles.checkoutButtonLink} href="/agendar">
+            AGENDAR HORÁRIO
+          </a>
+        </div>
+      );
+    }
+
+    if (expired && !expirationChecked) {
+      return (
+        <div className={styles.checkoutSuccess} role="status" aria-live="polite">
+          <strong>Verificando pagamento...</strong>
+          <p>
+            O prazo da reserva terminou. Estamos fazendo uma última consulta
+            segura antes de encerrar este Pix.
+          </p>
+        </div>
+      );
+    }
+    if (expired && expirationChecked) {
+      return (
+        <div className={styles.checkoutExpired} role="status" aria-live="polite">
+          <strong>Esta reserva expirou.</strong>
+          <p>
+            O prazo deste Pix terminou. Para continuar, prepare uma nova
+            contratação e gere um novo Pix.
+          </p>
+          <button
+            type="button"
+            className={styles.checkoutButton}
+            onClick={handleRestartCheckout}
+          >
+            PREPARAR NOVA CONTRATAÇÃO
+          </button>
+          <small className={styles.checkoutFootnote}>
+            Nenhuma assinatura é ativada sem confirmação segura do pagamento.
+          </small>
+        </div>
+      );
+    }
 
     return (
       <div className={styles.checkoutSuccess} role="status">

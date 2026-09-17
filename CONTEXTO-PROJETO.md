@@ -1,4 +1,4 @@
-﻿# CONTEXTO-PROJETO — Black Navalha
+# CONTEXTO-PROJETO — Black Navalha
 
 Última atualização: 2026-09-04
 
@@ -14826,3 +14826,606 @@ Antes de iniciar nova evolução funcional:
 Não é necessário criar nova Order ou repetir o teste PIX já aprovado para continuar o desenvolvimento.
 
 # FIM DO CHECKPOINT FINAL — 2026-09-15
+
+---
+
+# CHECKPOINT — ASSINATURAS / ACOMPANHAMENTO AUTOMÁTICO DO PIX — 2026-09-17
+
+## PRIORIDADE
+
+Este checkpoint complementa o checkpoint:
+
+MERCADO PAGO / PIX ORDERS END-TO-END APROVADO E IDEMPOTENTE — 2026-09-15
+
+A integração financeira validada permanece inalterada.
+
+Regra de produto:
+
+Plano Mensal = pagamento mensal AVULSO de R$ 150 via PIX.
+
+SEM renovação automática Mercado Pago.
+
+O navegador continua NÃO sendo autoridade financeira.
+
+## OBJETIVO DESTA ETAPA
+
+Melhorar a experiência do cliente depois da geração do PIX.
+
+Antes:
+
+- cliente gerava QR Code;
+- via Pix Copia e Cola;
+- aguardava confirmação;
+- a página não acompanhava automaticamente o estado interno da cobrança.
+
+Agora a página pode observar a confirmação já realizada server-side pelo webhook/RPC.
+
+## NOVA ROTA DE STATUS
+
+Criada:
+
+app/api/assinaturas/status/route.ts
+
+Método:
+
+POST
+
+Entrada:
+
+- chargeId;
+- checkoutToken.
+
+O checkoutToken é enviado no body JSON.
+
+NÃO é enviado em query string.
+
+A rota:
+
+- valida os dois UUIDs;
+- utiliza createAdminClient server-side;
+- procura subscription_charges simultaneamente por charge id + checkout_token;
+- não consulta estado informado pelo navegador como autoridade financeira;
+- não chama RPC de confirmação;
+- não altera charge;
+- não altera assinatura;
+- não altera ciclo;
+- não altera hold;
+- não consulta Mercado Pago para confirmar pagamento;
+- apenas observa o estado financeiro interno já consolidado pelo webhook/RPC.
+
+Resposta relevante:
+
+status
+paid
+activated
+paidAt
+
+paid = true somente quando:
+
+subscription_charges.status = paid
+
+activated = true somente quando:
+
+status = paid
+E subscription_id existe
+E cycle_id existe.
+
+Cache:
+
+Cache-Control: no-store
+
+## SEGURANÇA DA CONSULTA
+
+Foram testados três casos diretamente contra o endpoint:
+
+Charge + checkoutToken corretos:
+
+HTTP 200
+
+Resultado:
+
+status = paid
+paid = true
+activated = true
+
+Token UUID válido porém incorreto:
+
+HTTP 404
+
+Checkout não encontrado.
+
+Entrada inválida:
+
+HTTP 400
+
+Checkout inválido.
+
+O checkoutToken deixou de aparecer na URL.
+
+## POLLING NA INTERFACE
+
+Alterado:
+
+app/assinaturas/subscription-checkout-form.tsx
+
+Após a geração do PIX, a página consulta periodicamente:
+
+POST /api/assinaturas/status
+
+Intervalo planejado:
+
+aproximadamente 3 segundos.
+
+O polling envia:
+
+chargeId
+checkoutToken
+
+em JSON.
+
+A página somente apresenta confirmação quando o backend responde simultaneamente:
+
+paid = true
+activated = true
+
+Portanto:
+
+QR Code NÃO confirma pagamento.
+
+Pix Copia e Cola NÃO confirma pagamento.
+
+ticket_url NÃO confirma pagamento.
+
+retorno visual do Mercado Pago NÃO confirma pagamento.
+
+Somente o estado interno produzido pela confirmação server-side pode mudar a interface para sucesso.
+
+## TELA DE PAGAMENTO CONFIRMADO
+
+Quando a cobrança interna está paga e vinculada a assinatura/ciclo, a interface apresenta:
+
+Pagamento confirmado.
+
+A página informa que:
+
+- Plano Mensal está ativo;
+- pagamento foi confirmado com segurança pelo servidor;
+- benefícios estão liberados para o ciclo pago.
+
+Também é apresentado botão:
+
+AGENDAR HORÁRIO
+
+com destino:
+
+/agendar
+
+Nenhuma regra de /agendar foi alterada.
+
+## EXPIRAÇÃO DO PIX
+
+O cronômetro continua baseado exclusivamente em:
+
+reservation_expires_at
+
+retornado pelo servidor.
+
+Hold PIX:
+
+30 minutos.
+
+Nenhum timer independente foi criado.
+
+Quando o cronômetro chega a zero, a UI NÃO declara imediatamente a cobrança como expirada.
+
+Foi implementada uma consulta final ao backend.
+
+Fluxo:
+
+cronômetro chega a 00:00
+→ tela mostra Verificando pagamento...
+→ POST final para /api/assinaturas/status
+→ se paid + activated: mostrar sucesso
+→ caso contrário: mostrar reserva expirada.
+
+Isso cobre o caso em que a confirmação financeira acontece muito próxima da expiração.
+
+A RPC existente continua sendo autoridade para eventual confirmação posterior ao hold e continua revalidando capacidade sob lock.
+
+## RECOMEÇO APÓS EXPIRAÇÃO
+
+Quando a consulta final não encontra pagamento confirmado, a interface apresenta:
+
+Esta reserva expirou.
+
+Botão:
+
+PREPARAR NOVA CONTRATAÇÃO
+
+Esse botão limpa somente o estado local da tentativa:
+
+- prepared;
+- pix;
+- estado visual de confirmação;
+- mensagens;
+- checkoutToken local.
+
+Na próxima tentativa será gerado um novo checkoutToken.
+
+Nenhuma cobrança antiga é apagada pelo navegador.
+
+Nenhum dado financeiro é removido.
+
+Nenhum hold é manipulado diretamente pelo browser.
+
+## CSS
+
+Alterado:
+
+app/assinaturas/page.module.css
+
+Foram adicionados estilos para:
+
+- link/botão AGENDAR HORÁRIO após confirmação;
+- estado visual de reserva expirada.
+
+A identidade visual existente da página foi preservada.
+
+## TESTE COM CHARGE JÁ CONFIRMADA
+
+Foi reutilizada somente para leitura a charge sandbox já validada anteriormente:
+
+d4235514-6fa8-4106-be1d-448f377a6853
+
+O novo endpoint retornou:
+
+status = paid
+paid = true
+activated = true
+
+paidAt:
+
+2026-09-15T19:53:13.173+00:00
+
+Nenhuma nova operação financeira foi realizada nesse teste.
+
+## NOVA TENTATIVA SANDBOX PARA VALIDAR ESTADO PENDENTE
+
+Foi preparada uma nova contratação de TESTE pela interface.
+
+Dados de teste utilizados:
+
+Nome:
+
+Teste Black Navalha Polling
+
+E-mail de sandbox:
+
+blacknavalhapolling@testuser.com
+
+Foi gerado um PIX sandbox.
+
+Charge:
+
+9fc3d74b-10e7-49b9-b2c0-a7f5c4243f22
+
+Order:
+
+ORDTST01M2PKBNKTG4J4XT97B09SGX0Y
+
+Payment:
+
+PAY01M2PKBNMFZ5822Q7AKFTQSJX6
+
+Auditoria server-side confirmou:
+
+charge:
+pending
+
+subscription_id:
+null
+
+cycle_id:
+null
+
+paid_at:
+null
+
+Order:
+
+action_required / waiting_transfer
+
+Payment:
+
+action_required / waiting_transfer
+
+amount:
+
+150.00
+
+currency:
+
+BRL
+
+payment_method.id:
+
+pix
+
+payment_method.type:
+
+bank_transfer
+
+external_reference:
+
+9fc3d74b-10e7-49b9-b2c0-a7f5c4243f22
+
+payment_events:
+
+nenhum para essa Order durante a auditoria.
+
+Portanto a interface permaneceu aguardando corretamente.
+
+NÃO houve falso positivo de pagamento.
+
+## CENÁRIO APRO NESSA NOVA ORDER
+
+MERCADO_PAGO_TEST_MODE foi verificado de forma segura:
+
+true
+
+createPixOrder foi verificado e envia:
+
+payer.first_name
+
+quando payerFirstName é fornecido.
+
+A rota atual fornece:
+
+APRO
+
+quando:
+
+MERCADO_PAGO_TEST_MODE=true
+
+Porém essa nova Order permaneceu:
+
+action_required / waiting_transfer
+
+durante a observação.
+
+GET da Order não retornou objeto payer, portanto esse GET não permite provar se first_name foi persistido/exposto na resposta.
+
+NÃO foi alterada a integração apenas por causa desse comportamento do sandbox.
+
+NÃO foi utilizado banco/app PIX real.
+
+NÃO foi forçada confirmação financeira.
+
+A Order pendente deve permanecer como dado de teste/auditoria, salvo necessidade futura específica.
+
+## BUILD
+
+Foram executados builds após as alterações.
+
+Estado final salvo passou em:
+
+npm.cmd run build
+
+Resultado:
+
+APROVADO.
+
+- Compiled successfully;
+- TypeScript sem erros;
+- páginas geradas;
+- nova rota /api/assinaturas/status reconhecida.
+
+## DIFF CHECK
+
+Verificação final:
+
+git diff --check
+
+Resultado:
+
+NONE
+
+Avisos LF/CRLF conhecidos não representam erro funcional.
+
+## BANCO
+
+Nenhuma migration criada nesta etapa.
+
+Nenhuma alteração estrutural de banco.
+
+Migrations aplicadas permanecem:
+
+007–017.
+
+NÃO reaplicar.
+
+## MERCADO PAGO
+
+Nenhuma alteração na arquitetura financeira validada.
+
+Fluxo continua:
+
+plano
+→ barbeiro
+→ capacidade
+→ SELECT ... FOR UPDATE
+→ hold 30 minutos
+→ charge pending
+→ Order PIX
+→ webhook autenticado
+→ GET Order server-side
+→ validações financeiras
+→ RPC transacional/idempotente
+→ charge paid
+→ assinatura active
+→ ciclo paid
+→ hold consumed.
+
+O polling apenas OBSERVA o resultado desse fluxo.
+
+Ele não confirma pagamento.
+
+## CAPACIDADE
+
+Permanece:
+
+30 assinantes por barbeiro.
+
+Preservar obrigatoriamente:
+
+SELECT ... FOR UPDATE.
+
+Hold PIX:
+
+30 minutos.
+
+Carência após ciclo pago:
+
+2 dias.
+
+Não confundir hold e carência.
+
+## COMISSÃO
+
+Percentual continua NÃO definido.
+
+NÃO inventar percentual.
+
+Nenhuma comissão foi implementada nesta etapa.
+
+## NÃO ALTERAR
+
+Não alterar:
+
+/agendar
+create_public_multi_appointment
+integração existente dos benefícios.
+
+Não retomar renovação automática do Mercado Pago.
+
+## ARQUIVOS DESTA ETAPA
+
+Modificados:
+
+app/assinaturas/subscription-checkout-form.tsx
+app/assinaturas/page.module.css
+
+Criado:
+
+app/api/assinaturas/status/route.ts
+
+Nenhum outro arquivo funcional deve ser incluído automaticamente no checkpoint desta etapa.
+
+## GIT
+
+Checkpoint versionado anterior:
+
+b8eab1b Conclui pagamento PIX via Mercado Pago Orders
+
+Não versionar:
+
+ASSINATURAS-LOTE.txt
+CODIGO-COMPLETO.txt
+.env.local
+
+Nunca usar:
+
+git add .
+
+Commit/push somente com autorização explícita.
+
+## ESTADO DA ETAPA
+
+API de acompanhamento:
+
+APROVADA.
+
+Validação de acesso charge + token:
+
+APROVADA.
+
+Polling:
+
+IMPLEMENTADO.
+
+Confirmação visual baseada exclusivamente no backend:
+
+IMPLEMENTADA.
+
+Proteção contra falso positivo:
+
+VALIDADA com Order pendente.
+
+Consulta final na expiração:
+
+IMPLEMENTADA.
+
+Recomeço após expiração:
+
+IMPLEMENTADO.
+
+Build:
+
+APROVADO.
+
+Nenhuma cobrança real realizada.
+
+## PRÓXIMO PASSO
+
+Antes de nova evolução:
+
+- revisar Git status;
+- revisar somente o diff dos três arquivos funcionais desta etapa e deste contexto;
+- validar visualmente o estado de expiração quando oportuno, sem adulterar banco/relógio apenas para forçar o teste;
+- decidir checkpoint Git conscientemente;
+- commit/push somente com autorização explícita.
+
+# FIM DO CHECKPOINT — 2026-09-17
+
+## COMPLEMENTO DE VALIDAÇÃO — EXPIRAÇÃO E HARD REFRESH
+
+Após a tentativa sandbox pendente atingir o fim do período observado, foi realizada auditoria somente-leitura da charge:
+
+9fc3d74b-10e7-49b9-b2c0-a7f5c4243f22
+
+Resultado:
+
+- status = pending;
+- subscription_id = null;
+- cycle_id = null;
+- paid_at = null.
+
+Hold relacionado:
+
+- status persistido = held;
+- expires_at já no passado;
+- subscription_id = null;
+- cycle_id = null.
+
+Isso confirma ausência de ativação indevida.
+
+O status persistido held após expires_at não foi alterado manualmente. A validade temporal continua determinada por expires_at e as rotinas existentes revalidam/expiram capacidade quando necessário.
+
+A aba que permaneceu aberta durante alterações de código voltou ao formulário ao final da tentativa. Essa aba havia sido carregada antes da implementação final da UX de expiração e, portanto, NÃO é considerada validação visual do novo estado "Esta reserva expirou".
+
+Depois de Ctrl+Shift+R, a versão atual de /assinaturas foi validada visualmente.
+
+Confirmado:
+
+- Plano Mensal R$ 150;
+- quatro serviços incluídos;
+- formulário de contratação;
+- barbeiro com Vagas disponíveis;
+- botão PREPARAR CONTRATAÇÃO;
+- aviso de reserva por 30 minutos;
+- nenhum resíduo visual da tentativa anterior;
+- nenhuma ativação indevida.
+
+O estado específico "Esta reserva expirou" permanece implementado e coberto por build, mas não foi forçado com nova espera de 30 minutos apenas para validação visual.
+
+Não criar novo PIX somente para esse teste sem necessidade funcional.

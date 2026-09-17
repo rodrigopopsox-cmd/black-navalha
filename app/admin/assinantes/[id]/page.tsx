@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 import SubscriptionEditForm from "./subscription-edit-form";
+import SubscriptionHistory from "./subscription-history";
 
 type Props = {
   params: Promise<{
@@ -87,35 +88,62 @@ export default async function EditarAssinaturaPage({
       (item) => item.service_id
     );
 
+  const {
+    data: barbers,
+    error: barbersError,
+  } = await supabase
+    .from("barbers")
+    .select("id, name")
+    .order("name");
+
+  if (barbersError) {
+    console.error(
+      "Erro ao carregar barbeiros da assinatura",
+      barbersError.message
+    );
+  }
+
   return (
-    <SubscriptionEditForm
-      subscription={{
-        id: subscription.id,
+    <>
+      <SubscriptionEditForm
+        subscription={{
+          id: subscription.id,
 
-        customerId:
-          subscription.customer_id,
+          customerId:
+            subscription.customer_id,
 
-        customerName:
-          customer?.name ?? "",
+          customerName:
+            customer?.name ?? "",
 
-        phone:
-          customer?.phone ?? "",
+          phone:
+            customer?.phone ?? "",
 
-        planName:
-          subscription.name,
+          planName:
+            subscription.name,
 
-        status:
-          subscription.status,
+          status:
+            subscription.status,
 
-        startsAt:
-          subscription.starts_at,
+          startsAt:
+            subscription.starts_at,
 
-        expiresAt:
-          subscription.expires_at ?? "",
+          expiresAt:
+            subscription.expires_at ?? "",
 
-        selectedServiceIds,
-      }}
-      services={services ?? []}
-    />
+          selectedServiceIds,
+        }}
+        services={services ?? []}
+      />
+
+      <main
+        className="admin-page"
+        style={{ paddingTop: 0 }}
+      >
+        <SubscriptionHistory
+          subscriptionId={subscription.id}
+          barbers={barbers ?? []}
+        />
+      </main>
+    </>
   );
 }

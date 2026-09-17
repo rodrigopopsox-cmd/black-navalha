@@ -15810,3 +15810,425 @@ TESTADA E APROVADA.
 Nenhuma cobrança real realizada.
 
 # FIM DO CHECKPOINT — 2026-09-17
+
+---
+
+# CHECKPOINT — ADMIN DE ASSINANTES / HISTÓRICO FINANCEIRO E OPERACIONAL — 2026-09-17
+
+## PRIORIDADE
+
+Este checkpoint complementa:
+
+- CHECKPOINT FINAL — MERCADO PAGO / PIX ORDERS END-TO-END APROVADO E IDEMPOTENTE — 2026-09-15;
+- CHECKPOINT — ASSINATURAS / ACOMPANHAMENTO AUTOMÁTICO DO PIX — 2026-09-17;
+- CHECKPOINT FINAL — RENOVAÇÃO VOLUNTÁRIA DE ASSINATURA — 2026-09-17.
+
+As regras financeiras e operacionais desses checkpoints permanecem inalteradas.
+
+## OBJETIVO
+
+Foi evoluída a área:
+
+/admin/assinantes/[id]
+
+para fornecer visão administrativa somente leitura do histórico financeiro e operacional real da assinatura.
+
+A menor evolução arquitetônica foi escolhida:
+
+- preservar a página existente de edição;
+- preservar o formulário existente;
+- adicionar o histórico na própria página;
+- não criar nova rota;
+- não alterar banco.
+
+## ARQUIVOS
+
+Alterado:
+
+- app/admin/assinantes/[id]/page.tsx
+
+Criado:
+
+- app/admin/assinantes/[id]/subscription-history.tsx
+
+Nenhum arquivo do Mercado Pago, fluxo público de assinatura ou agendamento foi alterado nesta etapa.
+
+## IMPLEMENTAÇÃO
+
+A página administrativa passou a apresentar:
+
+- ciclo atual;
+- status do ciclo;
+- barbeiro vinculado ao ciclo;
+- início e fim do ciclo;
+- carência;
+- situação financeira;
+- data/hora do pagamento;
+- histórico de ciclos;
+- valor histórico do ciclo;
+- histórico de cobranças;
+- valor da cobrança;
+- status da cobrança;
+- provider;
+- Order ID do Mercado Pago quando existente;
+- barbeiro relacionado à cobrança;
+- vínculo da cobrança com o ciclo;
+- Charge ID;
+- Cycle ID;
+- data de criação da cobrança.
+
+Status de ciclo tratados:
+
+- pending;
+- paid;
+- grace;
+- expired;
+- cancelled.
+
+Status financeiros tratados:
+
+- pending;
+- paid;
+- failed;
+- cancelled;
+- expired;
+- refunded;
+- partially_refunded.
+
+Provider:
+
+mercado_pago
+
+é apresentado administrativamente como:
+
+Mercado Pago.
+
+## ASSINATURA LEGADA
+
+Nenhum histórico foi fabricado.
+
+Se uma assinatura não possuir:
+
+- subscription_cycles;
+- subscription_charges;
+
+a interface apresenta estado explícito de ausência de histórico financeiro.
+
+Isso preserva a assinatura legada existente.
+
+## LEITURA DOS DADOS
+
+O formulário existente continua usando o client administrativo autenticado para:
+
+- subscriptions;
+- customers;
+- subscription_services;
+- services.
+
+O histórico financeiro utiliza createAdminClient server-side para leitura de:
+
+- subscription_cycles;
+- subscription_charges.
+
+Durante a validação foi identificado que service_role não possuía SELECT em barbers.
+
+Não foi criada migration nem ampliada permissão apenas para apresentação.
+
+A solução mínima foi reutilizar o createClient administrativo já existente na página para carregar:
+
+- barbers.id;
+- barbers.name;
+
+e fornecer esses dados ao componente de histórico.
+
+Isso corrigiu a apresentação do profissional sem alteração de banco.
+
+## CONTRATOS UTILIZADOS
+
+subscription_cycles:
+
+- id;
+- subscription_id;
+- plan_id;
+- barber_id;
+- period_start;
+- period_end;
+- grace_until;
+- status;
+- price_amount;
+- created_at.
+
+subscription_charges:
+
+- id;
+- subscription_id;
+- cycle_id;
+- plan_id;
+- barber_id;
+- amount;
+- currency;
+- status;
+- provider;
+- provider_charge_id;
+- paid_at;
+- failed_at;
+- cancelled_at;
+- expired_at;
+- refunded_at;
+- created_at.
+
+Foi respeitada a alteração posterior da migration 009 que permite subscription_charges.subscription_id NULL durante pré-checkout.
+
+## VALIDAÇÃO COM DADOS REAIS DE SANDBOX
+
+Foi utilizada a assinatura sandbox já existente.
+
+Nenhum PIX novo foi criado.
+
+Nenhuma cobrança foi realizada.
+
+Nenhum dado artificial foi criado.
+
+Validação visual aprovada em:
+
+/admin/assinantes/[id]
+
+Dados reais apresentados:
+
+Assinatura:
+
+Teste Black Navalha
+
+Ciclo:
+
+15/09/2026 até 14/10/2026
+
+Status:
+
+Pago
+
+Barbeiro:
+
+Rodrigo Alves Correa
+
+Carência:
+
+até 17/10/2026 00:00
+
+Valor do ciclo:
+
+R$ 150,00
+
+Situação financeira:
+
+Pago
+
+Pagamento:
+
+15/09/2026 16:53
+
+Provider:
+
+Mercado Pago
+
+Order ID:
+
+ORDTST01M2HZ39TZ187852ED7YM3BD4G
+
+A relação entre charge e ciclo também foi apresentada.
+
+## CORREÇÃO DURANTE O TESTE
+
+Na primeira validação visual o barbeiro apareceu como:
+
+Profissional não identificado
+
+O log server-side mostrou:
+
+permission denied for table barbers
+
+A causa era exclusivamente a tentativa de leitura de barbers com createAdminClient/service_role.
+
+A leitura foi transferida para o client administrativo autenticado já existente.
+
+Após a correção, a interface apresentou corretamente:
+
+Rodrigo Alves Correa
+
+em:
+
+- Barbeiro do ciclo;
+- Histórico de ciclos;
+- Histórico de cobranças.
+
+Nenhuma alteração de banco foi necessária.
+
+## BUILD
+
+Executado:
+
+npm.cmd run build
+
+Resultado final:
+
+APROVADO.
+
+- compilação concluída;
+- TypeScript sem erros;
+- páginas geradas;
+- /admin/assinantes/[id] reconhecida como rota dinâmica.
+
+## DIFF CHECK
+
+Executado:
+
+git diff --check
+
+Resultado:
+
+APROVADO.
+
+Existe somente aviso conhecido de conversão futura LF para CRLF, sem erro de whitespace.
+
+## BANCO
+
+Nenhuma alteração.
+
+Nenhuma migration criada.
+
+Nenhuma migration aplicada.
+
+Migrations 007–018 permanecem aplicadas e NÃO devem ser reaplicadas.
+
+Não houve alteração em:
+
+- schema;
+- RLS;
+- policies;
+- RPCs;
+- capacidade;
+- hold;
+- carência;
+- Mercado Pago;
+- renovação.
+
+## REGRAS PRESERVADAS
+
+Plano Mensal continua sendo pagamento mensal avulso via PIX.
+
+SEM renovação automática Mercado Pago.
+
+Renovação continua voluntária.
+
+Capacidade:
+
+30 assinantes por barbeiro.
+
+Hold PIX:
+
+30 minutos.
+
+Carência pós-ciclo:
+
+2 dias.
+
+Janela de renovação:
+
+7 dias antes do fim do ciclo.
+
+SELECT ... FOR UPDATE permanece preservado.
+
+confirm_mercado_pago_subscription_payment permanece transacional/idempotente e sem comissão.
+
+Percentual/regra de comissão continuam NÃO definidos.
+
+Nenhuma comissão foi criada.
+
+## NÃO ALTERADO
+
+Não foi alterado:
+
+- /agendar;
+- create_public_multi_appointment;
+- integração dos benefícios da assinatura;
+- criação PIX;
+- webhook;
+- HMAC;
+- polling;
+- capacidade;
+- renovação voluntária.
+
+## GIT
+
+HEAD/origin oficial de início desta frente:
+
+188a565 Implementa renovacao voluntaria de assinaturas
+
+Arquivos funcionais desta etapa ainda não commitados:
+
+- app/admin/assinantes/[id]/page.tsx
+- app/admin/assinantes/[id]/subscription-history.tsx
+
+Após esta atualização, CONTEXTO-PROJETO.md também ficará modificado.
+
+Devem permanecer fora do Git:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt;
+- .env.local.
+
+Nunca usar:
+
+git add .
+
+Commit/push somente com autorização explícita.
+
+## ESTADO DA ETAPA
+
+Histórico operacional:
+
+IMPLEMENTADO E VALIDADO.
+
+Histórico financeiro:
+
+IMPLEMENTADO E VALIDADO.
+
+Barbeiro do ciclo:
+
+VALIDADO.
+
+Ciclo atual:
+
+VALIDADO.
+
+Carência:
+
+VALIDADA.
+
+Cobrança e valor:
+
+VALIDADOS.
+
+Pagamento:
+
+VALIDADO.
+
+Provider Mercado Pago:
+
+VALIDADO.
+
+Order ID:
+
+VALIDADO.
+
+Relação Charge -> Ciclo -> Assinatura:
+
+VALIDADA.
+
+Build:
+
+APROVADO.
+
+Nenhuma alteração de banco realizada.
+
+# FIM DO CHECKPOINT — 2026-09-17

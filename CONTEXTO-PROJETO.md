@@ -17600,3 +17600,398 @@ Próxima evolução recomendada:
 Não alterar datas reais apenas para forçar a janela.
 
 # FIM DO CHECKPOINT — 2026-09-17
+
+---
+
+# CHECKPOINT FINAL — MINHA ASSINATURA / UX DA RENOVAÇÃO AUTENTICADA E ACESSO PÚBLICO — 2026-09-17
+
+## PRIORIDADE
+
+Este checkpoint sucede e complementa:
+
+- CHECKPOINT — MINHA ASSINATURA / IDENTIDADE SEGURA E BASE DA RENOVAÇÃO AUTENTICADA — 2026-09-17;
+- CHECKPOINT FINAL — RENOVAÇÃO VOLUNTÁRIA DE ASSINATURA — 2026-09-17;
+- CHECKPOINT — ASSINATURAS / ACOMPANHAMENTO AUTOMÁTICO DO PIX — 2026-09-17;
+- CHECKPOINT FINAL — MERCADO PAGO / PIX ORDERS END-TO-END APROVADO E IDEMPOTENTE — 2026-09-15.
+
+As regras financeiras, de capacidade, identidade e renovação server-side permanecem inalteradas.
+
+## GIT
+
+Commit funcional:
+
+22c6e03 Refina renovacao autenticada e acesso do cliente
+
+Push realizado com sucesso:
+
+main → origin/main
+
+HEAD e origin/main confirmados no mesmo commit:
+
+22c6e03827cf6535a3e135c145cf7032d7d4e710
+
+Estado após o push:
+
+?? ASSINATURAS-LOTE.txt
+?? CODIGO-COMPLETO.txt
+
+Esses dois arquivos devem continuar fora do Git.
+
+Nunca usar:
+
+git add .
+
+## UX DA RENOVAÇÃO AUTENTICADA
+
+Alterado:
+
+- app/minha-assinatura/renewal-checkout.tsx
+
+O componente agora espelha a proteção já existente no checkout público quando o cronômetro atinge 00:00.
+
+Fluxo implementado:
+
+cronômetro chega a 00:00
+→ NÃO declara expiração imediatamente
+→ apresenta "Verificando pagamento..."
+→ faz consulta final para POST /api/assinaturas/status
+→ se paid = true e activated = true, apresenta sucesso
+→ somente caso contrário apresenta reserva expirada.
+
+A consulta de status continua apenas observacional.
+
+O navegador NÃO confirma pagamento.
+
+O endpoint de status NÃO confirma pagamento.
+
+A autoridade financeira permanece:
+
+Mercado Pago Order
+→ webhook HMAC
+→ GET Order server-side
+→ validações financeiras
+→ RPC transacional/idempotente.
+
+## REFRESH AUTOMÁTICO
+
+Após confirmação simultânea:
+
+paid = true
+activated = true
+
+o componente executa:
+
+router.refresh()
+
+Objetivo:
+
+atualizar automaticamente os Server Components de /minha-assinatura para que o novo ciclo possa ser refletido sem depender de reload manual.
+
+A mensagem de sucesso também foi atualizada para informar que os dados da assinatura são atualizados automaticamente.
+
+## CRONÔMETRO
+
+Permanece baseado exclusivamente em:
+
+reservation_expires_at
+
+retornado pelo servidor.
+
+Nenhum timer financeiro independente foi criado.
+
+Hold PIX permanece:
+
+30 minutos.
+
+Order expiration_time permanece:
+
+PT30M.
+
+## VALIDAÇÃO DA JANELA REAL
+
+A assinatura sandbox continua com:
+
+Cliente:
+Teste Black Navalha
+
+Plano:
+Plano Mensal
+
+Valor:
+R$ 150,00 por mês
+
+Status:
+Ativa
+
+Ciclo:
+15/09/2026 → 14/10/2026
+
+Barbeiro:
+Rodrigo Alves Correa
+
+Renovação:
+Abre em 07/10/2026
+
+Carência:
+até 17/10/2026 00:00
+
+Em 17/09/2026 a área privada continuou corretamente SEM apresentar:
+
+- seletor de barbeiro;
+- PREPARAR RENOVAÇÃO;
+- GERAR PIX DA RENOVAÇÃO.
+
+Nenhuma data, ciclo, capacidade ou relógio foi adulterado para forçar a janela.
+
+Nenhum PIX foi criado para esta validação.
+
+## VALIDAÇÃO DESKTOP E MOBILE
+
+/minha-assinatura foi validada visualmente em desktop.
+
+APROVADO.
+
+Também foi validada em viewport mobile de aproximadamente 390 x 844.
+
+APROVADO.
+
+No mobile:
+
+- cards permanecem contidos;
+- não foi observado overflow horizontal;
+- ciclo, barbeiro, renovação e carência permanecem legíveis;
+- serviços permanecem corretamente apresentados;
+- controles de renovação continuam ausentes antes da janela.
+
+## ENTRADA PÚBLICA "MINHA ASSINATURA"
+
+Alterados:
+
+- app/page.tsx;
+- app/page.module.css.
+
+Foi adicionada entrada clara:
+
+Minha assinatura
+
+na navegação pública da Home.
+
+Também foi adicionado acesso no rodapé.
+
+Desktop:
+
+- Minha assinatura aparece antes do CTA Agendar horário;
+- navegação preservada;
+- direção visual existente preservada.
+
+Mobile:
+
+o CSS anterior escondia todos os links comuns da navegação e preservava somente Agendar horário.
+
+Foi criada exceção específica para Minha assinatura.
+
+Em viewport mobile, o cabeçalho agora apresenta:
+
+- marca Black Navalha;
+- Minha assinatura;
+- Agendar horário.
+
+Os links Trabalhos, Serviços e Contato continuam ocultos no cabeçalho mobile, preservando a composição enxuta existente.
+
+Validação visual mobile:
+
+APROVADA.
+
+## FLUXO HOME → MINHA ASSINATURA
+
+O acesso Minha assinatura da Home foi testado no mobile.
+
+Com sessão válida do cliente, abriu diretamente:
+
+/minha-assinatura
+
+e apresentou a assinatura correta:
+
+Teste Black Navalha
+
+Nenhuma consulta por WhatsApp foi introduzida.
+
+A identidade continua baseada em Supabase Auth e customers.auth_user_id.
+
+## BUILD
+
+Build final executado após todas as alterações:
+
+npm.cmd run build
+
+Resultado:
+
+APROVADO.
+
+- Next.js 16.3.4;
+- compilação concluída;
+- TypeScript sem erros;
+- rotas geradas normalmente.
+
+## DIFF CHECK
+
+Executado:
+
+git diff --check
+
+Resultado:
+
+APROVADO.
+
+Somente avisos conhecidos de futura conversão LF/CRLF, sem erro de whitespace.
+
+## BANCO
+
+Nenhuma alteração de banco nesta frente.
+
+Nenhuma migration criada ou aplicada.
+
+Migrations 007–023 permanecem aplicadas.
+
+NÃO reaplicar nenhuma.
+
+## MERCADO PAGO
+
+Nenhuma alteração no motor financeiro.
+
+Preservado:
+
+- POST /v1/orders;
+- GET /v1/orders/{id};
+- external_reference = subscription_charge.id;
+- provider_charge_id = Order ID ORD...;
+- webhook HMAC;
+- data.id ORIGINAL, inclusive maiúsculas;
+- polling observacional;
+- confirmação server-side;
+- idempotência.
+
+Nenhuma cobrança real foi realizada.
+
+Nenhum PIX novo foi criado nesta frente.
+
+## CAPACIDADE E RENOVAÇÃO
+
+Permanecem:
+
+- capacidade de 30 assinantes por barbeiro;
+- SELECT ... FOR UPDATE obrigatório;
+- hold PIX de 30 minutos;
+- Order expiration_time PT30M;
+- janela antecipada de 7 dias;
+- carência pós-ciclo de 2 dias;
+- mesmo barbeiro não consome segunda vaga;
+- troca de barbeiro exige capacidade real;
+- pagamento pendente não transfere/libera antecipadamente a vaga anterior.
+
+Migration 018 continua sendo autoridade dessas regras.
+
+## COMISSÃO
+
+Percentual/regra continuam NÃO definidos.
+
+NÃO inventar percentual.
+
+Nenhuma comissão foi criada.
+
+## NÃO ALTERADO
+
+Não foi alterado:
+
+- /agendar;
+- create_public_multi_appointment;
+- integração existente dos benefícios;
+- criação PIX;
+- webhook;
+- HMAC;
+- Admin financeiro;
+- Admin de capacidade;
+- renovação server-side;
+- identidade segura já validada.
+
+## TESTE END-TO-END DA RENOVAÇÃO AUTENTICADA
+
+Continua conscientemente PENDENTE.
+
+A assinatura sandbox entra na janela real somente em:
+
+07/10/2026
+
+Não adulterar datas/ciclo/relógio apenas para forçar esse teste.
+
+Quando existir janela adequada ou fixture isolada conscientemente autorizada, validar:
+
+identidade segura
+→ assinatura correta
+→ janela correta
+→ barbeiro
+→ capacidade
+→ nova charge
+→ nova Order PIX
+→ confirmação server-side
+→ novo ciclo
+→ refresh automático da área privada.
+
+Nenhuma cobrança real.
+
+## ESTADO FINAL
+
+UX segura de expiração da renovação autenticada:
+
+IMPLEMENTADA.
+
+Consulta final no 00:00:
+
+IMPLEMENTADA.
+
+Refresh automático após paid + activated:
+
+IMPLEMENTADO.
+
+Desktop /minha-assinatura:
+
+APROVADO.
+
+Mobile /minha-assinatura:
+
+APROVADO.
+
+Entrada pública Minha assinatura:
+
+IMPLEMENTADA E VALIDADA.
+
+Home mobile:
+
+APROVADA após inclusão do acesso.
+
+Build:
+
+APROVADO.
+
+Banco:
+
+INALTERADO.
+
+## PRÓXIMO PASSO
+
+Versionar somente esta atualização de CONTEXTO-PROJETO.md quando houver autorização explícita.
+
+Não incluir:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt;
+- .env.local.
+
+Depois do checkpoint documental, o estado esperado é somente:
+
+?? ASSINATURAS-LOTE.txt
+?? CODIGO-COMPLETO.txt
+
+A renovação autenticada end-to-end deve aguardar a janela real de 07/10/2026 ou fixture isolada conscientemente autorizada.
+
+# FIM DO CHECKPOINT — 2026-09-17

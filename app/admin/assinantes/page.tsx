@@ -501,6 +501,9 @@ export default async function AssinantesPage({
                     ) ?? null
                   : subscriptionCharges[0] ?? null;
 
+              const renewal =
+                getRenewalStatus(currentCycle);
+
               return (
                 <article
                   className="subscription-card"
@@ -628,6 +631,12 @@ export default async function AssinantesPage({
                             )}`
                           : undefined
                       }
+                    />
+
+                    <OperationalData
+                      label="RENOVAÇÃO"
+                      value={renewal.label}
+                      detail={renewal.detail}
                     />
                   </div>
 
@@ -765,6 +774,106 @@ function formatDate(value: string) {
       day
     )
   );
+}
+
+type RenewalCycle = {
+  period_end: string;
+  grace_until: string;
+} | null;
+
+function getRenewalStatus(
+  cycle: RenewalCycle
+) {
+  if (!cycle) {
+    return {
+      label: "Sem ciclo comercial",
+      detail: undefined,
+    };
+  }
+
+  const now = new Date();
+
+  const today =
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/Sao_Paulo",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(now);
+
+  const opensOn = addDaysToDateString(
+    cycle.period_end,
+    -7
+  );
+
+  const graceUntil = new Date(
+    cycle.grace_until
+  );
+
+  if (
+    today > cycle.period_end &&
+    graceUntil <= now
+  ) {
+    return {
+      label: "Carência encerrada",
+      detail: `Encerrada em ${formatDateTime(
+        cycle.grace_until
+      )}`,
+    };
+  }
+
+  if (
+    today > cycle.period_end &&
+    graceUntil > now
+  ) {
+    return {
+      label: "Disponível na carência",
+      detail: `Até ${formatDateTime(
+        cycle.grace_until
+      )}`,
+    };
+  }
+
+  if (today >= opensOn) {
+    return {
+      label: "Disponível",
+      detail: `Ciclo termina em ${formatDate(
+        cycle.period_end
+      )}`,
+    };
+  }
+
+  return {
+    label: `Abre em ${formatDate(opensOn)}`,
+    detail: "7 dias antes do fim do ciclo",
+  };
+}
+
+function addDaysToDateString(
+  value: string,
+  days: number
+) {
+  const [year, month, day] = value
+    .split("-")
+    .map(Number);
+
+  const date = new Date(
+    Date.UTC(year, month - 1, day)
+  );
+
+  date.setUTCDate(
+    date.getUTCDate() + days
+  );
+
+  return [
+    date.getUTCFullYear(),
+    String(
+      date.getUTCMonth() + 1
+    ).padStart(2, "0"),
+    String(
+      date.getUTCDate()
+    ).padStart(2, "0"),
+  ].join("-");
 }
 
 function formatDateTime(value: string) {

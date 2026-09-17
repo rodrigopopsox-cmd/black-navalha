@@ -16739,3 +16739,210 @@ Banco:
 INALTERADO.
 
 # FIM DO CHECKPOINT — 2026-09-17
+
+---
+
+# CHECKPOINT — ADMIN DE ASSINANTES / ACOMPANHAMENTO DE RENOVAÇÃO — 2026-09-17
+
+## OBJETIVO
+
+A listagem:
+
+/admin/assinantes
+
+passou a apresentar o estado administrativo da renovação voluntária de cada assinatura.
+
+A funcionalidade é somente leitura.
+
+Ela NÃO autoriza renovação no frontend e NÃO substitui as regras server-side implementadas pela migration 018.
+
+## ARQUIVO FUNCIONAL
+
+Alterado:
+
+- app/admin/assinantes/page.tsx
+
+## ESTADOS APRESENTADOS
+
+A interface deriva o estado de renovação a partir do ciclo real.
+
+Antes da janela:
+
+- Abre em DD/MM/AAAA;
+- detalhe: 7 dias antes do fim do ciclo.
+
+Dentro dos últimos 7 dias do ciclo:
+
+- Disponível.
+
+Depois do period_end, enquanto grace_until ainda estiver no futuro:
+
+- Disponível na carência.
+
+Depois do encerramento da carência:
+
+- Carência encerrada.
+
+Assinatura sem ciclo comercial:
+
+- Sem ciclo comercial.
+
+## REGRA PRESERVADA
+
+A janela administrativa segue a regra de produto já implementada no backend:
+
+- renovação abre 7 dias antes do fim do ciclo;
+- permanece possível durante os 2 dias de carência;
+- não existe renovação automática Mercado Pago;
+- renovação gera nova cobrança PIX voluntária.
+
+A informação visual não concede permissão.
+
+create_subscription_checkout e as RPCs da migration 018 continuam sendo autoridade para aceitar ou rejeitar uma tentativa real.
+
+## VALIDAÇÃO SANDBOX
+
+Assinatura:
+
+Teste Black Navalha
+
+Ciclo:
+
+15/09/2026 até 14/10/2026
+
+Data atual da validação:
+
+17/09/2026
+
+Estado apresentado:
+
+RENOVAÇÃO
+
+Abre em 07/10/2026
+
+Detalhe:
+
+7 dias antes do fim do ciclo
+
+A data apresentada está consistente com a regra de 7 dias antes do encerramento em 14/10/2026.
+
+## VALIDAÇÃO LEGADA
+
+A assinatura legada existente, sem ciclo comercial, foi validada.
+
+Estado apresentado:
+
+RENOVAÇÃO
+
+Sem ciclo comercial
+
+Nenhum histórico ou janela de renovação foi fabricado para essa assinatura.
+
+## DADOS PRESERVADOS
+
+Continuaram visíveis e corretos:
+
+- cliente;
+- plano;
+- status;
+- barbeiro;
+- ciclo;
+- carência;
+- financeiro;
+- data de pagamento;
+- serviços incluídos;
+- edição da assinatura.
+
+Acentuação e caracteres UTF-8 foram validados visualmente.
+
+## BUILD
+
+Executado:
+
+npm.cmd run build
+
+Resultado:
+
+APROVADO.
+
+- compilação concluída;
+- TypeScript sem erros;
+- /admin/assinantes permanece dinâmica.
+
+## BANCO
+
+Nenhuma alteração.
+
+Nenhuma migration criada ou aplicada.
+
+Migrations 007-018 permanecem aplicadas.
+
+NÃO reaplicar.
+
+## NÃO ALTERADO
+
+Não foi alterado:
+
+- /agendar;
+- create_public_multi_appointment;
+- Mercado Pago;
+- PIX;
+- webhook;
+- HMAC;
+- polling;
+- capacidade;
+- RPCs;
+- renovação server-side;
+- comissão.
+
+Nenhum PIX ou cobrança foi criado para esta validação.
+
+## GIT
+
+Checkpoint funcional anterior:
+
+fe91695 Adiciona capacidade de assinantes por barbeiro
+
+Arquivo funcional desta etapa:
+
+- app/admin/assinantes/page.tsx
+
+Após esta atualização:
+
+- CONTEXTO-PROJETO.md ficará modificado.
+
+Devem permanecer fora do Git:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt;
+- .env.local.
+
+Nunca usar:
+
+git add .
+
+Commit/push somente com autorização explícita.
+
+## ESTADO
+
+Acompanhamento administrativo da renovação:
+
+IMPLEMENTADO E VALIDADO.
+
+Regra de 7 dias:
+
+VALIDADA.
+
+Assinatura legada:
+
+PRESERVADA.
+
+Build:
+
+APROVADO.
+
+Banco:
+
+INALTERADO.
+
+# FIM DO CHECKPOINT — 2026-09-17

@@ -19856,3 +19856,830 @@ git add .
 Commit/push somente com autorização explícita.
 
 # FIM DO CHECKPOINT — 2026-09-18
+
+---
+
+# CHECKPOINT DE CONTINUIDADE — CENTRAL DO CLIENTE / NOVA IDENTIDADE VISUAL — 2026-09-18
+
+## PRIORIDADE
+
+Este é o checkpoint visual mais recente.
+
+Preservar integralmente o checkpoint anterior:
+
+CENTRAL DO CLIENTE / REMARCAÇÃO DE AGENDAMENTOS — 2026-09-18.
+
+A remarcação já está concluída, E2E aprovada e versionada.
+
+Não refazer remarcação.
+
+## GIT OFICIAL
+
+Branch:
+
+main
+
+HEAD/origin antes dos refinamentos visuais atuais:
+
+780b4eb Adiciona remarcacao de agendamentos pelo cliente
+
+Remarcação foi commitada e enviada com sucesso.
+
+Migrations aplicadas:
+
+007–030.
+
+NÃO reaplicar nenhuma.
+
+Devem permanecer fora do Git:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt;
+- .env.local.
+
+Nunca usar:
+
+git add .
+
+Os refinamentos visuais descritos abaixo ainda NÃO foram commitados.
+
+## DIREÇÃO DE PRODUTO
+
+A área autenticada em:
+
+/minha-assinatura
+
+passa conceitualmente a ser chamada de:
+
+CENTRAL DO CLIENTE.
+
+A URL /minha-assinatura pode permanecer.
+
+Motivo:
+
+a área já não representa somente assinatura.
+
+Ela reúne:
+
+- identidade do cliente;
+- plano;
+- ciclo;
+- barbeiro;
+- renovação;
+- serviços incluídos;
+- próximos agendamentos;
+- remarcação;
+- cancelamento;
+- histórico de atendimentos.
+
+## IDENTIDADE VISUAL APROVADA
+
+Foi definida uma direção visual para esta área que deve servir como referência para os próximos refinamentos públicos.
+
+Características:
+
+- preto dominante;
+- dourado #d29d4f para contexto, labels e destaques;
+- branco para informação principal;
+- tipografia limpa, pesada e espaçada;
+- poucos elementos por bloco;
+- hierarquia visual forte;
+- cards escuros;
+- bordas discretas;
+- evitar excesso de textos explicativos;
+- manter a experiência funcional, mas com aparência premium da Black Navalha.
+
+## MARCA BLACK NAVALHA
+
+Foi adicionada presença institucional forte no topo da Central.
+
+Utilizado o ativo já existente:
+
+public/black-navalha/logo.png
+
+O cabeçalho apresenta:
+
+- emblema/logo;
+- BLACK NAVALHA;
+- BARBEARIA;
+- identificação CENTRAL DO CLIENTE.
+
+A composição visual atual foi APROVADA como direção.
+
+Não substituir por marca genérica.
+
+## IDENTIDADE DO CLIENTE
+
+O formato anterior:
+
+Olá, NOME DO CLIENTE
+
+foi rejeitado visualmente.
+
+Também foi rejeitada a tentativa:
+
+SUA ÁREA BLACK NAVALHA.
+
+Direção final aprovada:
+
+label:
+
+CLIENTE
+
+em dourado.
+
+Abaixo:
+
+NOME DO CLIENTE
+
+em branco, caixa alta, tipografia pesada e espaçada inspirada na escrita textual BLACK NAVALHA da Home.
+
+Não utilizar fonte serif/itálica para o nome.
+
+Não adicionar texto explicativo abaixo do nome neste momento.
+
+Objetivo:
+
+visual limpo e com identidade Black Navalha.
+
+## PLANO
+
+O bloco:
+
+PLANO ATUAL
+PLANO MENSAL
+
+permanece como protagonista depois da identidade do cliente.
+
+Apresentação atual:
+
+Plano Mensal
+Ativa · R$ 150,00 por mês
+
+foi preservada.
+
+## RESUMO DA ASSINATURA
+
+Os quatro cards anteriores foram refinados semanticamente.
+
+Antes:
+
+- Ciclo;
+- Barbeiro;
+- Renovação;
+- Carência.
+
+Agora:
+
+- VALIDADE DO PLANO;
+- SEU BARBEIRO;
+- PRÓXIMA RENOVAÇÃO;
+- RESERVA DA VAGA.
+
+A apresentação desktop foi alterada de quatro cards estreitos para grade 2x2.
+
+Resultado visual:
+
+APROVADO como direção.
+
+Exemplo atual da fixture:
+
+VALIDADE DO PLANO
+22/09/2026 até 21/10/2026
+
+SEU BARBEIRO
+Rodrigo Alves Correa
+
+PRÓXIMA RENOVAÇÃO
+Abre em 14/10/2026
+
+RESERVA DA VAGA
+Até 24/10/2026, 00:00
+
+No mobile a grade utiliza uma coluna.
+
+Nenhuma regra de renovação/capacidade foi alterada.
+
+## SERVIÇOS INCLUÍDOS
+
+O bloco permanece funcional e recebeu refinamento visual.
+
+Utiliza:
+
+- título branco;
+- ícone dourado;
+- pequenos marcadores dourados;
+- separadores discretos.
+
+Ainda pode ser reorganizado na hierarquia da página no próximo chat.
+
+## AGENDA / HISTÓRICO
+
+Foi iniciado refinamento visual de:
+
+Próximos agendamentos
+Histórico de atendimentos.
+
+Criada nova hierarquia para próximos horários:
+
+- seção Agenda;
+- destaque "Seu próximo horário";
+- data mais forte;
+- horário;
+- profissional;
+- serviços;
+- status;
+- gestão de remarcação/cancelamento preservada.
+
+Histórico passou a ter aparência visualmente secundária em relação ao próximo atendimento.
+
+Estados vazios também foram refinados.
+
+Arquivo principal:
+
+app/minha-assinatura/upcoming-appointments.tsx
+
+A lógica de dados NÃO foi alterada.
+
+## ORDEM DE CONTEÚDO — PRÓXIMA DECISÃO
+
+Foi sugerido mover:
+
+Seu próximo horário
+
+para imediatamente depois do plano/resumo, antes de:
+
+Serviços incluídos.
+
+Motivo:
+
+a agenda possui maior utilidade cotidiana para o cliente.
+
+Essa reorganização ainda deve ser validada conscientemente no próximo chat.
+
+Não assumir automaticamente que o comando de reordenação foi executado.
+
+## CSS
+
+Arquivo:
+
+app/minha-assinatura/page.module.css
+
+Recebeu refinamentos visuais incrementais.
+
+IMPORTANTE:
+
+o arquivo já possuía estilos acumulados de fases anteriores e inclusive blocos duplicados de renewalPanel/renewalBarbers/pixBox.
+
+Nesta fase foram adicionados novos overrides no final.
+
+No próximo chat, antes do checkpoint visual definitivo, é recomendável CONSOLIDAR o CSS conscientemente em vez de continuar adicionando overrides indefinidamente.
+
+Não fazer uma reescrita cega do CSS.
+
+Preservar a aparência atual aprovada.
+
+## ENCODING
+
+Durante uma tentativa de alteração usando Get-Content + Set-Content, textos UTF-8 foram temporariamente corrompidos.
+
+Exemplos observados:
+
+Ativa Â·
+RenovaÃ§Ã£o
+ServiÃ§os
+
+O problema foi corrigido restaurando page.tsx do Git e passando a utilizar explicitamente:
+
+[System.Text.UTF8Encoding]::new($false)
+
+com:
+
+[System.IO.File]::ReadAllText
+[System.IO.File]::WriteAllText
+
+Textos foram novamente confirmados corretamente:
+
+Olá
+Você
+Disponível
+Renovação
+Carência
+Serviços incluídos
+por mês
+
+REGRA PARA PRÓXIMOS CHATS:
+
+Ao editar arquivos com acentuação via PowerShell, preferir leitura/escrita UTF-8 explícita com System.IO.
+
+Evitar Get-Content → Set-Content para arquivos com texto português quando isso puder recodificar conteúdo.
+
+## CHROME
+
+Foi observado que:
+
+Start-Process "http://localhost:3000/..."
+
+abre o navegador padrão, que na máquina atual pode ser Edge.
+
+Para validação visual, o responsável está utilizando Google Chrome.
+
+Padrão preferido daqui para frente:
+
+localizar explicitamente chrome.exe e chamar:
+
+Start-Process $chrome "URL"
+
+Exemplo:
+
+$chrome = @(
+  "$env:ProgramFiles\Google\Chrome\Application\chrome.exe",
+  "${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe",
+  "$env:LOCALAPPDATA\Google\Chrome\Application\chrome.exe"
+) | Where-Object { Test-Path $_ } | Select-Object -First 1
+
+Start-Process $chrome "http://localhost:3000/minha-assinatura"
+
+## BUILD
+
+Builds foram executados durante os refinamentos.
+
+Últimos builds:
+
+APROVADOS.
+
+Next.js:
+
+16.3.4.
+
+TypeScript:
+
+sem erros.
+
+git diff --check:
+
+sem erros funcionais.
+
+Somente avisos conhecidos LF/CRLF.
+
+## BANCO
+
+Nenhuma alteração de banco nesta fase visual.
+
+Nenhuma migration criada ou aplicada depois da 030.
+
+Migrations aplicadas permanecem:
+
+007–030.
+
+NÃO reaplicar.
+
+## REGRAS FUNCIONAIS PRESERVADAS
+
+Remarcação:
+
+CONCLUÍDA E E2E APROVADA.
+
+Cancelamento:
+
+CONCLUÍDO E E2E APROVADO.
+
+PIX Orders:
+
+E2E APROVADO E IDEMPOTENTE.
+
+Polling PIX:
+
+PRESERVADO.
+
+Renovação voluntária:
+
+PRESERVADA.
+
+Renovação autenticada:
+
+E2E APROVADA.
+
+Recuperação de senha:
+
+E2E APROVADA.
+
+Agendamento autenticado:
+
+PRESERVADO.
+
+Nenhuma dessas engines deve ser refeita durante o refinamento visual.
+
+## DECISÕES FUTURAS JÁ DISCUTIDAS
+
+### TROCA DE BARBEIRO NA REMARCAÇÃO
+
+Direção aprovada conceitualmente para futura evolução:
+
+Se o appointment utilizou benefício de assinatura através de:
+
+appointment_services.subscription_id
+
+o atendimento deve permanecer preso ao barbeiro vinculado ao ciclo da assinatura.
+
+A troca de barbeiro da assinatura continua ocorrendo somente na renovação, conforme regras existentes.
+
+Se o appointment NÃO utilizou benefício de assinatura:
+
+cliente autenticado poderá futuramente trocar de barbeiro durante remarcação, desde que:
+
+- novo barbeiro realize todos os mesmos serviços;
+- exista disponibilidade;
+- preço/serviços históricos sejam preservados;
+- operação seja atômica;
+- PostgreSQL permaneça autoridade final.
+
+Não implementar essa evolução durante refinamento visual sem nova etapa específica.
+
+### HISTÓRICO DE REMARCAÇÕES
+
+DECISÃO:
+
+NÃO implementar.
+
+O responsável não considera útil e não deseja poluir a experiência/dados com histórico adicional de horários anteriores.
+
+O mesmo appointment.id continua representando o atendimento vigente.
+
+### COMISSÃO
+
+Direção de produto discutida:
+
+o Admin deverá controlar a comissão.
+
+Proposta:
+
+percentual configurável de 0% a 100%.
+
+0% representa nenhuma comissão.
+
+Preferência arquitetural discutida:
+
+percentual por barbeiro.
+
+Quando uma mensalidade for confirmada, o percentual e valor utilizados deverão ser congelados historicamente na comissão daquele pagamento, para que mudanças futuras de percentual não alterem histórico.
+
+subscription_commission_entries já existe, mas seu contrato exato deve ser inspecionado SOMENTE quando essa frente for iniciada.
+
+Ainda não implementar comissão durante refinamento visual.
+
+## PRÓXIMA SEQUÊNCIA DE PRODUTO
+
+Ordem escolhida:
+
+1. concluir refinamento visual da Central do Cliente;
+2. refinar login/criação de conta/recuperação;
+3. refinar /assinaturas e experiência PIX;
+4. revisar visualmente /agendar sem alterar engine;
+5. padronizar estados de loading, erro, sucesso e vazio;
+6. depois evoluir troca de barbeiro na remarcação conforme regra de assinatura;
+7. depois comissão configurável pelo Admin;
+8. preparação final para produção somente após experiência pública estar visualmente consistente.
+
+## PRÓXIMO PASSO EXATO
+
+No próximo chat:
+
+1. ler integralmente CONTEXTO-PROJETO.md;
+2. priorizar este checkpoint;
+3. confirmar Git;
+4. NÃO alterar banco;
+5. NÃO refazer remarcação;
+6. abrir /minha-assinatura no Chrome;
+7. continuar refinamento visual a partir do estado ATUAL aprovado;
+8. avaliar primeiro a hierarquia:
+   Plano/resumo → próximo horário → serviços → histórico;
+9. validar desktop;
+10. validar mobile;
+11. consolidar CSS ao final da Central para remover duplicações/overrides obsoletos sem alterar aparência aprovada;
+12. npm.cmd run build;
+13. git diff --check;
+14. checkpoint Git somente com autorização explícita.
+
+## GIT / WORKING TREE ESPERADO
+
+HEAD/origin:
+
+780b4eb Adiciona remarcacao de agendamentos pelo cliente
+
+Alterações visuais locais esperadas:
+
+- app/minha-assinatura/page.tsx;
+- app/minha-assinatura/page.module.css;
+- app/minha-assinatura/upcoming-appointments.tsx;
+- CONTEXTO-PROJETO.md após este checkpoint.
+
+Devem permanecer untracked:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt.
+
+.env.local nunca deve ser exibido/versionado.
+
+Nunca usar:
+
+git add .
+
+Commit/push somente com autorização explícita.
+
+# FIM DO CHECKPOINT — 2026-09-18
+---
+
+# CHECKPOINT FINAL — CENTRAL DO CLIENTE / NOVA IDENTIDADE VISUAL — 2026-09-18
+
+## STATUS
+
+Refinamento visual da Central do Cliente em:
+
+/minha-assinatura
+
+CONCLUÍDO, VALIDADO E APROVADO.
+
+Esta frente foi exclusivamente de apresentação/hierarquia visual.
+
+Nenhuma regra funcional, financeira ou de banco foi alterada.
+
+## IDENTIDADE APROVADA
+
+A área /minha-assinatura passa a ser apresentada conceitualmente como:
+
+CENTRAL DO CLIENTE
+
+A URL permanece inalterada.
+
+Direção visual consolidada:
+
+- preto dominante;
+- branco para informação principal;
+- dourado #d29d4f para contexto, labels e destaques;
+- logo real Black Navalha;
+- tipografia limpa, pesada e espaçada;
+- cards escuros;
+- bordas discretas;
+- baixa poluição visual;
+- hierarquia forte;
+- experiência premium coerente com a Home Black Navalha.
+
+## TOPO
+
+Preservado e aprovado:
+
+- logo Black Navalha;
+- BLACK NAVALHA;
+- BARBEARIA;
+- CENTRAL DO CLIENTE.
+
+Identidade do cliente:
+
+- label CLIENTE em dourado;
+- nome em branco;
+- caixa alta;
+- peso forte;
+- espaçamento inspirado na identidade textual BLACK NAVALHA.
+
+Continuam rejeitados e não devem retornar:
+
+- "Olá, nome";
+- "Sua área Black Navalha";
+- nome serif/itálico;
+- textos explicativos desnecessários.
+
+## SAIR
+
+A ação SAIR deixou de ocupar um botão administrativo grande ao lado da identidade do cliente.
+
+Foi integrada de forma discreta ao cabeçalho institucional, junto ao contexto CENTRAL DO CLIENTE.
+
+Resultado:
+
+- desktop aprovado;
+- mobile aprovado;
+- nome do cliente permanece protagonista;
+- ação continua disponível sem competir visualmente com o conteúdo principal.
+
+## PLANO E SERVIÇOS
+
+O Plano Mensal permanece protagonista.
+
+Foi aproveitado o espaço disponível no card principal para integrar:
+
+SERVIÇOS INCLUÍDOS
+
+diretamente ao bloco do plano.
+
+Desktop:
+
+- plano na coluna esquerda;
+- serviços incluídos na coluna direita.
+
+Mobile:
+
+- plano e serviços empilham dentro do mesmo card.
+
+Isso substitui o antigo painel independente de Serviços incluídos e associa visualmente os benefícios ao próprio plano.
+
+Composição aprovada.
+
+## RESUMO DO PLANO
+
+Mantido imediatamente após o card principal:
+
+- VALIDADE DO PLANO;
+- SEU BARBEIRO;
+- PRÓXIMA RENOVAÇÃO;
+- RESERVA DA VAGA.
+
+Desktop:
+
+grade 2 x 2.
+
+Mobile:
+
+cards empilhados.
+
+Nenhuma regra ou dado foi alterado.
+
+## AGENDA
+
+A hierarquia foi reorganizada para colocar:
+
+SEU PRÓXIMO HORÁRIO
+
+imediatamente depois do plano/resumo.
+
+A Agenda possui mais importância visual que o Histórico.
+
+Estado vazio foi simplificado para:
+
+Nenhum horário marcado
+
+O texto explicativo redundante foi removido.
+
+O CTA:
+
+AGENDAR HORÁRIO
+
+permanece ligado a /agendar e foi reduzido visualmente para não competir com o card do Plano Mensal.
+
+No mobile o CTA utiliza a largura disponível.
+
+Nenhuma regra de /agendar foi alterada.
+
+## HISTÓRICO
+
+HISTÓRICO DE ATENDIMENTOS permanece por último na hierarquia principal.
+
+Foi deliberadamente reduzido visualmente:
+
+- fundo mais discreto;
+- títulos menos fortes;
+- cards mais compactos;
+- status menos destacado;
+- ícones e textos secundários menos contrastantes.
+
+O histórico continua totalmente legível, mas não compete com plano ou agenda.
+
+Nenhum dado/histórico foi removido.
+
+## ORDEM VISUAL FINAL
+
+Hierarquia aprovada:
+
+identidade Black Navalha
+→ cliente
+→ plano + serviços incluídos
+→ resumo operacional
+→ seu próximo horário
+→ agendar horário
+→ histórico de atendimentos.
+
+Renovação autenticada continua aparecendo somente quando funcionalmente aplicável pelas regras já existentes.
+
+## ARQUIVOS ALTERADOS
+
+- app/minha-assinatura/page.tsx
+- app/minha-assinatura/page.module.css
+- app/minha-assinatura/upcoming-appointments.tsx
+- CONTEXTO-PROJETO.md
+
+## CSS
+
+Foi confirmado que app/minha-assinatura/page.module.css possui estilos históricos/overrides acumulados.
+
+Foi conscientemente decidido NÃO executar uma grande refatoração destrutiva do CSS nesta etapa porque:
+
+- o resultado visual atual está aprovado;
+- desktop e mobile estão aprovados;
+- o build está aprovado;
+- uma limpeza ampla possui risco desnecessário de regressão visual.
+
+A consolidação profunda poderá ser feita futuramente como refatoração isolada, com comparação visual antes/depois.
+
+Não reintroduzir estilos rejeitados apenas porque ainda existam regras históricas sem uso no CSS.
+
+## VALIDAÇÃO VISUAL
+
+Desktop:
+
+APROVADO.
+
+Mobile aproximadamente 385–390 px:
+
+APROVADO.
+
+Confirmados visualmente:
+
+- marca;
+- Central do Cliente;
+- cliente;
+- logout discreto;
+- Plano Mensal;
+- Serviços incluídos integrados;
+- resumo operacional;
+- Agenda;
+- CTA Agendar horário;
+- Histórico.
+
+Nenhum overflow problemático foi identificado na validação final.
+
+## BUILD
+
+Executado:
+
+npm.cmd run build
+
+Resultado:
+
+APROVADO.
+
+- Next.js 16.3.4;
+- Compiled successfully;
+- TypeScript sem erros;
+- páginas geradas normalmente;
+- /minha-assinatura reconhecida como rota dinâmica.
+
+## DIFF CHECK
+
+Executado:
+
+git diff --check
+
+Resultado:
+
+APROVADO.
+
+Foram apresentados apenas avisos conhecidos de futura conversão LF para CRLF.
+
+Nenhum erro de whitespace foi reportado.
+
+## BANCO
+
+Nenhuma alteração.
+
+Migrations 007–030 permanecem aplicadas.
+
+NÃO reaplicar nenhuma.
+
+Nenhuma migration foi criada nesta frente.
+
+## FUNCIONALIDADES PRESERVADAS
+
+Não foi reconstruído ou alterado:
+
+- /agendar;
+- create_public_multi_appointment;
+- benefício/preço de assinatura;
+- cancelamento;
+- remarcação;
+- próximos agendamentos;
+- recuperação de senha;
+- identidade segura;
+- renovação voluntária;
+- renovação autenticada;
+- Mercado Pago Orders;
+- PIX;
+- webhook/HMAC;
+- polling;
+- Admin financeiro;
+- Admin de capacidade.
+
+## PRÓXIMA DIREÇÃO VISUAL
+
+Após o checkpoint da Central do Cliente, a sequência planejada permanece:
+
+1. refinamento visual de login/criação/recuperação do cliente;
+2. refinamento de /assinaturas e experiência PIX;
+3. /agendar somente visual;
+4. padronização de loading/erro/sucesso/estados vazios;
+5. troca de barbeiro na remarcação conforme regra já definida;
+6. comissão administrativa;
+7. preparação para produção.
+
+Não iniciar automaticamente nova frente antes de confirmar o checkpoint Git.
+
+# FIM DO CHECKPOINT — 2026-09-18

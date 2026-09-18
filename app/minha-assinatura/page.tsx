@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
@@ -239,18 +240,42 @@ export default async function MinhaAssinaturaPage() {
   return (
     <main className={styles.page}>
       <div className={styles.narrow}>
-        <header className={styles.privateHeader}>
-          <div>
-            <span className={styles.eyebrow}>Minha assinatura</span>
-            <h1>Olá, {identity.customer.name}</h1>
-          </div>
+        <div className={styles.customerBrand}>
+          <Link href="/" className={styles.customerBrandIdentity}>
+            <Image
+              src="/black-navalha/logo.png"
+              alt="Black Navalha"
+              width={78}
+              height={58}
+              priority
+              className={styles.customerBrandLogo}
+            />
 
-          <form action={signOutCustomer}>
-            <button className={styles.logoutButton} type="submit">
-              <LogOut size={15} aria-hidden="true" />
-              Sair
-            </button>
-          </form>
+            <div className={styles.customerBrandCopy}>
+              <strong>BLACK NAVALHA</strong>
+              <span>BARBEARIA</span>
+            </div>
+          </Link>
+
+          <div className={styles.customerBrandActions}>
+            <div className={styles.customerBrandArea}>
+              CENTRAL DO CLIENTE
+            </div>
+
+            <form action={signOutCustomer}>
+              <button className={styles.customerLogout} type="submit">
+                <LogOut size={12} aria-hidden="true" />
+                Sair
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <header className={styles.privateHeader}>
+          <div className={styles.customerIdentityClean}>
+            <span>Cliente</span>
+            <strong>{identity.customer.name}</strong>
+          </div>
         </header>
 
         {!data || !data.has_subscription ? (
@@ -297,21 +322,40 @@ function SubscriptionView({
   return (
     <>
       <section className={styles.subscriptionHero}>
-        <BadgeCheck size={30} aria-hidden="true" />
-        <div>
-          <span className={styles.eyebrow}>Plano atual</span>
-          <h2>{data.plan?.name ?? data.subscription.name}</h2>
-          <p>
-            {STATUS_LABELS[data.subscription.status] ?? data.subscription.status}
-            {data.plan ? ` · ${formatMoney(data.plan.price)} por mês` : ""}
-          </p>
+        <div className={styles.subscriptionHeroPlan}>
+          <BadgeCheck size={30} aria-hidden="true" />
+          <div>
+            <span className={styles.eyebrow}>Plano atual</span>
+            <h2>{data.plan?.name ?? data.subscription.name}</h2>
+            <p>
+              {STATUS_LABELS[data.subscription.status] ?? data.subscription.status}
+              {data.plan ? ` · ${formatMoney(data.plan.price)} por mês` : ""}
+            </p>
+          </div>
+        </div>
+
+        <div className={styles.subscriptionHeroServices}>
+          <div className={styles.subscriptionHeroServicesTitle}>
+            <Scissors size={17} aria-hidden="true" />
+            <span>Serviços incluídos</span>
+          </div>
+
+          {data.services.length > 0 ? (
+            <ul>
+              {data.services.map((service) => (
+                <li key={service.name}>{service.name}</li>
+              ))}
+            </ul>
+          ) : (
+            <p>Nenhum serviço incluído.</p>
+          )}
         </div>
       </section>
 
       <section className={styles.infoGrid}>
         <article className={styles.infoCard}>
           <CalendarDays size={20} aria-hidden="true" />
-          <span>Ciclo</span>
+          <span>Validade do plano</span>
           <strong>
             {data.cycle
               ? `${formatDate(data.cycle.period_start)} até ${formatDate(
@@ -323,20 +367,20 @@ function SubscriptionView({
 
         <article className={styles.infoCard}>
           <UserRound size={20} aria-hidden="true" />
-          <span>Barbeiro</span>
+          <span>Seu barbeiro</span>
           <strong>{data.cycle?.barber_name ?? "Não informado"}</strong>
         </article>
 
         <article className={styles.infoCard}>
           <CalendarDays size={20} aria-hidden="true" />
-          <span>Renovação</span>
+          <span>Próxima renovação</span>
           <strong>{renewal.label}</strong>
           {renewal.detail ? <small>{renewal.detail}</small> : null}
         </article>
 
         <article className={styles.infoCard}>
           <CalendarDays size={20} aria-hidden="true" />
-          <span>Carência</span>
+          <span>Reserva da vaga</span>
           <strong>
             {data.cycle
               ? `Até ${new Intl.DateTimeFormat("pt-BR", {
@@ -349,35 +393,18 @@ function SubscriptionView({
         </article>
       </section>
 
-      <section className={styles.servicesPanel}>
-        <div className={styles.servicesHeading}>
-          <Scissors size={20} aria-hidden="true" />
-          <h3>Serviços incluídos</h3>
-        </div>
-
-        {data.services.length > 0 ? (
-          <ul>
-            {data.services.map((service) => (
-              <li key={service.name}>{service.name}</li>
-            ))}
-          </ul>
-        ) : (
-          <p>Nenhum serviço incluído foi encontrado para esta assinatura.</p>
-        )}
-      </section>
-
       <UpcomingAppointments appointments={upcomingAppointments} />
-
-      <UpcomingAppointments
-        appointments={appointmentHistory}
-        variant="history"
-      />
 
       <div className={styles.actions}>
         <Link href="/agendar" className={styles.primaryLink}>
           Agendar horário
         </Link>
       </div>
+
+      <UpcomingAppointments
+        appointments={appointmentHistory}
+        variant="history"
+      />
 
       {renewalAvailable && data.cycle?.barber_id ? (
         renewalBarbers.length > 0 ? (

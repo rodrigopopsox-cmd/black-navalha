@@ -1,4 +1,4 @@
-﻿.page {
+.page {
   min-height: 100vh;
   padding: 48px 20px 80px;
   color: #f5f1eb;
@@ -833,5 +833,948 @@
 
   .rescheduleTimes {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* =========================================================
+   CENTRAL DO CLIENTE — VISUAL REFRESH
+========================================================= */
+
+.narrow {
+  width: min(760px, 100%);
+}
+
+.privateHeader {
+  margin-bottom: 36px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #252525;
+}
+
+.privateHeader h1 {
+  max-width: 560px;
+  font-size: clamp(34px, 6vw, 52px);
+}
+
+.subscriptionHero {
+  position: relative;
+  overflow: hidden;
+  align-items: center;
+  padding: 30px;
+  border: 1px solid rgba(210, 157, 79, 0.38);
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(210, 157, 79, 0.14), transparent 35%),
+    linear-gradient(135deg, #141310, #0d0d0d);
+}
+
+.subscriptionHero::after {
+  position: absolute;
+  width: 130px;
+  height: 130px;
+  top: -70px;
+  right: -50px;
+  border: 1px solid rgba(210, 157, 79, 0.16);
+  border-radius: 999px;
+  content: "";
+}
+
+.subscriptionHero h2 {
+  font-size: clamp(24px, 5vw, 34px);
+  letter-spacing: -0.025em;
+}
+
+.infoGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.infoCard {
+  min-height: 150px;
+  padding: 20px;
+  border-radius: 8px;
+  background: linear-gradient(145deg, #111, #0c0c0c);
+}
+
+.infoCard svg {
+  margin-bottom: 18px;
+}
+
+.servicesPanel,
+.appointmentsPanel,
+.renewalPanel {
+  border-radius: 10px;
+}
+
+.sectionHeading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sectionHeadingIcon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  place-items: center;
+  border: 1px solid rgba(210, 157, 79, 0.28);
+  border-radius: 50%;
+  background: rgba(210, 157, 79, 0.07);
+  color: #d29d4f;
+}
+
+.sectionHeading h3 {
+  margin: 3px 0 0;
+  color: #f5f1eb;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+}
+
+.sectionEyebrow {
+  color: #77716b;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.upcomingPanel {
+  margin-top: 16px;
+  padding: 28px;
+  border-color: rgba(210, 157, 79, 0.32);
+  background:
+    radial-gradient(circle at 95% 0%, rgba(210, 157, 79, 0.07), transparent 30%),
+    #0f0f0f;
+}
+
+.nextAppointmentCard {
+  display: grid;
+  gap: 22px;
+  margin-top: 22px;
+  padding: 24px;
+  border: 1px solid rgba(210, 157, 79, 0.35);
+  border-radius: 9px;
+  background: linear-gradient(145deg, #15130f, #0b0b0b 62%);
+}
+
+.nextAppointmentTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.nextAppointmentLabel {
+  display: block;
+  margin-bottom: 7px;
+  color: #d29d4f;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.nextAppointmentDate {
+  display: block;
+  color: #f5f1eb;
+  font-size: clamp(20px, 4vw, 27px);
+  line-height: 1.15;
+}
+
+.nextAppointmentTime {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  color: #d29d4f;
+}
+
+.nextAppointmentTime strong {
+  color: #eee9e2;
+  font-size: 15px;
+}
+
+.nextAppointmentMeta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 15px 0;
+  border-top: 1px solid #28251f;
+  border-bottom: 1px solid #28251f;
+}
+
+.nextAppointmentMeta > div {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+  color: #aaa49d;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.nextAppointmentMeta svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+  color: #d29d4f;
+}
+
+.appointmentManagement {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+  gap: 10px;
+}
+
+.appointmentManagement > div {
+  min-width: 0;
+}
+
+.appointmentManagement .appointmentReschedule,
+.appointmentManagement .appointmentCancellation {
+  height: 100%;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.appointmentManagement .appointmentReschedule > p,
+.appointmentManagement .appointmentCancellation > p {
+  grid-column: 1 / -1;
+}
+
+.otherAppointmentsTitle {
+  margin-top: 25px;
+  color: #77716b;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.appointmentCard {
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.appointmentCardTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.historyPanel {
+  margin-top: 16px;
+  background: #0c0c0c;
+}
+
+.historyPanel .sectionHeadingIcon {
+  border-color: #303030;
+  background: #111;
+  color: #827b73;
+}
+
+.historyPanel .appointmentCard {
+  border-color: #242424;
+  background: #0a0a0a;
+}
+
+.historyPanel .appointmentStatus {
+  border-color: #34302a;
+  background: transparent;
+  color: #a79d91;
+}
+
+.appointmentsEmpty {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-top: 22px;
+  border-radius: 8px;
+}
+
+.appointmentsEmpty > svg {
+  flex: 0 0 auto;
+  color: #6e6861;
+}
+
+.appointmentsEmpty strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #c4beb6;
+  font-size: 12px;
+}
+
+.appointmentsEmpty p {
+  margin: 0;
+}
+
+.actions {
+  margin: 16px 0;
+}
+
+.actions .primaryLink {
+  min-height: 56px;
+  border-radius: 8px;
+  box-shadow: 0 8px 30px rgba(210, 157, 79, 0.08);
+}
+
+.servicesPanel {
+  padding: 28px;
+}
+
+.servicesPanel li {
+  position: relative;
+  padding-left: 17px;
+}
+
+.servicesPanel li::before {
+  position: absolute;
+  top: 18px;
+  left: 0;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #d29d4f;
+  content: "";
+}
+
+@media (max-width: 760px) {
+  .infoGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .infoCard {
+    min-height: 135px;
+  }
+}
+
+@media (max-width: 620px) {
+  .page {
+    padding: 24px 12px 56px;
+  }
+
+  .privateHeader {
+    gap: 18px;
+    margin-bottom: 24px;
+  }
+
+  .privateHeader h1 {
+    font-size: clamp(31px, 10vw, 42px);
+  }
+
+  .subscriptionHero {
+    padding: 24px 20px;
+  }
+
+  .infoGrid {
+    gap: 8px;
+  }
+
+  .infoCard {
+    min-height: 128px;
+    padding: 17px;
+  }
+
+  .infoCard strong {
+    font-size: 12px;
+  }
+
+  .upcomingPanel,
+  .historyPanel,
+  .servicesPanel,
+  .renewalPanel {
+    padding: 20px;
+  }
+
+  .nextAppointmentCard {
+    padding: 19px;
+  }
+
+  .nextAppointmentTop {
+    display: grid;
+  }
+
+  .nextAppointmentMeta {
+    grid-template-columns: 1fr;
+  }
+
+  .appointmentManagement {
+    grid-template-columns: 1fr;
+  }
+
+  .appointmentCardTop {
+    gap: 10px;
+  }
+
+  .actions .primaryLink {
+    min-height: 52px;
+  }
+}
+
+/* Black Navalha customer brand */
+.customerBrand {
+  display: flex;
+  min-height: 82px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 30px;
+  padding: 12px 0 18px;
+  border-bottom: 1px solid rgba(210, 157, 79, 0.28);
+}
+
+.customerBrandIdentity {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.customerBrandLogo {
+  width: 70px;
+  height: 56px;
+  flex: 0 0 auto;
+  object-fit: contain;
+  filter: invert(1);
+}
+
+.customerBrandCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.customerBrandCopy strong {
+  color: #f5f1eb;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.customerBrandCopy span {
+  color: #d29d4f;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.28em;
+}
+
+.customerBrandArea {
+  padding: 9px 12px;
+  border: 1px solid rgba(210, 157, 79, 0.28);
+  border-radius: 999px;
+  color: #a9a29a;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  white-space: nowrap;
+}
+
+@media (max-width: 620px) {
+  .customerBrand {
+    min-height: 66px;
+    gap: 10px;
+    margin-bottom: 24px;
+    padding: 8px 0 14px;
+  }
+
+  .customerBrandIdentity {
+    gap: 9px;
+  }
+
+  .customerBrandLogo {
+    width: 48px;
+    height: 42px;
+  }
+
+  .customerBrandCopy {
+    gap: 4px;
+  }
+
+  .customerBrandCopy strong {
+    font-size: 13px;
+    letter-spacing: 0.08em;
+  }
+
+  .customerBrandCopy span {
+    font-size: 6px;
+    letter-spacing: 0.2em;
+  }
+
+  .customerBrandArea {
+    padding: 7px 8px;
+    font-size: 6px;
+    letter-spacing: 0.1em;
+  }
+}
+
+.customerIdentity {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  margin-top: 17px;
+}
+
+.customerIdentity span {
+  color: #756f68;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.customerIdentity strong {
+  color: #d2ccc4;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.customerWelcomeText {
+  max-width: 470px;
+  margin: 8px 0 0;
+  color: #7f7972;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+@media (max-width: 620px) {
+  .customerIdentity {
+    display: grid;
+    gap: 4px;
+    margin-top: 14px;
+  }
+
+  .customerWelcomeText {
+    font-size: 11px;
+  }
+}
+/* Customer identity refinement */
+.customerIdentity span {
+  color: #d29d4f;
+}
+
+.customerIdentity strong {
+  color: #f5f1eb;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+@media (max-width: 620px) {
+  .customerIdentity strong {
+    font-size: 15px;
+  }
+}
+/* Clean customer identity */
+.customerWelcome h1 {
+  margin-top: 0;
+}
+
+.customerSignature {
+  margin-top: 18px;
+  color: #d29d4f;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(21px, 3.2vw, 29px);
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.15;
+}
+
+@media (max-width: 620px) {
+  .customerSignature {
+    margin-top: 14px;
+    font-size: 21px;
+  }
+}
+/* Customer name — Black Navalha identity */
+.customerIdentityClean {
+  display: grid;
+  gap: 8px;
+}
+
+.customerIdentityClean span {
+  color: #d29d4f;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.customerIdentityClean strong {
+  color: #f5f1eb;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: clamp(24px, 4vw, 34px);
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+@media (max-width: 620px) {
+  .customerIdentityClean {
+    gap: 6px;
+  }
+
+  .customerIdentityClean strong {
+    font-size: clamp(20px, 7vw, 27px);
+    letter-spacing: 0.04em;
+  }
+}
+/* Subscription information hierarchy */
+.infoGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.infoCard {
+  min-height: auto;
+  padding: 20px 22px;
+}
+
+.infoCard svg {
+  margin-bottom: 13px;
+}
+
+.infoCard span {
+  margin-bottom: 6px;
+  color: #d29d4f;
+}
+
+.infoCard strong {
+  font-size: 14px;
+}
+
+@media (min-width: 761px) {
+  .infoCard:nth-child(1),
+  .infoCard:nth-child(2) {
+    background:
+      linear-gradient(135deg, rgba(210, 157, 79, 0.045), transparent 55%),
+      #0f0f0f;
+  }
+}
+
+@media (max-width: 620px) {
+  .infoGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .infoCard {
+    min-height: 0;
+    padding: 18px;
+  }
+}
+/* CENTRAL DO CLIENTE — HIERARQUIA FINAL */
+
+/* Agenda: protagonista operacional, CTA forte sem competir com o plano */
+.actions {
+  display: flex;
+  margin: 12px 0 22px;
+}
+
+.actions .primaryLink {
+  width: auto;
+  min-width: 220px;
+  min-height: 48px;
+  padding: 0 28px;
+  border-radius: 6px;
+  box-shadow: none;
+}
+
+/* Serviços: conteúdo do plano mais compacto */
+.servicesPanel {
+  margin-top: 0;
+  padding: 22px 26px;
+  border-color: #262626;
+  background: #0d0d0d;
+}
+
+.servicesHeading {
+  margin-bottom: 12px;
+}
+
+.servicesPanel ul {
+  margin-top: 8px;
+}
+
+.servicesPanel li {
+  min-height: 0;
+  padding-top: 11px;
+  padding-bottom: 11px;
+  color: #c9c3bb;
+  font-size: 12px;
+}
+
+.servicesPanel li::before {
+  top: 17px;
+  width: 4px;
+  height: 4px;
+}
+
+.servicesPanel li + li {
+  border-top-color: #202020;
+}
+
+/* Histórico: deliberadamente subordinado à agenda */
+.historyPanel {
+  margin-top: 16px;
+  padding: 22px 26px;
+  border-color: #222;
+  background: #0a0a0a;
+}
+
+.historyPanel .sectionHeadingIcon {
+  width: 34px;
+  height: 34px;
+  flex-basis: 34px;
+  border-color: #292929;
+  background: #0d0d0d;
+  color: #6f6962;
+}
+
+.historyPanel .sectionEyebrow {
+  color: #66615b;
+}
+
+.historyPanel .sectionHeading h3 {
+  color: #c3bdb5;
+  font-size: 14px;
+}
+
+.historyPanel .appointmentsList {
+  gap: 7px;
+  margin-top: 16px;
+}
+
+.historyPanel .appointmentCard {
+  gap: 11px;
+  padding: 15px 17px;
+  border-color: #202020;
+  background: #080808;
+}
+
+.historyPanel .appointmentDate strong {
+  font-size: 12px;
+}
+
+.historyPanel .appointmentDetails {
+  gap: 6px;
+}
+
+.historyPanel .appointmentDetails > div {
+  color: #8d8780;
+  font-size: 11px;
+}
+
+.historyPanel .appointmentDetails svg,
+.historyPanel .appointmentDate > svg {
+  color: #9b763e;
+}
+
+.historyPanel .appointmentStatus {
+  padding: 5px 8px;
+  border-color: #292723;
+  color: #8f877d;
+  font-size: 8px;
+}
+
+.historyPanel .appointmentsEmpty {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-color: #202020;
+  background: #080808;
+}
+
+.historyPanel .appointmentsEmpty strong {
+  margin: 0;
+  color: #817b74;
+  font-size: 11px;
+}
+
+@media (max-width: 620px) {
+  .actions {
+    margin: 10px 0 18px;
+  }
+
+  .actions .primaryLink {
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+  }
+
+  .servicesPanel,
+  .historyPanel {
+    padding: 18px;
+  }
+
+  .servicesPanel li {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  .historyPanel .appointmentCard {
+    padding: 14px;
+  }
+}
+/* CENTRAL DO CLIENTE — SERVIÇOS NO PLANO */
+
+.subscriptionHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(290px, 0.9fr);
+  gap: 34px;
+}
+
+.subscriptionHeroPlan {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+}
+
+.subscriptionHeroPlan > svg {
+  flex: 0 0 auto;
+  color: #d29d4f;
+}
+
+.subscriptionHeroServices {
+  position: relative;
+  z-index: 1;
+  padding-left: 30px;
+  border-left: 1px solid rgba(210, 157, 79, 0.22);
+}
+
+.subscriptionHeroServicesTitle {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 12px;
+  color: #d29d4f;
+}
+
+.subscriptionHeroServicesTitle span {
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.subscriptionHeroServices ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.subscriptionHeroServices li {
+  position: relative;
+  padding-left: 13px;
+  color: #c9c3bb;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.subscriptionHeroServices li::before {
+  position: absolute;
+  top: 6px;
+  left: 0;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #d29d4f;
+  content: "";
+}
+
+.subscriptionHeroServices > p {
+  margin: 0;
+  color: #8d8780;
+  font-size: 11px;
+}
+
+@media (max-width: 760px) {
+  .subscriptionHero {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+
+  .subscriptionHeroServices {
+    padding-top: 20px;
+    padding-left: 0;
+    border-top: 1px solid rgba(210, 157, 79, 0.18);
+    border-left: 0;
+  }
+}
+
+@media (max-width: 620px) {
+  .subscriptionHeroPlan {
+    align-items: flex-start;
+  }
+
+  .subscriptionHeroServices {
+    padding-top: 18px;
+  }
+}
+/* CENTRAL DO CLIENTE — LOGOUT DISCRETO */
+
+.customerBrandActions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.customerBrandActions form {
+  margin: 0;
+}
+
+.customerLogout {
+  display: inline-flex;
+  min-height: 28px;
+  padding: 0;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+  color: #77716b;
+  cursor: pointer;
+  font: inherit;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition: color 160ms ease;
+}
+
+.customerLogout:hover {
+  color: #d29d4f;
+}
+
+.customerLogout svg {
+  color: #6e6861;
+}
+
+.privateHeader {
+  display: block;
+}
+
+@media (max-width: 620px) {
+  .customerBrandActions {
+    gap: 9px;
+  }
+
+  .customerLogout {
+    min-height: 24px;
+    gap: 4px;
+    font-size: 6px;
+    letter-spacing: 0.1em;
+  }
+
+  .customerLogout svg {
+    width: 10px;
+    height: 10px;
+  }
+
+  .privateHeader {
+    margin-bottom: 24px;
   }
 }

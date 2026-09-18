@@ -19145,3 +19145,450 @@ Interromper para:
 - commit/push.
 
 # FIM DO CHECKPOINT — 2026-09-18
+
+---
+
+# CHECKPOINT FINAL — CENTRAL DO CLIENTE / CANCELAMENTO, AGENDAMENTO AUTENTICADO E RECUPERAÇÃO DE SENHA — 2026-09-18
+
+## PRIORIDADE
+
+Este é o checkpoint mais recente e deve ter prioridade sobre checkpoints anteriores quando houver conflito.
+
+Preservar integralmente os checkpoints consolidados de:
+
+- Mercado Pago PIX Orders E2E aprovado/idempotente;
+- acompanhamento automático do PIX;
+- renovação voluntária;
+- identidade segura da Minha Assinatura;
+- renovação autenticada E2E;
+- Central do Cliente com próximos agendamentos e histórico.
+
+## GIT OFICIAL
+
+Branch:
+
+main
+
+HEAD/origin:
+
+8c01a61 Adiciona gestao de agendamentos e recuperacao de senha
+
+Push realizado com sucesso:
+
+main → origin/main
+
+Working tree após o push:
+
+?? ASSINATURAS-LOTE.txt
+?? CODIGO-COMPLETO.txt
+
+Esses arquivos permanecem fora do Git.
+
+.env.local nunca deve ser versionado.
+
+Nunca usar:
+
+git add .
+
+## CANCELAMENTO DE AGENDAMENTO PELO CLIENTE
+
+Status:
+
+CONCLUÍDO E VALIDADO END-TO-END.
+
+Rota:
+
+/minha-assinatura
+
+Regra definida:
+
+- scheduled pode ser cancelado;
+- confirmed pode ser cancelado;
+- completed não pode;
+- no_show não pode;
+- cancelled é tratado idempotentemente;
+- antecedência mínima: 1 hora antes de start_at;
+- exatamente 1 hora antes ainda é permitido;
+- menos de 1 hora é recusado;
+- cancelamento no mesmo dia é permitido quando respeita a antecedência;
+- horário iniciado/passado é recusado;
+- motivo não é obrigatório nesta primeira versão;
+- cancelamento altera somente appointments.status para cancelled;
+- appointment e histórico não são apagados;
+- remarcação NÃO foi implementada e permanece etapa separada.
+
+## SEGURANÇA DO CANCELAMENTO
+
+Migration criada, aplicada e versionada:
+
+supabase/sql/025-customer-appointment-cancellation.sql
+
+Cria:
+
+public.cancel_my_appointment(p_appointment_id uuid)
+
+A RPC:
+
+- deriva identidade exclusivamente de auth.uid();
+- exige e-mail confirmado;
+- resolve customers.id por customers.auth_user_id;
+- não recebe customer_id do browser;
+- garante que appointment pertence ao próprio cliente;
+- usa FOR UPDATE no appointment;
+- revalida status;
+- revalida prazo usando now() no PostgreSQL;
+- permite somente scheduled/confirmed;
+- altera somente status para cancelled;
+- não concede UPDATE amplo em appointments;
+- EXECUTE somente para authenticated;
+- anon/public sem execução.
+
+NÃO reaplicar migration 025.
+
+## IMPLEMENTAÇÃO DO CANCELAMENTO
+
+Arquivos:
+
+- app/minha-assinatura/appointment-actions.ts
+- app/minha-assinatura/cancel-appointment-button.tsx
+- app/minha-assinatura/upcoming-appointments.tsx
+- app/minha-assinatura/page.module.css
+
+A Server Action:
+
+- revalida sessão com supabase.auth.getUser();
+- exige e-mail confirmado;
+- chama cancel_my_appointment;
+- não recebe customer_id;
+- traduz erros conhecidos para mensagens amigáveis;
+- revalida /minha-assinatura após sucesso.
+
+A UI:
+
+- mostra CANCELAR AGENDAMENTO somente nos próximos agendamentos scheduled/confirmed;
+- informa a regra de 1 hora;
+- pede confirmação antes de cancelar;
+- desabilita visualmente quando o prazo local já encerrou;
+- não considera o browser autoridade sobre o prazo;
+- atualiza a Central após cancelamento.
+
+## TESTE E2E DO CANCELAMENTO
+
+Foi criado um agendamento real controlado pelo fluxo normal /agendar para a identidade autenticada da fixture.
+
+Atendimento:
+
+18/09/2026
+09:00 às 09:30
+
+Profissional:
+
+Rodrigo Alves Correa
+
+Serviço:
+
+Barba Assinante Mensal
+
+Estado inicial:
+
+Agendado
+
+O cancelamento foi realizado uma única vez pela Central do Cliente.
+
+Resultado:
+
+- saiu de Próximos agendamentos;
+- apareceu em Histórico de atendimentos;
+- status passou para Cancelado;
+- data preservada;
+- horário preservado;
+- profissional preservado;
+- serviço preservado;
+- nenhum histórico apagado.
+
+E2E:
+
+APROVADO.
+
+## /AGENDAR — CLIENTE AUTENTICADO
+
+Foi identificada uma necessidade de UX durante o E2E:
+
+o cliente autenticado na Minha Assinatura ainda precisava redigitar Nome e WhatsApp no passo 5 do agendamento.
+
+Foi implementada melhoria sem tornar /agendar privado.
+
+Arquivos:
+
+- app/agendar/page.tsx
+- app/agendar/booking-flow.tsx
+
+Comportamento atual:
+
+Cliente anônimo:
+
+- fluxo público permanece;
+- informa Nome e WhatsApp normalmente.
+
+Cliente autenticado, com e-mail confirmado e customer vinculado:
+
+- customer é resolvido server-side por auth_user_id = auth.uid();
+- Nome é preenchido automaticamente;
+- WhatsApp é preenchido automaticamente;
+- campos ficam bloqueados para edição no passo 5;
+- texto do passo 5 informa que os dados já estão vinculados à conta.
+
+Não é enviado customer_id do browser.
+
+create_public_multi_appointment NÃO foi alterada.
+
+Benefício/preço NÃO foi reconstruído.
+
+Teste confirmou serviço de assinatura com:
+
+R$ 0,00
+
+preservando a regra existente.
+
+## LEITURA PÚBLICA PARA CLIENTE AUTENTICADO
+
+Durante o teste foi identificado que algumas policies públicas antigas permitiam leitura para anon, mas não para cliente authenticated não-admin.
+
+Isso fazia o cliente autenticado perder dados necessários ao mesmo /agendar público.
+
+Foram corrigidas somente as leituras comprovadamente necessárias.
+
+### Migration 026
+
+supabase/sql/026-authenticated-barber-services-read.sql
+
+Permite a authenticated visualizar barber_services de barbeiros ativos, seguindo a mesma necessidade pública do agendamento.
+
+Somente SELECT.
+
+Nenhum INSERT/UPDATE/DELETE adicional.
+
+APLICADA.
+
+NÃO reaplicar.
+
+### Migration 027
+
+supabase/sql/027-authenticated-active-barbers-read.sql
+
+Permite a authenticated visualizar somente barbeiros ativos.
+
+Somente SELECT.
+
+APLICADA.
+
+NÃO reaplicar.
+
+### Migration 028
+
+supabase/sql/028-authenticated-working-hours-read.sql
+
+Permite a authenticated visualizar somente jornadas ativas de barbeiros ativos.
+
+Somente SELECT.
+
+APLICADA.
+
+NÃO reaplicar.
+
+Após 026–028:
+
+- Rodrigo Alves Correa voltou a aparecer no passo Profissional;
+- datas de atendimento voltaram a aparecer;
+- horários funcionaram;
+- passo 5 foi alcançado normalmente;
+- cliente autenticado teve Nome/WhatsApp preenchidos;
+- agendamento foi concluído normalmente.
+
+Não foi concedida escrita pública adicional.
+
+## RECUPERAÇÃO DE SENHA
+
+Status anterior:
+
+PENDENTE por rate limit.
+
+Status atual:
+
+CONCLUÍDA E VALIDADA END-TO-END.
+
+Arquivos versionados:
+
+- app/minha-assinatura/entrar/customer-auth-form.tsx
+- app/minha-assinatura/auth/recuperacao/route.ts
+- app/minha-assinatura/recuperar-senha/page.tsx
+- app/minha-assinatura/recuperar-senha/recover-password-form.tsx
+- app/minha-assinatura/redefinir-senha/page.tsx
+- app/minha-assinatura/redefinir-senha/reset-password-form.tsx
+
+Fluxo validado:
+
+/minha-assinatura/entrar
+→ Esqueci minha senha
+→ /minha-assinatura/recuperar-senha
+→ resetPasswordForEmail
+→ e-mail real recebido
+→ /minha-assinatura/auth/recuperacao
+→ exchangeCodeForSession
+→ /minha-assinatura/redefinir-senha
+→ updateUser({ password })
+→ nova senha gravada.
+
+O rate limit do Supabase permaneceu:
+
+2 emails/h
+
+e NÃO foi alterado apenas para teste.
+
+O tratamento amigável de HTTP 429 foi preservado.
+
+## VALIDAÇÃO DA NOVA SENHA
+
+Após redefinição:
+
+- login com a nova senha: APROVADO;
+- senha antiga: rejeitada como E-mail ou senha inválidos.
+
+Portanto a recuperação pública está validada funcionalmente.
+
+## PÓS-RESET
+
+Durante o primeiro E2E foi observado que a sessão de recovery mantinha o usuário autenticado e a implementação redirecionava diretamente para /minha-assinatura.
+
+Foi decidido que a UX correta é exigir login consciente após redefinir a senha.
+
+reset-password-form.tsx foi ajustado para:
+
+updateUser({ password })
+→ supabase.auth.signOut()
+→ /minha-assinatura/entrar
+
+Build após o ajuste:
+
+APROVADO.
+
+Não foi enviado novo e-mail apenas para repetir todo o fluxo depois dessa pequena alteração de navegação.
+
+A nova senha em si foi validada por login real e a antiga foi recusada.
+
+## BUILD FINAL
+
+Executado após as alterações:
+
+npm.cmd run build
+
+Resultado:
+
+APROVADO.
+
+- Next.js 16.3.4;
+- compilação concluída;
+- TypeScript sem erros;
+- rotas de recuperação reconhecidas;
+- /agendar reconhecida;
+- /minha-assinatura reconhecida.
+
+git diff --check durante a implementação não apresentou erro funcional.
+
+No staging final foi observado somente:
+
+app/agendar/booking-flow.tsx: new blank line at EOF
+
+Detalhe cosmético sem impacto funcional.
+
+## BANCO
+
+Migrations aplicadas agora:
+
+007–028.
+
+NÃO reaplicar nenhuma.
+
+Novas desta sessão:
+
+025 — cancelamento seguro do próprio appointment;
+026 — leitura de barber_services para cliente authenticated;
+027 — leitura de barbeiros ativos para cliente authenticated;
+028 — leitura de jornadas ativas para cliente authenticated.
+
+## NÃO ALTERADO
+
+Permaneceu sem reconstrução:
+
+- create_public_multi_appointment;
+- regra de benefício das assinaturas;
+- Mercado Pago Orders;
+- PIX;
+- webhook;
+- HMAC;
+- polling;
+- renovação server-side;
+- Admin financeiro;
+- Admin de capacidade.
+
+## REGRAS FINANCEIRAS PRESERVADAS
+
+Plano Mensal continua:
+
+pagamento mensal avulso via PIX.
+
+SEM renovação automática Mercado Pago.
+
+Capacidade:
+
+30 assinantes por barbeiro.
+
+SELECT ... FOR UPDATE permanece obrigatório onde já implementado.
+
+Hold PIX:
+
+30 minutos.
+
+Janela de renovação:
+
+7 dias.
+
+Carência:
+
+2 dias.
+
+Comissão continua NÃO definida.
+
+NÃO inventar percentual.
+
+## PRÓXIMA FRENTE
+
+Cancelamento está concluído.
+
+Remarcação continua conscientemente separada.
+
+Próxima evolução natural da gestão de agendamentos pelo cliente:
+
+REMARCAÇÃO.
+
+Antes de implementar, definir conscientemente:
+
+- antecedência mínima;
+- status remarcáveis;
+- se confirmed pode ser remarcado;
+- disponibilidade do novo horário;
+- manutenção de serviços;
+- manutenção ou troca do barbeiro;
+- comportamento transacional para não perder o horário antigo antes de reservar o novo;
+- integração com benefícios/preço histórico;
+- fronteira segura baseada em auth.uid().
+
+Não implementar remarcação como simples cancelamento + novo agendamento sem definir atomicidade e regras.
+
+Qualquer nova alteração de banco deve usar o próximo número disponível:
+
+029.
+
+Antes de aplicar nova migration, obter autorização explícita.
+
+# FIM DO CHECKPOINT — 2026-09-18

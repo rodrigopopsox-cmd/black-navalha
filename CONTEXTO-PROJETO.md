@@ -17995,3 +17995,1153 @@ Depois do checkpoint documental, o estado esperado é somente:
 A renovação autenticada end-to-end deve aguardar a janela real de 07/10/2026 ou fixture isolada conscientemente autorizada.
 
 # FIM DO CHECKPOINT — 2026-09-17
+---
+
+# CHECKPOINT DE CONTINUIDADE — RENOVAÇÃO AUTENTICADA E2E / RECUPERAÇÃO DE SENHA PENDENTE — 2026-09-17
+
+## PRIORIDADE
+
+Este é o checkpoint mais recente e deve ter prioridade sobre checkpoints anteriores quando houver conflito.
+
+Preservar integralmente:
+
+- CHECKPOINT FINAL — MERCADO PAGO / PIX ORDERS END-TO-END APROVADO E IDEMPOTENTE — 2026-09-15;
+- CHECKPOINT — ASSINATURAS / ACOMPANHAMENTO AUTOMÁTICO DO PIX — 2026-09-17;
+- CHECKPOINT FINAL — RENOVAÇÃO VOLUNTÁRIA DE ASSINATURA — 2026-09-17;
+- CHECKPOINT — MINHA ASSINATURA / IDENTIDADE SEGURA E BASE DA RENOVAÇÃO AUTENTICADA — 2026-09-17;
+- CHECKPOINT FINAL — MINHA ASSINATURA / UX DA RENOVAÇÃO AUTENTICADA E ACESSO PÚBLICO — 2026-09-17.
+
+## GIT OFICIAL VERSIONADO
+
+Branch:
+
+main
+
+HEAD/origin antes do trabalho local posterior:
+
+8ca5116 Registra refinamento da Minha Assinatura
+
+Commit funcional anterior:
+
+22c6e03 Refina renovacao autenticada e acesso do cliente
+
+main e origin/main estavam sincronizados em 8ca5116.
+
+Devem continuar fora do Git:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt;
+- .env.local.
+
+Nunca usar:
+
+git add .
+
+Commit/push somente com autorização explícita.
+
+## RENOVAÇÃO AUTENTICADA — TESTE END-TO-END AGORA APROVADO
+
+A pendência anterior de teste E2E da renovação autenticada foi exercitada com uma FIXTURE ISOLADA conscientemente autorizada.
+
+Não foram adulterados:
+
+- ciclo da assinatura sandbox Teste Black Navalha;
+- datas da assinatura sandbox original;
+- relógio do banco;
+- histórico financeiro da assinatura sandbox original.
+
+A assinatura original Teste Black Navalha permanece separada.
+
+## FIXTURE QA
+
+Foi criada uma fixture isolada identificada como:
+
+Fixture Renovacao Autenticada
+
+Foi utilizado customer próprio, identidade Auth própria, assinatura própria e ciclo-base sintético próprio.
+
+O ciclo-base foi criado deliberadamente como dado de QA para permitir teste dentro da janela de renovação sem alterar a assinatura sandbox principal.
+
+Não foi criada charge histórica fictícia para o ciclo-base.
+
+Não foi criado payment_event histórico fictício.
+
+Não foi criada comissão.
+
+A fixture utiliza o Plano Mensal e Rodrigo Alves Correa.
+
+A identidade foi vinculada por:
+
+Supabase Auth
+→ customers.auth_user_id
+
+preservando o modelo seguro da área privada.
+
+## JANELA DA FIXTURE
+
+Antes da renovação, a área privada apresentou:
+
+Ciclo:
+22/08/2026 até 21/09/2026
+
+Barbeiro:
+Rodrigo Alves Correa
+
+Renovação:
+Disponível
+
+Carência:
+até 24/09/2026 00:00
+
+Os quatro serviços subscriber_service foram apresentados corretamente.
+
+Pela primeira vez a UX autenticada apresentou, dentro de uma janela válida:
+
+- seleção do barbeiro;
+- indicação Seu barbeiro atual;
+- PREPARAR RENOVAÇÃO.
+
+## PREPARAÇÃO AUTENTICADA
+
+Foi clicado uma única vez:
+
+PREPARAR RENOVAÇÃO
+
+Resultado:
+
+APROVADO.
+
+Foi criado pelo motor real:
+
+identidade autenticada
+→ create_my_subscription_renewal_checkout
+→ create_subscription_checkout
+→ regra da migration 018
+→ hold
+→ subscription_charge pending.
+
+O cronômetro iniciou próximo de:
+
+30:00
+
+e permaneceu baseado em:
+
+reservation_expires_at.
+
+Mesmo barbeiro foi corretamente aceito sem exigir segunda vaga.
+
+## PIX DA RENOVAÇÃO
+
+Foi clicado uma única vez:
+
+GERAR PIX DA RENOVAÇÃO
+
+Resultado:
+
+APROVADO.
+
+A interface apresentou:
+
+- QR Code;
+- Pix Copia e Cola;
+- cronômetro;
+- aviso de que a confirmação é feita pelo servidor.
+
+Nenhum banco/app PIX real foi utilizado.
+
+Nenhuma transferência real foi realizada.
+
+## ORDER PIX DA RENOVAÇÃO
+
+Charge:
+
+0998f703-d133-441f-b09d-c79bb07375bb
+
+Order sandbox:
+
+ORDTST01M2S2F4T3ZHM0C8TBTCDK3W74
+
+Payment sandbox:
+
+PAY01M2S2F4TTQ2HJ5M1KYBK8AD0D
+
+GET server-side da Order confirmou:
+
+Order:
+processed / accredited
+
+Payment:
+processed / accredited
+
+external_reference:
+0998f703-d133-441f-b09d-c79bb07375bb
+
+currency:
+BRL
+
+total_amount:
+150.00
+
+Portanto a correlação financeira da renovação estava correta.
+
+## WEBHOOK DA RENOVAÇÃO
+
+Foi aberto novo Cloudflare Quick Tunnel temporário:
+
+https://want-grown-disco-rated.trycloudflare.com
+
+Webhook de teste utilizado:
+
+https://want-grown-disco-rated.trycloudflare.com/api/mercado-pago/webhook
+
+A URL é TEMPORÁRIA e NÃO deve ser presumida válida em outra sessão.
+
+No Mercado Pago permaneceu selecionado somente:
+
+Order (Mercado Pago)
+
+O segredo HMAC NÃO foi regenerado.
+
+Foi utilizada a ferramenta oficial de simulação com a MESMA Order da renovação.
+
+Resultado:
+
+HTTP 200 OK
+
+O body fictício do simulador NÃO foi usado como autoridade financeira.
+
+O webhook continuou consultando GET /v1/orders/{id} server-side.
+
+## REFRESH AUTOMÁTICO — VALIDADO E2E
+
+Após o HTTP 200 do webhook, a aba /minha-assinatura permaneceu aberta.
+
+NÃO foi utilizado F5 manual.
+
+O polling observou:
+
+paid = true
+activated = true
+
+e o fluxo com:
+
+router.refresh()
+
+atualizou automaticamente a página.
+
+A tela passou do ciclo:
+
+22/08/2026 → 21/09/2026
+
+para:
+
+22/09/2026 → 21/10/2026
+
+Também passou a apresentar:
+
+Renovação:
+Abre em 14/10/2026
+
+Carência:
+até 24/10/2026 00:00
+
+Os controles de renovação desapareceram novamente porque o novo ciclo ficou fora da janela antecipada.
+
+Portanto o refresh automático foi VALIDADO end-to-end.
+
+## AUDITORIA FINAL DA RENOVAÇÃO
+
+Auditoria somente leitura confirmou:
+
+subscription_status:
+active
+
+starts_at:
+2026-08-22
+
+expires_at:
+2026-10-21
+
+total_cycles:
+2
+
+paid_cycles:
+2
+
+commissions:
+0
+
+Cobrança da renovação:
+
+status:
+paid
+
+amount:
+150.00
+
+currency:
+BRL
+
+provider_charge_id:
+ORDTST01M2S2F4T3ZHM0C8TBTCDK3W74
+
+cycle_id:
+preenchido
+
+paid_at:
+preenchido
+
+Hold:
+
+status:
+consumed
+
+Portanto foi validado:
+
+identidade segura
+→ assinatura correta
+→ janela correta
+→ mesmo barbeiro
+→ capacidade
+→ hold
+→ nova charge
+→ nova Order PIX
+→ confirmação Mercado Pago sandbox
+→ webhook HMAC
+→ GET Order server-side
+→ RPC transacional/idempotente
+→ novo ciclo
+→ polling
+→ router.refresh()
+→ novo ciclo exibido automaticamente.
+
+Nenhuma cobrança real.
+
+Nenhuma comissão.
+
+## RECUPERAÇÃO DE SENHA — NOVA FRENTE LOCAL
+
+Durante a criação da identidade fixture ocorreu uma situação em que a senha utilizada no signup não ficou conhecida pelo responsável.
+
+Isso revelou uma lacuna real de produto:
+
+a área do cliente não possuía fluxo de recuperação de senha.
+
+Foi iniciada implementação local de recuperação.
+
+Arquivos locais envolvidos:
+
+- app/minha-assinatura/entrar/customer-auth-form.tsx;
+- app/minha-assinatura/recuperar-senha/page.tsx;
+- app/minha-assinatura/recuperar-senha/recover-password-form.tsx;
+- app/minha-assinatura/auth/recuperacao/route.ts;
+- app/minha-assinatura/redefinir-senha/page.tsx;
+- app/minha-assinatura/redefinir-senha/reset-password-form.tsx.
+
+## VALIDAÇÃO DE SENHA
+
+customer-auth-form.tsx recebeu validação programática adicional:
+
+- e-mail válido;
+- senha com no mínimo 6 caracteres.
+
+A validação HTML required/minLength já existia e foi preservada.
+
+Foi adicionado acesso:
+
+Esqueci minha senha
+
+no modo de login.
+
+## FLUXO DE RECUPERAÇÃO IMPLEMENTADO LOCALMENTE
+
+Fluxo preparado:
+
+/minha-assinatura/recuperar-senha
+→ resetPasswordForEmail
+→ callback server-side
+→ exchangeCodeForSession
+→ /minha-assinatura/redefinir-senha
+→ updateUser({ password })
+→ /minha-assinatura.
+
+Foi criada Route Handler:
+
+/minha-assinatura/auth/recuperacao
+
+A nova Redirect URL foi adicionada no Supabase:
+
+http://localhost:3000/minha-assinatura/auth/recuperacao
+
+A Redirect URL anterior de confirmação foi preservada:
+
+http://localhost:3000/minha-assinatura/auth/callback
+
+Site URL permaneceu:
+
+http://localhost:3000
+
+## BUILD DA RECUPERAÇÃO
+
+A primeira versão baseada em useSearchParams revelou exigência do Next.js 16 de Suspense durante build.
+
+A implementação foi posteriormente ajustada para callback server-side e página protegida por sessão.
+
+Build final após o ajuste:
+
+npm.cmd run build
+
+APROVADO.
+
+Rotas reconhecidas:
+
+- /minha-assinatura/auth/recuperacao;
+- /minha-assinatura/recuperar-senha;
+- /minha-assinatura/redefinir-senha.
+
+git diff --check:
+
+APROVADO.
+
+## RATE LIMIT DE E-MAIL
+
+O teste real da recuperação encontrou:
+
+HTTP 429
+
+code:
+over_email_send_rate_limit
+
+message:
+email rate limit exceeded
+
+No Supabase Authentication → Rate Limits foi confirmado:
+
+Rate limit for sending emails:
+2 emails/h
+
+O limite NÃO foi alterado.
+
+Foi decidido não enfraquecer a configuração apenas para destravar a fixture.
+
+A UI passou a tratar especificamente status 429 com mensagem:
+
+Muitas solicitações foram feitas. Aguarde alguns minutos e tente novamente.
+
+A instrumentação temporária usada para diagnosticar o erro foi REMOVIDA.
+
+## RECUPERAÇÃO DE SENHA — STATUS CORRETO
+
+IMPLEMENTAÇÃO:
+
+PRONTA LOCALMENTE.
+
+BUILD:
+
+APROVADO.
+
+TRATAMENTO DE RATE LIMIT:
+
+VALIDADO.
+
+FLUXO COMPLETO DE E-MAIL → NOVA SENHA:
+
+AINDA NÃO VALIDADO devido exclusivamente ao limite 2 emails/h.
+
+NÃO registrar a recuperação como concluída até executar uma solicitação real depois da liberação do rate limit e validar:
+
+e-mail
+→ callback
+→ sessão
+→ nova senha
+→ login.
+
+## ALTERAÇÃO ADMINISTRATIVA EXCLUSIVA DA FIXTURE
+
+Para não bloquear o E2E da renovação, foi autorizada alteração administrativa da senha somente da identidade Auth da fixture.
+
+A senha foi atualizada localmente usando a Admin API e SUPABASE_SERVICE_ROLE_KEY sem imprimir segredo ou senha.
+
+Isso foi exclusivamente para a fixture QA.
+
+Não foi utilizado como substituto da futura validação do fluxo público de recuperação.
+
+## BANCO
+
+Nenhuma migration nova foi criada para a fixture ou recuperação de senha.
+
+Migrations 007–023 permanecem aplicadas.
+
+NÃO reaplicar nenhuma.
+
+A fixture constitui DADO DE QA, não alteração estrutural do schema.
+
+## CAPACIDADE / PIX / RENOVAÇÃO
+
+Permanecem inalterados:
+
+- capacidade: 30 assinantes por barbeiro;
+- SELECT ... FOR UPDATE obrigatório;
+- hold PIX: 30 minutos;
+- Order expiration_time: PT30M;
+- janela antecipada: 7 dias;
+- carência: 2 dias;
+- mesmo barbeiro não consome segunda vaga;
+- troca de barbeiro exige capacidade;
+- pagamento pendente não libera antecipadamente vaga anterior.
+
+## MERCADO PAGO
+
+Motor financeiro permanece aprovado:
+
+POST /v1/orders
+GET /v1/orders/{id}
+
+external_reference = subscription_charge.id
+
+Webhook HMAC preservando data.id ORIGINAL, inclusive maiúsculas.
+
+Browser NÃO confirma pagamento.
+
+Polling apenas observa estado interno.
+
+## COMISSÃO
+
+Percentual/regra continuam NÃO definidos.
+
+NÃO inventar percentual.
+
+Auditoria da renovação fixture:
+
+commissions = 0
+
+## NÃO ALTERAR
+
+Não alterar:
+
+- /agendar;
+- create_public_multi_appointment;
+- integração existente dos benefícios;
+- motor PIX;
+- webhook;
+- HMAC;
+- regras server-side de renovação;
+- Admin financeiro;
+- Admin de capacidade.
+
+## WORKING TREE ESPERADO NESTE MOMENTO
+
+Além dos arquivos auxiliares, existem alterações locais da recuperação de senha ainda NÃO versionadas.
+
+Esperado:
+
+M app/minha-assinatura/entrar/customer-auth-form.tsx
+
+Novos diretórios/arquivos:
+
+- app/minha-assinatura/auth/recuperacao/
+- app/minha-assinatura/recuperar-senha/
+- app/minha-assinatura/redefinir-senha/
+
+E continuam untracked:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt.
+
+Não descartar a recuperação de senha.
+
+Não commitar como concluída antes do teste completo.
+
+## PRÓXIMA FRENTE RECOMENDADA — NOVO CHAT
+
+Depois de ler integralmente o contexto:
+
+1. preservar as alterações locais de recuperação de senha;
+2. NÃO repetir o E2E de renovação autenticada, que agora está APROVADO;
+3. quando o rate limit permitir, concluir uma única validação real da recuperação de senha;
+4. não alterar Rate Limits apenas para o teste;
+5. não criar novo PIX para repetir teste já aprovado.
+
+Próxima evolução funcional recomendada:
+
+CENTRAL DO CLIENTE / MINHA ASSINATURA
+
+Adicionar uma ação permanente e clara:
+
+AGENDAR HORÁRIO
+
+em:
+
+/minha-assinatura
+
+mesmo fora do fluxo de confirmação de pagamento.
+
+Objetivo:
+
+permitir que o assinante autenticado utilize facilmente seus benefícios e siga para o agendamento existente.
+
+Regras:
+
+- apenas criar ponte para /agendar;
+- NÃO reconstruir /agendar;
+- NÃO selecionar serviço automaticamente sem decisão específica;
+- NÃO alterar benefício/preço;
+- NÃO alterar banco;
+- preservar identidade e renovação;
+- validar desktop/mobile;
+- npm.cmd run build;
+- git diff --check.
+
+Antes de implementar, inspecionar somente:
+
+app/minha-assinatura/page.tsx
+
+e CSS diretamente necessário.
+
+## GIT / CHECKPOINT
+
+Ainda NÃO fazer commit/push automaticamente.
+
+Commit/push continuam exigindo autorização explícita.
+
+Antes de qualquer checkpoint futuro:
+
+- revisar alterações locais da recuperação;
+- manter ASSINATURAS-LOTE.txt fora;
+- manter CODIGO-COMPLETO.txt fora;
+- manter .env.local fora;
+- nunca usar git add ..
+
+# FIM DO CHECKPOINT DE CONTINUIDADE — 2026-09-17
+---
+
+# CHECKPOINT DE CONTINUIDADE — CENTRAL DO CLIENTE / AGENDAMENTO E HISTÓRICO — 2026-09-18
+
+## PRIORIDADE
+
+Este é o checkpoint funcional mais recente e deve ser lido em conjunto com:
+
+- CHECKPOINT DE CONTINUIDADE — RENOVAÇÃO AUTENTICADA E2E / RECUPERAÇÃO DE SENHA PENDENTE — 2026-09-17;
+- CHECKPOINT FINAL — MINHA ASSINATURA / UX DA RENOVAÇÃO AUTENTICADA E ACESSO PÚBLICO — 2026-09-17;
+- CHECKPOINT — MINHA ASSINATURA / IDENTIDADE SEGURA E BASE DA RENOVAÇÃO AUTENTICADA — 2026-09-17;
+- CHECKPOINT FINAL — RENOVAÇÃO VOLUNTÁRIA DE ASSINATURA — 2026-09-17;
+- CHECKPOINT FINAL — MERCADO PAGO / PIX ORDERS END-TO-END APROVADO E IDEMPOTENTE — 2026-09-15.
+
+Quando houver conflito, os checkpoints mais recentes prevalecem.
+
+## GIT OFICIAL
+
+Branch:
+
+main
+
+HEAD/origin atual:
+
+f02b68a Adiciona historico de atendimentos na Minha Assinatura
+
+Commits recentes desta continuidade:
+
+ba709dd Adiciona agendamento na Minha Assinatura
+78845fb Adiciona proximos agendamentos na Minha Assinatura
+f02b68a Adiciona historico de atendimentos na Minha Assinatura
+
+HEAD, main e origin/main foram confirmados sincronizados em f02b68a.
+
+## CTA PERMANENTE — AGENDAR HORÁRIO
+
+Foi adicionada à área autenticada:
+
+/minha-assinatura
+
+uma ação permanente:
+
+AGENDAR HORÁRIO
+
+Destino:
+
+/agendar
+
+Objetivo:
+
+permitir que o assinante autenticado acesse diretamente o fluxo existente de agendamento, mesmo fora do fluxo de confirmação de pagamento ou renovação.
+
+Regras preservadas:
+
+- /agendar NÃO foi reconstruído;
+- nenhum serviço é selecionado automaticamente;
+- preço/benefício NÃO foi alterado;
+- banco NÃO foi alterado para este CTA;
+- identidade e renovação permaneceram intactas.
+
+Validação:
+
+desktop APROVADO;
+mobile aproximadamente 390 x 844 APROVADO;
+navegação para /agendar APROVADA;
+passo 1 "Escolha seus serviços" aberto corretamente;
+nenhum serviço pré-selecionado.
+
+Build:
+
+APROVADO.
+
+git diff --check:
+
+APROVADO.
+
+Commit:
+
+ba709dd Adiciona agendamento na Minha Assinatura
+
+## PRÓXIMOS AGENDAMENTOS
+
+Foi adicionada à Central do Cliente uma seção somente leitura:
+
+PRÓXIMOS AGENDAMENTOS
+
+Objetivo:
+
+mostrar ao cliente autenticado somente os próprios horários futuros efetivos.
+
+Arquivos versionados:
+
+- app/minha-assinatura/page.tsx;
+- app/minha-assinatura/page.module.css;
+- app/minha-assinatura/upcoming-appointments.tsx;
+- lib/customer-auth/appointments.ts;
+- supabase/sql/024-my-appointments-read.sql.
+
+## MIGRATION 024
+
+Criada, aplicada e versionada:
+
+supabase/sql/024-my-appointments-read.sql
+
+Resultado da aplicação no Supabase:
+
+Success. No rows returned
+
+NÃO reaplicar.
+
+A migration cria:
+
+public.get_my_appointments()
+
+Características de segurança:
+
+- não recebe customer_id;
+- não recebe telefone;
+- não recebe e-mail do browser;
+- exige auth.uid();
+- exige e-mail confirmado;
+- deriva customers.id através de customers.auth_user_id = auth.uid();
+- retorna somente appointments do próprio customer;
+- retorna DTO mínimo;
+- não expõe notas;
+- não expõe dados financeiros do Mercado Pago;
+- não expõe informações de outro cliente;
+- EXECUTE concedido somente a authenticated;
+- public/anon sem execução.
+
+Dados retornados:
+
+- appointment id;
+- start_at;
+- end_at;
+- price histórico;
+- status;
+- nome do barbeiro;
+- nomes dos serviços.
+
+A RPC é somente leitura.
+
+Nenhuma alteração foi feita em /agendar.
+
+## REGRA DE PRÓXIMOS AGENDAMENTOS
+
+A página considera como próximos:
+
+status:
+scheduled
+ou
+confirmed
+
+e:
+
+end_at >= horário atual.
+
+A leitura segura fica em:
+
+lib/customer-auth/appointments.ts
+
+através de:
+
+getMyAppointments()
+
+A UI fica em:
+
+app/minha-assinatura/upcoming-appointments.tsx
+
+Validação com identidade atual:
+
+nenhum horário futuro existente.
+
+Estado vazio real apresentado:
+
+"Você não possui próximos horários agendados."
+
+Nenhum agendamento artificial foi criado apenas para teste.
+
+Desktop:
+
+APROVADO.
+
+Mobile:
+
+APROVADO.
+
+Build:
+
+APROVADO.
+
+git diff --check:
+
+APROVADO.
+
+Commit:
+
+78845fb Adiciona proximos agendamentos na Minha Assinatura
+
+## HISTÓRICO DE ATENDIMENTOS
+
+A mesma RPC 024 foi reutilizada.
+
+Nenhuma migration nova foi necessária.
+
+Foi adicionada seção:
+
+HISTÓRICO DE ATENDIMENTOS
+
+A UI reutiliza o componente de agendamentos existente com variante de histórico.
+
+Status conhecidos apresentados:
+
+scheduled — Agendado
+confirmed — Confirmado
+completed — Concluído
+cancelled — Cancelado
+no_show — Não compareceu
+
+O histórico recebe agendamentos que não são próximos e que:
+
+- já encerraram temporalmente;
+- ou possuem status completed;
+- ou possuem status cancelled;
+- ou possuem status no_show.
+
+Ordenação:
+
+mais recente primeiro.
+
+Um atendimento cancelado/no_show futuro não aparece como próximo atendimento efetivo e pode aparecer imediatamente no histórico.
+
+A apresentação reutiliza:
+
+- data;
+- horário;
+- profissional;
+- serviços;
+- status.
+
+Nenhum dado administrativo adicional é exposto.
+
+Validação com identidade atual:
+
+nenhum atendimento passado disponível.
+
+Estado vazio real apresentado:
+
+"Você ainda não possui atendimentos no histórico."
+
+Nenhum dado artificial foi criado para preencher o histórico.
+
+Desktop:
+
+APROVADO.
+
+Mobile aproximadamente 390 x 844:
+
+APROVADO.
+
+Sem overflow observado.
+
+Console do navegador:
+
+sem erro da aplicação durante a validação.
+
+AGENDAR HORÁRIO permaneceu preservado.
+
+Build final:
+
+APROVADO.
+
+git diff --check:
+
+APROVADO.
+
+Commit:
+
+f02b68a Adiciona historico de atendimentos na Minha Assinatura
+
+## RECUPERAÇÃO DE SENHA — CONTINUA PENDENTE
+
+As alterações locais de recuperação de senha foram conscientemente preservadas e NÃO entraram nos commits da Central do Cliente.
+
+Estado local esperado:
+
+M app/minha-assinatura/entrar/customer-auth-form.tsx
+
+Novos diretórios/arquivos:
+
+- app/minha-assinatura/auth/recuperacao/
+- app/minha-assinatura/recuperar-senha/
+- app/minha-assinatura/redefinir-senha/
+
+Implementação continua pronta localmente e com build aprovado anteriormente.
+
+Fluxo completo continua NÃO validado por causa do rate limit de e-mail do Supabase:
+
+2 emails/h.
+
+Não alterar Rate Limit apenas para o teste.
+
+Não marcar recuperação como concluída.
+
+Quando oportuno, fazer somente UMA tentativa real e validar:
+
+e-mail
+→ callback
+→ sessão
+→ nova senha
+→ login.
+
+Nesta continuidade foi decidido conscientemente adiar esse teste.
+
+## WORKING TREE APÓS OS COMMITS FUNCIONAIS
+
+Estado confirmado após f02b68a:
+
+M CONTEXTO-PROJETO.md
+M app/minha-assinatura/entrar/customer-auth-form.tsx
+?? ASSINATURAS-LOTE.txt
+?? CODIGO-COMPLETO.txt
+?? app/minha-assinatura/auth/recuperacao/
+?? app/minha-assinatura/recuperar-senha/
+?? app/minha-assinatura/redefinir-senha/
+
+Não descartar esses arquivos locais de recuperação.
+
+ASSINATURAS-LOTE.txt e CODIGO-COMPLETO.txt devem continuar fora do Git.
+
+.env.local nunca deve ser versionado.
+
+Nunca usar:
+
+git add .
+
+## BANCO
+
+Migrations aplicadas agora:
+
+007–024.
+
+NÃO reaplicar nenhuma.
+
+Migration nova desta continuidade:
+
+024 — leitura segura dos próprios agendamentos.
+
+Nenhuma outra alteração de banco foi realizada nesta continuidade.
+
+## REGRAS FINANCEIRAS PRESERVADAS
+
+Plano Mensal:
+
+pagamento mensal avulso via PIX.
+
+SEM renovação automática Mercado Pago.
+
+Orders API:
+
+POST /v1/orders
+GET /v1/orders/{id}
+
+external_reference:
+
+subscription_charge.id
+
+provider_charge_id:
+
+Order ID ORD...
+
+Webhook:
+
+/api/mercado-pago/webhook
+
+HMAC:
+
+preservar data.id ORIGINAL, inclusive maiúsculas.
+
+Browser NÃO confirma pagamento.
+
+Polling apenas observa o estado interno.
+
+E2E PIX e renovação autenticada já foram aprovados anteriormente.
+
+NÃO repetir sem necessidade.
+
+## CAPACIDADE / RENOVAÇÃO
+
+Preservar:
+
+30 assinantes por barbeiro.
+
+SELECT ... FOR UPDATE obrigatório.
+
+Hold PIX:
+
+30 minutos.
+
+Order expiration_time:
+
+PT30M.
+
+Janela antecipada de renovação:
+
+7 dias.
+
+Carência:
+
+2 dias.
+
+Mesmo barbeiro em renovação:
+
+não consome segunda vaga.
+
+Troca de barbeiro:
+
+exige capacidade real.
+
+Pagamento pendente:
+
+não transfere/libera antecipadamente vaga anterior.
+
+## COMISSÃO
+
+Percentual/regra continuam NÃO definidos.
+
+NÃO inventar percentual.
+
+NÃO criar comissão.
+
+## NÃO ALTERAR
+
+Não alterar sem nova necessidade concreta:
+
+- /agendar;
+- create_public_multi_appointment;
+- integração existente dos benefícios;
+- motor PIX;
+- Orders API;
+- webhook;
+- HMAC;
+- renovação server-side;
+- Admin financeiro;
+- Admin de capacidade.
+
+## PRÓXIMA FRENTE — GESTÃO DE AGENDAMENTOS PELO CLIENTE
+
+Próxima evolução escolhida:
+
+GESTÃO PELO CLIENTE
+
+na Central:
+
+/minha-assinatura
+
+Direção desejada:
+
+permitir ao cliente autenticado gerenciar os próprios agendamentos.
+
+Antes de implementar qualquer mutação, definir conscientemente as regras de negócio.
+
+Primeira funcionalidade recomendada:
+
+CANCELAMENTO DE AGENDAMENTO PELO CLIENTE.
+
+Questões que precisam ser definidas antes da escrita:
+
+- quais status podem ser cancelados pelo cliente;
+- antecedência mínima para cancelamento;
+- se confirmed pode ser cancelado;
+- comportamento para agendamento no mesmo dia;
+- se existe necessidade de motivo;
+- como tratar horário já iniciado/passado;
+- se cancelamento deve apenas alterar status para cancelled;
+- se haverá futura remarcação como operação separada.
+
+Segurança obrigatória:
+
+- identidade derivada de auth.uid();
+- nunca receber customer_id do browser como autoridade;
+- nunca permitir alterar appointment de outro customer;
+- revalidar sessão server-side;
+- mutação protegida no banco;
+- preservar regras administrativas existentes;
+- não conceder UPDATE público amplo em appointments.
+
+A arquitetura recomendada é criar fronteira server-side/RPC específica para o próprio cliente, em vez de reutilizar a permissão administrativa de UPDATE.
+
+Qualquer nova alteração de banco deve ser versionada no próximo número disponível:
+
+025.
+
+Antes de aplicar migration:
+
+apresentar regra/modelagem e obter autorização explícita.
+
+REMARCAÇÃO:
+
+não implementar automaticamente junto com cancelamento.
+
+Tratar como etapa separada após cancelamento estar definido/testado.
+
+## FORMA DE TRABALHO
+
+No próximo chat:
+
+1. ler integralmente CONTEXTO-PROJETO.md;
+2. priorizar este checkpoint e os checkpoints financeiros/identidade recentes;
+3. confirmar HEAD f02b68a ou checkpoint documental posterior;
+4. preservar recuperação de senha local;
+5. não repetir E2E PIX/renovação;
+6. não reaplicar migrations 007–024;
+7. começar diretamente pela definição objetiva das regras de cancelamento do cliente;
+8. evitar auditoria geral;
+9. inspecionar somente arquivos/contratos necessários;
+10. usar comandos PowerShell completos;
+11. usar npm.cmd;
+12. não usar comandos com exit $LASTEXITCODE no Terminal integrado, pois isso pode encerrar a sessão PowerShell;
+13. preferir comandos sem pager;
+14. commit/push somente com autorização explícita.
+
+Interromper para:
+
+- operação destrutiva;
+- nova credencial;
+- cobrança real;
+- decisão financeira indefinida;
+- alteração relevante de banco;
+- commit/push.
+
+# FIM DO CHECKPOINT — 2026-09-18

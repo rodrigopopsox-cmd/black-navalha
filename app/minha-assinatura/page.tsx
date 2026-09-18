@@ -195,6 +195,25 @@ export default async function MinhaAssinaturaPage() {
         appointment.status === "confirmed")
   );
 
+  const upcomingIds = new Set(
+    upcomingAppointments.map((appointment) => appointment.id)
+  );
+
+  const appointmentHistory = appointments
+    .filter(
+      (appointment) =>
+        !upcomingIds.has(appointment.id) &&
+        (new Date(appointment.end_at) < now ||
+          appointment.status === "completed" ||
+          appointment.status === "cancelled" ||
+          appointment.status === "no_show")
+    )
+    .sort(
+      (first, second) =>
+        new Date(second.start_at).getTime() -
+        new Date(first.start_at).getTime()
+    );
+
   let renewalBarbers: PublicBarber[] = [];
   let renewalAvailable = false;
 
@@ -250,6 +269,7 @@ export default async function MinhaAssinaturaPage() {
           <SubscriptionView
             data={data}
             upcomingAppointments={upcomingAppointments}
+            appointmentHistory={appointmentHistory}
             renewalAvailable={renewalAvailable}
             renewalBarbers={renewalBarbers}
           />
@@ -262,11 +282,13 @@ export default async function MinhaAssinaturaPage() {
 function SubscriptionView({
   data,
   upcomingAppointments,
+  appointmentHistory,
   renewalAvailable,
   renewalBarbers,
 }: {
   data: Extract<MySubscriptionData, { has_subscription: true }>;
   upcomingAppointments: Awaited<ReturnType<typeof getMyAppointments>>;
+  appointmentHistory: Awaited<ReturnType<typeof getMyAppointments>>;
   renewalAvailable: boolean;
   renewalBarbers: PublicBarber[];
 }) {
@@ -345,6 +367,11 @@ function SubscriptionView({
       </section>
 
       <UpcomingAppointments appointments={upcomingAppointments} />
+
+      <UpcomingAppointments
+        appointments={appointmentHistory}
+        variant="history"
+      />
 
       <div className={styles.actions}>
         <Link href="/agendar" className={styles.primaryLink}>

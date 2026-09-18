@@ -1,6 +1,7 @@
 ﻿import {
   CalendarDays,
   Clock3,
+  History,
   Scissors,
   UserRound,
 } from "lucide-react";
@@ -14,6 +15,9 @@ const TIME_ZONE = "America/Sao_Paulo";
 const STATUS_LABELS: Record<string, string> = {
   scheduled: "Agendado",
   confirmed: "Confirmado",
+  completed: "Concluído",
+  cancelled: "Cancelado",
+  no_show: "Não compareceu",
 };
 
 function formatDate(value: string) {
@@ -34,21 +38,37 @@ function formatTime(value: string) {
   }).format(new Date(value));
 }
 
+type AppointmentListProps = {
+  appointments: MyAppointment[];
+  variant?: "upcoming" | "history";
+};
+
 export default function UpcomingAppointments({
   appointments,
-}: {
-  appointments: MyAppointment[];
-}) {
+  variant = "upcoming",
+}: AppointmentListProps) {
+  const isHistory = variant === "history";
+
   return (
     <section className={styles.appointmentsPanel}>
       <div className={styles.servicesHeading}>
-        <CalendarDays size={20} aria-hidden="true" />
-        <h3>Próximos agendamentos</h3>
+        {isHistory ? (
+          <History size={20} aria-hidden="true" />
+        ) : (
+          <CalendarDays size={20} aria-hidden="true" />
+        )}
+        <h3>
+          {isHistory ? "Histórico de atendimentos" : "Próximos agendamentos"}
+        </h3>
       </div>
 
       {appointments.length === 0 ? (
         <div className={styles.appointmentsEmpty}>
-          <p>Você não possui próximos horários agendados.</p>
+          <p>
+            {isHistory
+              ? "Você ainda não possui atendimentos no histórico."
+              : "Você não possui próximos horários agendados."}
+          </p>
         </div>
       ) : (
         <div className={styles.appointmentsList}>

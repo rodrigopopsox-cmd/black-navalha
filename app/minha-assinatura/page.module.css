@@ -653,3 +653,57 @@
   font-size: 12px;
   line-height: 1.6;
 }
+
+/* Customer appointment cancellation */
+.appointmentCancellation {
+  display: grid;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid #242424;
+}
+
+.appointmentCancellation > p {
+  margin: 0;
+  color: #88827b;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.cancelAppointmentButton {
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid rgba(210, 70, 70, 0.45);
+  border-radius: 5px;
+  background: rgba(210, 70, 70, 0.08);
+  color: #ff9d9d;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cancelAppointmentButton:hover:not(:disabled) {
+  border-color: rgba(230, 90, 90, 0.75);
+  background: rgba(210, 70, 70, 0.14);
+}
+
+.cancelAppointmentButton:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.appointmentCancellation > .cancellationUnavailable {
+  color: #9b958e;
+}
+
+.appointmentCancellation > .error,
+.appointmentCancellation > .success {
+  padding: 10px 12px;
+}
+
+@media (max-width: 620px) {
+  .cancelAppointmentButton {
+    width: 100%;
+  }
+}

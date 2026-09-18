@@ -68,10 +68,15 @@ export default function BookingFlow({
   services,
   barbers,
   links,
+  authenticatedCustomer,
 }: {
   services: Service[];
   barbers: Barber[];
   links: BarberService[];
+  authenticatedCustomer: {
+    name: string;
+    phone: string;
+  } | null;
 }) {
   const supabase = createClient();
 
@@ -138,10 +143,10 @@ export default function BookingFlow({
     useState("");
 
   const [customerName, setCustomerName] =
-    useState("");
+    useState(authenticatedCustomer?.name ?? "");
 
   const [customerPhone, setCustomerPhone] =
-    useState("");
+    useState(authenticatedCustomer?.phone ?? "");
 
   const [confirming, setConfirming] =
     useState(false);
@@ -1432,7 +1437,11 @@ export default function BookingFlow({
             <BookingHeading
               step="PASSO 5 DE 5"
               title="Confirme seu agendamento"
-              description="Confira as informações e informe seus dados."
+              description={
+                authenticatedCustomer
+                  ? "Confira as informações do seu agendamento. Seus dados já estão vinculados à sua conta."
+                  : "Confira as informações e informe seus dados."
+              }
             />
 
 
@@ -1519,7 +1528,7 @@ export default function BookingFlow({
                     customerName
                   }
                   disabled={
-                    confirming
+                    confirming || Boolean(authenticatedCustomer)
                   }
                   onChange={
                     (event) =>
@@ -1547,7 +1556,7 @@ export default function BookingFlow({
                     customerPhone
                   }
                   disabled={
-                    confirming
+                    confirming || Boolean(authenticatedCustomer)
                   }
                   onChange={
                     (event) =>
@@ -2245,5 +2254,7 @@ function capitalize(
     value.slice(1)
   );
 }
+
+
 
 

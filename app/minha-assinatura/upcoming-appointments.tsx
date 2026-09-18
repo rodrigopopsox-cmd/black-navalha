@@ -8,6 +8,7 @@
 
 import type { MyAppointment } from "@/lib/customer-auth/appointments";
 
+import CancelAppointmentButton from "./cancel-appointment-button";
 import styles from "./page.module.css";
 
 const TIME_ZONE = "America/Sao_Paulo";
@@ -115,6 +116,15 @@ export default function UpcomingAppointments({
               <span className={styles.appointmentStatus}>
                 {STATUS_LABELS[appointment.status] ?? appointment.status}
               </span>
+
+              {!isHistory &&
+              (appointment.status === "scheduled" ||
+                appointment.status === "confirmed") ? (
+                <CancelAppointmentButton
+                  appointmentId={appointment.id}
+                  startAt={appointment.start_at}
+                />
+              ) : null}
             </article>
           ))}
         </div>

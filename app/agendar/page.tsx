@@ -1,8 +1,34 @@
-import { createClient } from "@/lib/supabase/server";
+﻿import { createClient } from "@/lib/supabase/server";
 import BookingFlow from "./booking-flow";
+
+type BookingCustomer = {
+  name: string;
+  phone: string;
+} | null;
 
 export default async function AgendarPage() {
   const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let authenticatedCustomer: BookingCustomer = null;
+
+  if (user?.email_confirmed_at) {
+    const { data: customer } = await supabase
+      .from("customers")
+      .select("name, phone")
+      .eq("auth_user_id", user.id)
+      .maybeSingle();
+
+    if (customer) {
+      authenticatedCustomer = {
+        name: customer.name,
+        phone: customer.phone,
+      };
+    }
+  }
 
   const {
     data: services,
@@ -56,6 +82,7 @@ export default async function AgendarPage() {
       services={services ?? []}
       barbers={barbers ?? []}
       links={links ?? []}
+      authenticatedCustomer={authenticatedCustomer}
     />
   );
 }

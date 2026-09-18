@@ -1,6 +1,7 @@
-﻿"use client";
+"use client";
 
 import { FormEvent, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/client";
@@ -21,12 +22,23 @@ export default function CustomerAuthForm() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!normalizedEmail || !normalizedEmail.includes("@")) {
+      setError("Informe um e-mail válido.");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("A senha deve ter pelo menos 6 caracteres.");
+      return;
+    }
+
     setLoading(true);
     setError("");
     setMessage("");
 
     const supabase = createClient();
-    const normalizedEmail = email.trim().toLowerCase();
 
     if (mode === "login") {
       const { error: loginError } = await supabase.auth.signInWithPassword({
@@ -56,7 +68,9 @@ export default function CustomerAuthForm() {
     });
 
     if (signupError) {
-      setError("Não foi possível criar seu acesso. Verifique os dados e tente novamente.");
+      setError(
+        "Não foi possível criar seu acesso. Verifique os dados e tente novamente."
+      );
       setLoading(false);
       return;
     }
@@ -75,6 +89,7 @@ export default function CustomerAuthForm() {
 
   function changeMode(nextMode: Mode) {
     setMode(nextMode);
+    setPassword("");
     setError("");
     setMessage("");
   }
@@ -121,6 +136,12 @@ export default function CustomerAuthForm() {
             required
           />
         </label>
+
+        {mode === "login" ? (
+          <Link href="/minha-assinatura/recuperar-senha">
+            Esqueci minha senha
+          </Link>
+        ) : null}
 
         {error ? <p className={styles.error}>{error}</p> : null}
         {message ? <p className={styles.success}>{message}</p> : null}

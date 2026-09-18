@@ -8,6 +8,7 @@ import {
   UserRound,
 } from "lucide-react";
 
+import { getMyAppointments } from "@/lib/customer-auth/appointments";
 import { getCustomerIdentity } from "@/lib/customer-auth/identity";
 import {
   getMySubscription,
@@ -18,6 +19,7 @@ import { createClient } from "@/lib/supabase/server";
 import { signOutCustomer } from "./actions";
 import LinkCustomerButton from "./link-customer-button";
 import RenewalCheckout from "./renewal-checkout";
+import UpcomingAppointments from "./upcoming-appointments";
 import styles from "./page.module.css";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -180,7 +182,18 @@ export default async function MinhaAssinaturaPage() {
     );
   }
 
-  const data = await getMySubscription();
+  const [data, appointments] = await Promise.all([
+    getMySubscription(),
+    getMyAppointments(),
+  ]);
+
+  const now = new Date();
+  const upcomingAppointments = appointments.filter(
+    (appointment) =>
+      new Date(appointment.end_at) >= now &&
+      (appointment.status === "scheduled" ||
+        appointment.status === "confirmed")
+  );
 
   let renewalBarbers: PublicBarber[] = [];
   let renewalAvailable = false;
@@ -236,6 +249,7 @@ export default async function MinhaAssinaturaPage() {
         ) : (
           <SubscriptionView
             data={data}
+            upcomingAppointments={upcomingAppointments}
             renewalAvailable={renewalAvailable}
             renewalBarbers={renewalBarbers}
           />
@@ -247,10 +261,12 @@ export default async function MinhaAssinaturaPage() {
 
 function SubscriptionView({
   data,
+  upcomingAppointments,
   renewalAvailable,
   renewalBarbers,
 }: {
   data: Extract<MySubscriptionData, { has_subscription: true }>;
+  upcomingAppointments: Awaited<ReturnType<typeof getMyAppointments>>;
   renewalAvailable: boolean;
   renewalBarbers: PublicBarber[];
 }) {
@@ -327,6 +343,8 @@ function SubscriptionView({
           <p>Nenhum serviço incluído foi encontrado para esta assinatura.</p>
         )}
       </section>
+
+      <UpcomingAppointments appointments={upcomingAppointments} />
 
       <div className={styles.actions}>
         <Link href="/agendar" className={styles.primaryLink}>

@@ -19592,3 +19592,267 @@ Qualquer nova alteração de banco deve usar o próximo número disponível:
 Antes de aplicar nova migration, obter autorização explícita.
 
 # FIM DO CHECKPOINT — 2026-09-18
+
+---
+
+# CHECKPOINT FINAL — CENTRAL DO CLIENTE / REMARCAÇÃO DE AGENDAMENTOS — 2026-09-18
+
+## STATUS
+
+Remarcação de agendamento pelo cliente:
+
+CONCLUÍDA E VALIDADA END-TO-END.
+
+Rota:
+
+/minha-assinatura
+
+## REGRAS
+
+- scheduled pode ser remarcado;
+- confirmed pode ser remarcado;
+- completed, cancelled e no_show não podem;
+- antecedência mínima: 1 hora antes do horário original;
+- exatamente 1 hora antes é permitido;
+- mesmo dia é permitido respeitando a antecedência;
+- horário iniciado/passado é bloqueado;
+- mesmo barbeiro é mantido;
+- mesmos serviços são mantidos;
+- mesmo appointment.id é preservado;
+- repetir o mesmo start_at é idempotente;
+- preço histórico não é recalculado;
+- benefícios históricos não são recalculados;
+- appointment_services permanece preservado;
+- appointment_services.subscription_id permanece preservado.
+
+Remarcação continua separada do cancelamento.
+
+Não foi implementado fluxo cancelar → criar outro appointment.
+
+## ATOMICIDADE E CONCORRÊNCIA
+
+Migration criada e aplicada:
+
+supabase/sql/029-customer-appointment-rescheduling.sql
+
+RPC:
+
+public.reschedule_my_appointment(
+  p_appointment_id uuid,
+  p_start_at timestamptz
+)
+
+Segurança:
+
+- identidade por auth.uid();
+- e-mail confirmado;
+- customer derivado de customers.auth_user_id;
+- customer_id não vem do browser;
+- appointment próprio obrigatório;
+- FOR UPDATE no appointment;
+- somente authenticated possui EXECUTE;
+- anon não possui EXECUTE;
+- nenhum UPDATE público amplo foi concedido.
+
+A RPC valida:
+
+- status;
+- antecedência;
+- novo horário futuro;
+- duração;
+- jornada ativa;
+- blocked_times.
+
+A duração autoritativa utilizada pela RPC é a soma histórica de:
+
+appointment_services.duration_minutes.
+
+A escrita altera somente:
+
+appointments.start_at
+appointments.end_at.
+
+Proteção concorrente final:
+
+constraint existente prevent_overlapping_appointments
+
+EXCLUDE USING gist por:
+
+barber_id
++
+tstzrange(start_at, end_at, '[)')
+
+para status:
+
+scheduled
+confirmed.
+
+Caso outro cliente ocupe concorrentemente o novo intervalo, exclusion_violation aborta a remarcação e o horário antigo permanece intacto.
+
+## LEITURA PRIVADA PARA DISPONIBILIDADE
+
+Migration criada e aplicada:
+
+supabase/sql/030-my-appointments-barber-id.sql
+
+Ela atualiza somente:
+
+public.get_my_appointments()
+
+para incluir:
+
+barber_id
+
+no DTO privado do próprio cliente.
+
+Preservado:
+
+- auth.uid();
+- e-mail confirmado;
+- customers.auth_user_id;
+- somente appointments próprios;
+- EXECUTE authenticated;
+- anon sem EXECUTE.
+
+Nenhuma escrita adicional foi concedida.
+
+## UI
+
+Arquivos alterados/criados:
+
+- app/minha-assinatura/appointment-actions.ts
+- app/minha-assinatura/reschedule-appointment.tsx
+- app/minha-assinatura/upcoming-appointments.tsx
+- app/minha-assinatura/page.module.css
+- lib/customer-auth/appointments.ts
+
+A Central apresenta REMARCAR AGENDAMENTO separadamente de CANCELAR AGENDAMENTO.
+
+A remarcação:
+
+- seleciona nova data;
+- consulta horários disponíveis;
+- mantém barbeiro;
+- mantém serviços;
+- utiliza grade de 15 minutos;
+- remove o próprio intervalo atual somente da sugestão visual;
+- revalida tudo no PostgreSQL no momento da escrita.
+
+O browser não é autoridade sobre:
+
+- customer_id;
+- barber_id;
+- duração;
+- preço;
+- benefício;
+- disponibilidade final.
+
+## E2E
+
+Foi criado um appointment controlado pelo fluxo normal /agendar.
+
+Estado antes da remarcação:
+
+19/09/2026
+09:00 às 09:30
+Rodrigo Alves Correa
+Barba Assinante Mensal
+scheduled
+
+A remarcação foi executada pela Central.
+
+Estado depois:
+
+18/09/2026
+16:30 às 17:00
+Rodrigo Alves Correa
+Barba Assinante Mensal
+scheduled
+
+Appointment preservado:
+
+5c9a0c8a-8542-4729-aab1-68a59698fea4
+
+Auditoria confirmou preservação de:
+
+- mesmo appointment.id;
+- mesmo created_at;
+- mesmo customer_id;
+- mesmo barber_id;
+- status scheduled;
+- appointments.price = 0.00;
+- mesmo appointment_services;
+- mesmo service_id;
+- mesmo service_name;
+- appointment_services.price = 0;
+- mesmo subscription_id.
+
+Portanto não houve cancelamento + recriação.
+
+Após a remarcação para um horário a menos de 1 hora, a própria Central passou corretamente a bloquear nova remarcação e cancelamento conforme a regra vigente.
+
+## BUILD
+
+npm.cmd run build:
+
+APROVADO.
+
+Next.js 16.3.4.
+
+TypeScript sem erros.
+
+git diff --check:
+
+APROVADO.
+
+Somente avisos conhecidos LF/CRLF.
+
+## BANCO
+
+Migrations aplicadas agora:
+
+007–030.
+
+Novas desta frente:
+
+029 — remarcação atômica do próprio appointment.
+030 — barber_id no DTO privado get_my_appointments.
+
+NÃO reaplicar nenhuma migration.
+
+## PRESERVADO
+
+Não foi reconstruído ou alterado:
+
+- create_public_multi_appointment;
+- regra de benefício/preço;
+- Mercado Pago Orders;
+- PIX;
+- webhook;
+- HMAC;
+- polling;
+- renovação voluntária;
+- renovação autenticada;
+- recuperação de senha;
+- Admin financeiro;
+- Admin de capacidade.
+
+## GIT
+
+Base oficial desta frente:
+
+db353d4 Registra conclusao da gestao de agendamentos
+
+Devem continuar fora do Git:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt;
+- .env.local.
+
+Nunca usar:
+
+git add .
+
+Commit/push somente com autorização explícita.
+
+# FIM DO CHECKPOINT — 2026-09-18

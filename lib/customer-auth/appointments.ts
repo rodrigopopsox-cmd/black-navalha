@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export type MyAppointment = {
   id: string;
+  barber_id: string;
   start_at: string;
   end_at: string;
   price: number;
@@ -38,6 +39,7 @@ export async function getMyAppointments(): Promise<MyAppointment[]> {
 
   return data.map((appointment) => ({
     id: String(appointment.id),
+    barber_id: String(appointment.barber_id),
     start_at: String(appointment.start_at),
     end_at: String(appointment.end_at),
     price: Number(appointment.price),

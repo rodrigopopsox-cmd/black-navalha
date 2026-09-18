@@ -707,3 +707,131 @@
     width: 100%;
   }
 }
+
+/* Customer appointment rescheduling */
+.appointmentReschedule {
+  display: grid;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid #242424;
+}
+
+.rescheduleAppointmentButton,
+.confirmRescheduleButton {
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid rgba(210, 157, 79, 0.5);
+  border-radius: 5px;
+  background: rgba(210, 157, 79, 0.09);
+  color: #e6b96d;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.rescheduleAppointmentButton:hover:not(:disabled),
+.confirmRescheduleButton:hover:not(:disabled) {
+  border-color: rgba(230, 185, 109, 0.8);
+  background: rgba(210, 157, 79, 0.16);
+}
+
+.rescheduleAppointmentButton:disabled,
+.confirmRescheduleButton:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.rescheduleForm {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #292929;
+  border-radius: 5px;
+  background: #0d0d0d;
+}
+
+.rescheduleForm > p,
+.rescheduleFeedback,
+.rescheduleUnavailable {
+  margin: 0;
+  color: #918b84;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.rescheduleField {
+  display: grid;
+  gap: 7px;
+}
+
+.rescheduleField > span {
+  color: #bdb6ae;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.rescheduleField input {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid #343434;
+  border-radius: 5px;
+  background: #090909;
+  color: #eee9e2;
+  color-scheme: dark;
+  font: inherit;
+}
+
+.rescheduleTimes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+  gap: 8px;
+}
+
+.rescheduleTime {
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid #343434;
+  border-radius: 5px;
+  background: #090909;
+  color: #bbb5ad;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.rescheduleTime:hover:not(:disabled),
+.rescheduleTimeSelected {
+  border-color: #d29d4f;
+  color: #e6b96d;
+}
+
+.rescheduleTimeSelected {
+  background: rgba(210, 157, 79, 0.12);
+}
+
+.confirmRescheduleButton {
+  width: 100%;
+  background: #d29d4f;
+  color: #080808;
+}
+
+.appointmentReschedule > .error,
+.appointmentReschedule > .success {
+  padding: 10px 12px;
+}
+
+@media (max-width: 620px) {
+  .rescheduleAppointmentButton,
+  .confirmRescheduleButton {
+    width: 100%;
+  }
+
+  .rescheduleTimes {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

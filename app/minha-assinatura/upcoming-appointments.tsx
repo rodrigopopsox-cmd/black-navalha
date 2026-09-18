@@ -1,4 +1,4 @@
-﻿import {
+import {
   CalendarDays,
   Clock3,
   History,
@@ -9,6 +9,7 @@
 import type { MyAppointment } from "@/lib/customer-auth/appointments";
 
 import CancelAppointmentButton from "./cancel-appointment-button";
+import RescheduleAppointment from "./reschedule-appointment";
 import styles from "./page.module.css";
 
 const TIME_ZONE = "America/Sao_Paulo";
@@ -120,10 +121,16 @@ export default function UpcomingAppointments({
               {!isHistory &&
               (appointment.status === "scheduled" ||
                 appointment.status === "confirmed") ? (
-                <CancelAppointmentButton
-                  appointmentId={appointment.id}
-                  startAt={appointment.start_at}
-                />
+                <>
+                  <RescheduleAppointment
+                    appointmentId={appointment.id}
+                    startAt={appointment.start_at}
+                  />
+                  <CancelAppointmentButton
+                    appointmentId={appointment.id}
+                    startAt={appointment.start_at}
+                  />
+                </>
               ) : null}
             </article>
           ))}

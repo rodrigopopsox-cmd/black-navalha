@@ -1,4 +1,5 @@
-﻿import { redirect } from "next/navigation";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 import {
   BadgeCheck,
   CalendarDays,
@@ -326,6 +327,12 @@ function SubscriptionView({
           <p>Nenhum serviço incluído foi encontrado para esta assinatura.</p>
         )}
       </section>
+
+      <div className={styles.actions}>
+        <Link href="/agendar" className={styles.primaryLink}>
+          Agendar horário
+        </Link>
+      </div>
 
       {renewalAvailable && data.cycle?.barber_id ? (
         renewalBarbers.length > 0 ? (

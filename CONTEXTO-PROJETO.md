@@ -22332,3 +22332,469 @@ Depois da comissão:
 preparação final para produção.
 
 # FIM DO CHECKPOINT — 2026-09-19
+
+---
+
+# CHECKPOINT FINAL — COMISSÃO ADMINISTRATIVA DAS ASSINATURAS — 2026-09-19
+
+## PRIORIDADE
+
+Este é o checkpoint mais recente e deve prevalecer sobre checkpoints anteriores quando houver conflito.
+
+A frente:
+
+COMISSÃO ADMINISTRATIVA DAS ASSINATURAS
+
+está CONCLUÍDA, TESTADA E VERSIONADA no escopo seguro disponível sem fabricar nova cobrança.
+
+## GIT
+
+Commit funcional:
+
+3f7da02 Implementa comissoes administrativas de assinaturas
+
+Push realizado com sucesso:
+
+main → origin/main
+
+Após o checkpoint funcional, HEAD/origin estavam sincronizados em:
+
+3f7da02
+
+Working tree:
+
+?? ASSINATURAS-LOTE.txt
+?? CODIGO-COMPLETO.txt
+
+Esses arquivos devem continuar fora do Git.
+
+Nunca versionar:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt;
+- .env.local.
+
+Nunca usar:
+
+git add .
+
+Staging somente com caminhos explícitos.
+
+## MIGRATION 032
+
+Criada, aplicada e versionada:
+
+supabase/sql/032-subscription-barber-commission.sql
+
+Aplicação no Supabase:
+
+Success. No rows returned
+
+NÃO reaplicar.
+
+Migrations 007–032 estão aplicadas.
+
+NÃO reaplicar nenhuma.
+
+## REGRA DE COMISSÃO IMPLEMENTADA
+
+Cada barbeiro possui percentual próprio de comissão de assinatura.
+
+Campo:
+
+barbers.subscription_commission_rate
+
+Contrato:
+
+numeric(5,2)
+NOT NULL
+DEFAULT 0
+
+Validação:
+
+0% até 100%.
+
+Novos barbeiros começam em:
+
+0%.
+
+Não existe percentual global fixo no código.
+
+## ADMIN DE BARBEIROS
+
+Cadastro:
+
+/admin/barbeiros/novo
+
+passou a permitir configurar:
+
+COMISSÃO DE ASSINATURA (%)
+
+com default visual:
+
+0.
+
+Edição:
+
+/admin/barbeiros/[id]
+
+também permite alterar o percentual.
+
+A edição informa explicitamente que:
+
+- comissão incide somente sobre mensalidades efetivamente pagas;
+- alterações afetam somente pagamentos futuros.
+
+Validação existe na interface/Server Action e novamente no banco.
+
+## TESTE ADMINISTRATIVO DO PERCENTUAL
+
+Barbeiro utilizado:
+
+Rodrigo Alves Correa
+
+Estado inicial após migration:
+
+0%.
+
+Teste controlado:
+
+- percentual alterado para 10%;
+- salvamento realizado;
+- persistência confirmada após recarregar;
+- percentual restaurado para 0%;
+- novo salvamento realizado;
+- restauração para 0% confirmada após recarregar.
+
+Estado final:
+
+0%.
+
+Nenhum percentual temporário permaneceu configurado.
+
+Alterar percentual não cria comissão retroativa.
+
+## LEDGER EXISTENTE REAPROVEITADO
+
+Foi preservada e reutilizada:
+
+public.subscription_commission_entries
+
+Nenhuma tabela paralela de comissão foi criada.
+
+Estrutura histórica utilizada:
+
+- charge_id;
+- cycle_id;
+- barber_id;
+- entry_type;
+- amount;
+- rate;
+- reverses_entry_id;
+- created_at.
+
+rate representa o percentual histórico congelado.
+
+amount representa o valor histórico congelado.
+
+A constraint de rate foi fortalecida para aceitar apenas:
+
+NULL
+ou
+0 até 100.
+
+A compatibilidade histórica com rate NULL foi preservada.
+
+## LANÇAMENTO DA COMISSÃO
+
+A versão atual de:
+
+confirm_mercado_pago_subscription_payment
+
+foi evoluída preservando sua responsabilidade como fronteira transacional/idempotente de confirmação financeira.
+
+Toda a lógica anterior foi preservada, incluindo:
+
+- charge com FOR UPDATE;
+- barbeiro com FOR UPDATE;
+- capacidade;
+- SELECT ... FOR UPDATE;
+- hold;
+- customer;
+- assinatura;
+- renovação;
+- troca de barbeiro;
+- ciclos;
+- benefícios;
+- charge paid;
+- idempotência.
+
+Somente após uma charge pending ser efetivamente processada como paga, a RPC consulta o percentual atual do barbeiro historicamente vinculado ao novo ciclo.
+
+Comissão é criada somente quando:
+
+subscription_commission_rate > 0.
+
+Cálculo:
+
+round(charge.amount * rate / 100, 2)
+
+O lançamento grava:
+
+- charge_id da mensalidade;
+- cycle_id pago;
+- barber_id do ciclo;
+- entry_type = commission;
+- amount congelado;
+- rate congelado.
+
+Portanto mudança posterior no percentual do barbeiro não recalcula lançamentos antigos.
+
+## BARBEIRO CORRETO POR CICLO
+
+A comissão pertence ao barbeiro de:
+
+subscription_cycles.barber_id
+
+do ciclo pago correspondente.
+
+Assim:
+
+- contratação paga pertence ao profissional daquele ciclo;
+- renovação paga no mesmo profissional pertence ao mesmo barbeiro;
+- renovação paga com troca de barbeiro pertence ao novo profissional.
+
+Nenhuma comissão é vinculada a agendamentos/cortes comuns.
+
+## ESTADOS FINANCEIROS
+
+A comissão nasce somente dentro da confirmação financeira server-side válida.
+
+Não geram comissão:
+
+- pending;
+- failed;
+- cancelled;
+- expired.
+
+O navegador continua sem autoridade para confirmar pagamento.
+
+A arquitetura permanece:
+
+Mercado Pago Order
+→ webhook HMAC
+→ GET Order server-side
+→ validações financeiras
+→ confirm_mercado_pago_subscription_payment
+→ charge/ciclo pagos
+→ comissão quando percentual > 0.
+
+Polling continua somente observacional.
+
+## IDEMPOTÊNCIA
+
+subscription_commission_entries já possuía índice único de comissão positiva por charge.
+
+A RPC também preserva:
+
+- lock da charge;
+- transição pending → paid;
+- retorno idempotente quando a charge já foi processada.
+
+O INSERT da comissão não silencia conflito inesperado.
+
+Se existir inconsistência de duplicidade, a transação deve falhar em vez de aparentar sucesso.
+
+## ESTORNOS / REVERSÕES FUTURAS
+
+Nenhuma lógica de refund/estorno foi criada nesta frente.
+
+O histórico positivo não deverá ser apagado futuramente.
+
+A estrutura já existente foi preservada para reversão auditável:
+
+entry_type = reversal
+reverses_entry_id = lançamento original.
+
+Existe proteção de uma reversão por lançamento original.
+
+Uma futura frente de estorno deve registrar reversão em vez de apagar/recalcular comissão histórica.
+
+## ADMIN DE COMISSÕES
+
+Nova rota:
+
+/admin/comissoes
+
+Novo item:
+
+Comissões
+
+no menu administrativo.
+
+A página é somente leitura e apresenta:
+
+- total de comissões;
+- total de reversões;
+- saldo líquido;
+- quantidade de lançamentos;
+- histórico do ledger quando existir;
+- profissional;
+- valor histórico;
+- percentual histórico;
+- data/hora;
+- Charge ID;
+- Cycle ID;
+- referência do lançamento revertido quando aplicável.
+
+Nenhuma nova migration foi necessária para a leitura administrativa.
+
+Foi reutilizado o SELECT server-side já existente para:
+
+subscription_commission_entries.
+
+## ESTADO VAZIO VALIDADO
+
+Como:
+
+- pagamentos anteriores à migration 032 não são recalculados;
+- Rodrigo foi restaurado para 0%;
+- nenhuma nova cobrança foi criada somente para fabricar teste;
+
+a página /admin/comissoes foi validada corretamente com:
+
+COMISSÕES:
+R$ 0,00
+0 lançamentos
+
+REVERSÕES:
+R$ 0,00
+0 reversões
+
+SALDO LÍQUIDO:
+R$ 0,00
+
+Estado:
+
+Nenhuma comissão lançada.
+
+Isso é o comportamento esperado.
+
+## LIMITAÇÃO CONSCIENTE DE TESTE
+
+Não foi criado novo PIX nem nova cobrança apenas para produzir uma comissão positiva.
+
+Portanto o lançamento positivo real com percentual > 0 ainda não foi exercitado end-to-end com uma nova mensalidade paga após a migration 032.
+
+A lógica está integrada na mesma fronteira transacional de confirmação financeira já validada anteriormente.
+
+Quando ocorrer naturalmente uma nova mensalidade paga com percentual maior que 0, deve-se validar:
+
+- exatamente um lançamento;
+- charge correta;
+- ciclo correto;
+- barbeiro correto;
+- rate congelado;
+- amount congelado.
+
+Não fabricar cobrança apenas para esse teste se houver alternativa segura.
+
+## BUILD / VALIDAÇÃO
+
+Executado:
+
+npm.cmd run build
+
+Resultado:
+
+APROVADO.
+
+- Next.js 16.3.4;
+- compilação concluída;
+- TypeScript sem erros;
+- /admin/comissoes reconhecida como rota dinâmica.
+
+git diff --check:
+
+APROVADO.
+
+Somente avisos conhecidos de LF/CRLF, sem erro de whitespace.
+
+Validação visual:
+
+- edição de comissão do barbeiro: APROVADA;
+- persistência/restauração: APROVADA;
+- /admin/comissoes: APROVADA;
+- menu administrativo: APROVADO.
+
+## ARQUITETURA FINANCEIRA PRESERVADA
+
+Plano Mensal:
+
+R$ 150 por pagamento mensal AVULSO via PIX.
+
+SEM recorrência automática Mercado Pago.
+
+Mercado Pago:
+
+Orders API.
+
+Browser NÃO confirma pagamento.
+
+Webhook HMAC + GET Order server-side continuam sendo autoridade.
+
+Capacidade:
+
+30 assinantes por barbeiro.
+
+Preservar SELECT ... FOR UPDATE.
+
+Hold PIX:
+
+30 minutos.
+
+Janela de renovação:
+
+7 dias antes do fim do ciclo.
+
+Carência:
+
+2 dias.
+
+## NÃO RECONSTRUIR
+
+Permanecem concluídos e não devem ser refeitos sem necessidade concreta:
+
+- /agendar;
+- create_public_multi_appointment;
+- benefício/preço das assinaturas;
+- cancelamento;
+- remarcação;
+- troca de barbeiro;
+- Mercado Pago Orders;
+- PIX;
+- webhook/HMAC;
+- polling;
+- renovação voluntária;
+- renovação autenticada;
+- identidade segura;
+- recuperação de senha;
+- capacidade;
+- comissão administrativa.
+
+## PRÓXIMA FRENTE
+
+Próxima frente planejada:
+
+PREPARAÇÃO FINAL PARA PRODUÇÃO.
+
+Antes de iniciar:
+
+- confirmar Git;
+- não fazer auditoria geral sem escopo;
+- tratar credenciais/URLs de produção sem expor segredos;
+- preservar separação entre ambiente de teste e produção;
+- revisar somente os contratos necessários em blocos seguros;
+- nenhuma cobrança real sem autorização explícita.
+
+# FIM DO CHECKPOINT — 2026-09-19

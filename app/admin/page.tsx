@@ -228,9 +228,10 @@ export default async function AdminPage() {
                   style={{
                     display: "grid",
                     gridTemplateColumns:
-                      "90px minmax(160px, 1fr) minmax(160px, 1fr) minmax(180px, 1.5fr) 110px",
+                      "repeat(auto-fit, minmax(140px, 1fr))",
                     gap: "18px",
                     alignItems: "center",
+                    minWidth: 0,
                     border: "1px solid #222",
                     borderRadius: "7px",
                     padding: "16px 18px",
@@ -312,7 +313,7 @@ export default async function AdminPage() {
 
                   <div
                     style={{
-                      textAlign: "right",
+                      minWidth: 0,
                     }}
                   >
                     <small

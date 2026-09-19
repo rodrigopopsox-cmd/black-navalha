@@ -379,7 +379,7 @@ export default function SubscriptionCheckoutForm({
 
     if (paymentConfirmed) {
       return (
-        <div className={styles.checkoutSuccess} role="status" aria-live="polite">
+        <div className={`${styles.checkoutSuccess} ${styles.paymentConfirmed}`} role="status" aria-live="polite">
           <strong>Pagamento confirmado.</strong>
           <p>
             Seu Plano Mensal está ativo. O pagamento foi confirmado com
@@ -397,7 +397,7 @@ export default function SubscriptionCheckoutForm({
 
     if (expired && !expirationChecked) {
       return (
-        <div className={styles.checkoutSuccess} role="status" aria-live="polite">
+        <div className={`${styles.checkoutSuccess} ${styles.paymentChecking}`} role="status" aria-live="polite">
           <strong>Verificando pagamento...</strong>
           <p>
             O prazo da reserva terminou. Estamos fazendo uma última consulta
@@ -408,7 +408,7 @@ export default function SubscriptionCheckoutForm({
     }
     if (expired && expirationChecked) {
       return (
-        <div className={styles.checkoutExpired} role="status" aria-live="polite">
+        <div className={`${styles.checkoutExpired} ${styles.paymentExpired}`} role="status" aria-live="polite">
           <strong>Esta reserva expirou.</strong>
           <p>
             O prazo deste Pix terminou. Para continuar, prepare uma nova

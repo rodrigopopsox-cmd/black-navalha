@@ -36,7 +36,7 @@ export default function ResetPasswordForm() {
     });
 
     if (updateError) {
-      setError("NÃ£o foi possÃ­vel atualizar sua senha.");
+      setError("Não foi possível atualizar sua senha.");
       setLoading(false);
       return;
     }

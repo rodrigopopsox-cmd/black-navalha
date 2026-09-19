@@ -169,23 +169,44 @@
 
 .error,
 .success {
+  position: relative;
   margin: 0;
-  padding: 12px 14px;
-  border-radius: 5px;
+  padding: 12px 14px 12px 17px;
+  border: 1px solid #292929;
+  border-radius: 6px;
+  background: #0b0b0b;
+  color: #d4cec6;
   font-size: 12px;
-  line-height: 1.5;
+  line-height: 1.55;
+}
+
+.error::before,
+.success::before {
+  content: "";
+  position: absolute;
+  top: 11px;
+  bottom: 11px;
+  left: 0;
+  width: 2px;
+  border-radius: 999px;
 }
 
 .error {
-  border: 1px solid rgba(210, 70, 70, 0.35);
-  background: rgba(210, 70, 70, 0.08);
-  color: #ff9d9d;
+  border-color: rgba(154, 72, 65, 0.34);
+  color: #d7b4af;
+}
+
+.error::before {
+  background: #a85f57;
 }
 
 .success {
-  border: 1px solid rgba(90, 180, 110, 0.35);
-  background: rgba(90, 180, 110, 0.08);
-  color: #a8e8b5;
+  border-color: rgba(210, 157, 79, 0.32);
+  color: #eee7dd;
+}
+
+.success::before {
+  background: #d29d4f;
 }
 
 .icon {
@@ -759,6 +780,43 @@
   color: #918b84;
   font-size: 11px;
   line-height: 1.6;
+}
+
+.rescheduleFeedback {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #b8b0a6;
+}
+
+.rescheduleFeedback::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(210, 157, 79, 0.4);
+  border-top-color: #d29d4f;
+  border-radius: 50%;
+  animation: customerStateSpin 0.8s linear infinite;
+}
+
+.rescheduleUnavailable,
+.appointmentCancellation > .cancellationUnavailable {
+  padding-left: 11px;
+  border-left: 2px solid #3a3733;
+  color: #9b958e;
+}
+
+@keyframes customerStateSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rescheduleFeedback::before {
+    animation: none;
+  }
 }
 
 .rescheduleField {
@@ -2017,6 +2075,31 @@
   border-radius: 6px;
 }
 
+.authForm .primaryButton:disabled {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  cursor: wait;
+}
+
+.authForm .primaryButton:disabled::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(8, 8, 8, 0.35);
+  border-top-color: #080808;
+  border-radius: 50%;
+  animation: customerStateSpin 0.8s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .authForm .primaryButton:disabled::before {
+    animation: none;
+  }
+}
+
 @media (max-width: 620px) {
   .authPage {
     padding-top: 18px;
@@ -2252,5 +2335,104 @@
   .authPage .authCard:not(:has(.authTabs)) .authForm {
     padding-top: 22px;
     padding-bottom: 22px;
+  }
+}
+/* Customer interface states */
+.renewalPrepared,
+.renewalChecking,
+.renewalExpired,
+.renewalSuccess {
+  position: relative;
+  overflow: hidden;
+}
+
+.renewalPrepared::before,
+.renewalChecking::before,
+.renewalExpired::before,
+.renewalSuccess::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 2px;
+}
+
+.renewalPrepared::before,
+.renewalSuccess::before {
+  background: #d29d4f;
+}
+
+.renewalSuccess {
+  border-color: rgba(210, 157, 79, 0.4);
+  background:
+    linear-gradient(90deg, rgba(210, 157, 79, 0.07), transparent 32%),
+    #0d0d0d;
+}
+
+.renewalSuccess h3 {
+  color: #f5f1eb;
+}
+
+.renewalChecking {
+  border-color: #34302a;
+  background: #0d0d0d;
+}
+
+.renewalChecking::before {
+  background: #d29d4f;
+  animation: customerStatePulse 1.15s ease-in-out infinite alternate;
+}
+
+.renewalChecking h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.renewalChecking h3::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(210, 157, 79, 0.4);
+  border-top-color: #d29d4f;
+  border-radius: 50%;
+  animation: customerStateSpin 0.8s linear infinite;
+}
+
+.renewalExpired {
+  border-color: #2b2926;
+  border-top-color: #3a3733;
+  background: #0b0b0b;
+}
+
+.renewalExpired::before {
+  background: #4a4640;
+}
+
+.renewalExpired .eyebrow,
+.renewalExpired h3 {
+  color: #a39c93;
+}
+
+.renewalExpired > p {
+  color: #77716b;
+}
+
+@keyframes customerStatePulse {
+  from {
+    opacity: 0.35;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .renewalChecking::before,
+  .renewalChecking h3::before {
+    animation: none;
   }
 }

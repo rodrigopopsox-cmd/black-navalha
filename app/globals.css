@@ -2145,13 +2145,28 @@ img {
 }
 
 .booking-loading {
+  display: flex;
   padding: 30px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
 
-  color: #777777;
+  color: #9f9890;
 
   text-align: center;
 
   font-size: 11px;
+}
+
+.booking-loading::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(210, 157, 79, 0.4);
+  border-top-color: #d29d4f;
+  border-radius: 50%;
+  animation: bookingStateSpin 0.8s linear infinite;
 }
 
 
@@ -2280,14 +2295,15 @@ img {
 }
 
 .booking-form-error {
-  color: #ff9696;
+  position: relative;
+  color: #d7b4af;
 
-  background: rgba(180, 40, 40, 0.08);
+  background: #0b0b0b;
 
-  border: 1px solid #632b2b;
-  border-radius: 5px;
+  border: 1px solid rgba(154, 72, 65, 0.34);
+  border-radius: 6px;
 
-  padding: 13px;
+  padding: 13px 14px 13px 17px;
 
   margin-bottom: 20px;
 
@@ -4325,3 +4341,25 @@ span {
 /* =========================================================
    AGENDAR - CENTRAL DO CLIENTE IDENTITY ALIGNMENT END
    ========================================================= */
+.booking-form-error::before {
+  content: "";
+  position: absolute;
+  top: 11px;
+  bottom: 11px;
+  left: 0;
+  width: 2px;
+  border-radius: 999px;
+  background: #a85f57;
+}
+
+@keyframes bookingStateSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .booking-loading::before {
+    animation: none;
+  }
+}

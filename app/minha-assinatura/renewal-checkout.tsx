@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -290,7 +290,7 @@ export default function RenewalCheckout({
 
   if (confirmed) {
     return (
-      <section className={styles.renewalPanel}>
+      <section className={`${styles.renewalPanel} ${styles.renewalSuccess}`}>
         <span className={styles.eyebrow}>Renovação confirmada</span>
         <h3>Novo ciclo liberado.</h3>
         <p>
@@ -303,7 +303,15 @@ export default function RenewalCheckout({
 
   if (prepared) {
     return (
-      <section className={styles.renewalPanel}>
+      <section
+        className={`${styles.renewalPanel} ${
+          finalChecking
+            ? styles.renewalChecking
+            : expired
+              ? styles.renewalExpired
+              : styles.renewalPrepared
+        }`}
+      >
         <span className={styles.eyebrow}>Renovação preparada</span>
         <h3>
           {finalChecking

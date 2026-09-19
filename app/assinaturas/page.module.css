@@ -1734,3 +1734,107 @@
   
 /* Visual: ocultamos a faixa "Já é assinante?" porque o acesso já existe no cabeçalho */
 .existingCustomer { display: none !important; }
+/* Shared interface states */
+.checkoutError {
+  position: relative;
+  padding-left: 17px;
+  border-color: rgba(154, 72, 65, 0.34);
+  background: #0b0b0b;
+  color: #d7b4af;
+  line-height: 1.55;
+}
+
+.checkoutError::before {
+  content: "";
+  position: absolute;
+  top: 11px;
+  bottom: 11px;
+  left: 0;
+  width: 2px;
+  border-radius: 999px;
+  background: #a85f57;
+}
+
+.paymentConfirmed,
+.paymentChecking,
+.paymentExpired {
+  position: relative;
+}
+
+.paymentConfirmed::before,
+.paymentChecking::before,
+.paymentExpired::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 2px;
+}
+
+.paymentConfirmed::before {
+  background: #d29d4f;
+}
+
+.paymentChecking {
+  border-color: #34302a;
+  background: #0b0b0b;
+}
+
+.paymentChecking::before {
+  background: #d29d4f;
+  animation: subscriptionStatePulse 1.15s ease-in-out infinite alternate;
+}
+
+.paymentChecking > strong {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.paymentChecking > strong::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(210, 157, 79, 0.4);
+  border-top-color: #d29d4f;
+  border-radius: 50%;
+  animation: subscriptionStateSpin 0.8s linear infinite;
+}
+
+.paymentExpired::before {
+  background: #4a4640;
+}
+
+.paymentExpired > strong {
+  color: #a39c93;
+}
+
+.paymentExpired > p {
+  color: #77716b;
+}
+
+
+@keyframes subscriptionStateSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes subscriptionStatePulse {
+  from {
+    opacity: 0.35;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .paymentChecking::before,
+  .paymentChecking > strong::before {
+    animation: none;
+  }
+}

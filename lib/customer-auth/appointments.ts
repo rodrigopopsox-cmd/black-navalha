@@ -1,4 +1,4 @@
-﻿import "server-only";
+import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 
@@ -10,6 +10,7 @@ export type MyAppointment = {
   price: number;
   status: string;
   barber_name: string | null;
+  barber_change_allowed: boolean;
   services: Array<{
     name: string;
   }>;
@@ -48,6 +49,7 @@ export async function getMyAppointments(): Promise<MyAppointment[]> {
       typeof appointment.barber_name === "string"
         ? appointment.barber_name
         : null,
+    barber_change_allowed: appointment.barber_change_allowed === true,
     services: Array.isArray(appointment.services)
       ? appointment.services.map((service: { name?: unknown }) => ({
           name: String(service.name ?? ""),

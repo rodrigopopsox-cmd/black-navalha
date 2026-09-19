@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
@@ -58,19 +58,14 @@ export default function CancelAppointmentButton({
   return (
     <div className={styles.appointmentCancellation}>
       {canCancel ? (
-        <>
-          <p>
-            Você pode cancelar este horário até 1 hora antes do atendimento.
-          </p>
-          <button
-            type="button"
-            className={styles.cancelAppointmentButton}
-            onClick={handleCancel}
-            disabled={isPending}
-          >
-            {isPending ? "Cancelando..." : "Cancelar agendamento"}
-          </button>
-        </>
+        <button
+          type="button"
+          className={styles.cancelAppointmentButton}
+          onClick={handleCancel}
+          disabled={isPending}
+        >
+          {isPending ? "Cancelando..." : "Cancelar agendamento"}
+        </button>
       ) : (
         <p className={styles.cancellationUnavailable}>
           O prazo de cancelamento online encerrou. Cancelamentos pelo cliente

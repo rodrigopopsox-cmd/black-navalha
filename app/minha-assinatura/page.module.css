@@ -832,7 +832,8 @@
   text-transform: uppercase;
 }
 
-.rescheduleField input {
+.rescheduleField input,
+.rescheduleField select {
   width: 100%;
   min-height: 42px;
   padding: 0 12px;
@@ -842,6 +843,14 @@
   color: #eee9e2;
   color-scheme: dark;
   font: inherit;
+}
+
+.rescheduleField select {
+  cursor: pointer;
+}
+
+.rescheduleField select:disabled {
+  cursor: wait;
 }
 
 .rescheduleTimes {
@@ -1079,6 +1088,7 @@
 .appointmentManagement {
   display: grid;
   grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+  align-items: start;
   gap: 10px;
 }
 
@@ -1086,16 +1096,70 @@
   min-width: 0;
 }
 
+.appointmentManagementNote {
+  grid-column: 1 / -1;
+  margin: 2px 0 0;
+  color: #77716b;
+  font-size: 10px;
+  line-height: 1.55;
+}
+
 .appointmentManagement .appointmentReschedule,
 .appointmentManagement .appointmentCancellation {
-  height: 100%;
+  height: auto;
   padding-top: 0;
   border-top: 0;
+}
+
+.appointmentManagement .appointmentReschedule {
+  display: contents;
+}
+
+.appointmentManagement .appointmentReschedule > .rescheduleAppointmentButton {
+  grid-column: 1;
+}
+
+.appointmentManagement .appointmentReschedule > .rescheduleForm {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+
+.appointmentManagement .appointmentReschedule > .error,
+.appointmentManagement .appointmentReschedule > .success,
+.appointmentManagement .appointmentReschedule > .rescheduleUnavailable {
+  grid-column: 1 / -1;
+}
+
+.appointmentManagement .appointmentCancellation {
+  grid-column: 2;
+  grid-row: 1;
 }
 
 .appointmentManagement .appointmentReschedule > p,
 .appointmentManagement .appointmentCancellation > p {
   grid-column: 1 / -1;
+}
+
+@media (max-width: 620px) {
+  .appointmentManagement .appointmentReschedule > .rescheduleAppointmentButton,
+  .appointmentManagement .appointmentCancellation,
+  .appointmentManagement .appointmentReschedule > .rescheduleForm,
+  .appointmentManagement .appointmentReschedule > .error,
+  .appointmentManagement .appointmentReschedule > .success,
+  .appointmentManagement .appointmentReschedule > .rescheduleUnavailable {
+    grid-column: 1;
+  }
+
+  .appointmentManagement .appointmentCancellation {
+    grid-row: 2;
+  }
+
+  .appointmentManagement .appointmentReschedule > .rescheduleForm,
+  .appointmentManagement .appointmentReschedule > .error,
+  .appointmentManagement .appointmentReschedule > .success,
+  .appointmentManagement .appointmentReschedule > .rescheduleUnavailable {
+    grid-row: auto;
+  }
 }
 
 .otherAppointmentsTitle {

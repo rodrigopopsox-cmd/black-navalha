@@ -191,12 +191,20 @@ export default function UpcomingAppointments({
             <RescheduleAppointment
               appointmentId={firstAppointment.id}
               startAt={firstAppointment.start_at}
+              barberId={firstAppointment.barber_id}
+              barberName={firstAppointment.barber_name}
+              barberChangeAllowed={firstAppointment.barber_change_allowed}
             />
 
             <CancelAppointmentButton
               appointmentId={firstAppointment.id}
               startAt={firstAppointment.start_at}
             />
+
+            <p className={styles.appointmentManagementNote}>
+              Cancelamentos e remarcações online estão disponíveis até 1 hora
+              antes do atendimento.
+            </p>
           </div>
         </article>
       ) : null}
@@ -264,12 +272,20 @@ export default function UpcomingAppointments({
                     <RescheduleAppointment
                       appointmentId={appointment.id}
                       startAt={appointment.start_at}
+                      barberId={appointment.barber_id}
+                      barberName={appointment.barber_name}
+                      barberChangeAllowed={appointment.barber_change_allowed}
                     />
 
                     <CancelAppointmentButton
                       appointmentId={appointment.id}
                       startAt={appointment.start_at}
                     />
+
+                    <p className={styles.appointmentManagementNote}>
+                      Cancelamentos e remarcações online estão disponíveis até
+                      1 hora antes do atendimento.
+                    </p>
                   </div>
                 ) : null}
               </article>

@@ -10,6 +10,17 @@ export type CancelAppointmentState = {
   message: string;
 };
 
+export type RescheduleBarber = {
+  id: string;
+  name: string;
+  current: boolean;
+};
+
+export type RescheduleBarbersState = {
+  ok: boolean;
+  message: string;
+  barbers: RescheduleBarber[];
+};
 export type RescheduleAvailabilityState = {
   ok: boolean;
   message: string;
@@ -141,11 +152,57 @@ function generateAvailableTimes(
   return slots;
 }
 
+export async function getMyAppointmentRescheduleBarbers(
+  appointmentId: string
+): Promise<RescheduleBarbersState> {
+  if (!UUID_PATTERN.test(appointmentId)) {
+    return { ok: false, message: "Agendamento inválido.", barbers: [] };
+  }
+
+  const session = await validateCustomerSession();
+
+  if (!session.ok) {
+    return { ok: false, message: session.message, barbers: [] };
+  }
+
+  const { data, error } = await session.supabase.rpc(
+    "get_my_appointment_reschedule_barbers",
+    { p_appointment_id: appointmentId }
+  );
+
+  if (error) {
+    return {
+      ok: false,
+      message: "Não foi possível consultar os profissionais disponíveis.",
+      barbers: [],
+    };
+  }
+
+  const barbers = (Array.isArray(data) ? data : []).map((barber) => ({
+    id: String(barber.id),
+    name: String(barber.name),
+    current: barber.current === true,
+  }));
+
+  return {
+    ok: true,
+    message:
+      barbers.length > 0
+        ? ""
+        : "Nenhum profissional está disponível para este atendimento.",
+    barbers,
+  };
+}
 export async function getMyAppointmentRescheduleAvailability(
   appointmentId: string,
+  barberId: string,
   date: string
 ): Promise<RescheduleAvailabilityState> {
-  if (!UUID_PATTERN.test(appointmentId) || !DATE_PATTERN.test(date)) {
+  if (
+    !UUID_PATTERN.test(appointmentId) ||
+    !UUID_PATTERN.test(barberId) ||
+    !DATE_PATTERN.test(date)
+  ) {
     return {
       ok: false,
       message: "Data ou agendamento inválido.",
@@ -163,6 +220,23 @@ export async function getMyAppointmentRescheduleAvailability(
     };
   }
 
+  const { data: allowedBarbers, error: allowedBarbersError } =
+    await session.supabase.rpc("get_my_appointment_reschedule_barbers", {
+      p_appointment_id: appointmentId,
+    });
+
+  const barberIsAllowed =
+    !allowedBarbersError &&
+    Array.isArray(allowedBarbers) &&
+    allowedBarbers.some((barber) => String(barber.id) === barberId);
+
+  if (!barberIsAllowed) {
+    return {
+      ok: false,
+      message: "O profissional escolhido não está disponível para este atendimento.",
+      times: [],
+    };
+  }
   const appointments = await getMyAppointments();
   const ownAppointment = appointments.find(
     (appointment) => appointment.id === appointmentId
@@ -211,7 +285,7 @@ export async function getMyAppointmentRescheduleAvailability(
     await session.supabase
       .from("working_hours")
       .select("day_of_week, start_time, end_time")
-      .eq("barber_id", ownAppointment.barber_id)
+      .eq("barber_id", barberId)
       .eq("day_of_week", dayOfWeek)
       .eq("active", true)
       .maybeSingle();
@@ -235,7 +309,7 @@ export async function getMyAppointmentRescheduleAvailability(
   const { data: busyData, error: busyError } = await session.supabase.rpc(
     "get_busy_periods",
     {
-      p_barber_id: ownAppointment.barber_id,
+      p_barber_id: barberId,
       p_date: date,
     }
   );
@@ -294,10 +368,12 @@ export async function getMyAppointmentRescheduleAvailability(
 
 export async function rescheduleMyAppointment(
   appointmentId: string,
+  barberId: string,
   newStartAt: string
 ): Promise<RescheduleAppointmentState> {
   if (
     !UUID_PATTERN.test(appointmentId) ||
+    !UUID_PATTERN.test(barberId) ||
     !newStartAt ||
     Number.isNaN(new Date(newStartAt).getTime())
   ) {
@@ -320,6 +396,7 @@ export async function rescheduleMyAppointment(
     "reschedule_my_appointment",
     {
       p_appointment_id: appointmentId,
+      p_barber_id: barberId,
       p_start_at: newStartAt,
     }
   );
@@ -372,6 +449,32 @@ export async function rescheduleMyAppointment(
       };
     }
 
+    if (
+      errorMessage.includes("subscription appointment barber change not allowed")
+    ) {
+      return {
+        ok: false,
+        message:
+          "Este atendimento usa benefício da assinatura e deve permanecer com o profissional do ciclo atual.",
+      };
+    }
+
+    if (
+      errorMessage.includes("barber does not provide all appointment services")
+    ) {
+      return {
+        ok: false,
+        message:
+          "O profissional escolhido não realiza todos os serviços deste atendimento.",
+      };
+    }
+
+    if (errorMessage.includes("barber unavailable")) {
+      return {
+        ok: false,
+        message: "O profissional escolhido não está disponível.",
+      };
+    }
     if (
       errorMessage.includes("new appointment time outside barber working hours")
     ) {

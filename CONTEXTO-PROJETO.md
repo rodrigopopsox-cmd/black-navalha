@@ -22798,3 +22798,534 @@ Antes de iniciar:
 - nenhuma cobrança real sem autorização explícita.
 
 # FIM DO CHECKPOINT — 2026-09-19
+---
+
+# CHECKPOINT DE CONTINUIDADE — VERCEL ONLINE / AMBIENTE DE DEMONSTRAÇÃO / PREPARAÇÃO PARA PRODUÇÃO — 2026-09-19
+
+## PRIORIDADE
+
+Este é o checkpoint mais recente e deve prevalecer sobre checkpoints anteriores quando houver conflito.
+
+A frente atual é:
+
+PREPARAÇÃO FINAL PARA PRODUÇÃO.
+
+O projeto já possui agora um ambiente HTTPS público e permanente de demonstração na Vercel.
+
+Ainda NÃO é go-live financeiro real.
+
+Mercado Pago permanece em TESTE/SANDBOX.
+
+Nenhuma cobrança real foi realizada.
+
+## GIT
+
+Branch:
+
+main
+
+HEAD/origin no fechamento desta continuidade:
+
+2f33232 Corrige cliente e profissional no dashboard
+
+O push funcional mais recente foi concluído antes deste checkpoint.
+
+Working tree esperado antes desta atualização documental:
+
+?? ASSINATURAS-LOTE.txt
+?? CODIGO-COMPLETO.txt
+
+Nunca versionar:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt;
+- .env.local.
+
+Nunca usar:
+
+git add .
+
+Staging somente com caminhos explícitos.
+
+Commit/push continuam exigindo autorização explícita.
+
+## COMISSÕES ADMINISTRATIVAS
+
+A frente anterior permanece concluída.
+
+Commit funcional:
+
+3f7da02 Implementa comissoes administrativas de assinaturas
+
+Commit documental:
+
+92565b7 Registra conclusao das comissoes administrativas
+
+Migration 032:
+
+supabase/sql/032-subscription-barber-commission.sql
+
+APLICADA.
+
+Migrations 007–032 estão aplicadas.
+
+NÃO reaplicar nenhuma.
+
+## HOSPEDAGEM ESCOLHIDA PARA DEMONSTRAÇÃO
+
+Plataforma:
+
+Vercel.
+
+Projeto:
+
+black-navalha
+
+Repositório conectado:
+
+rodrigopopsox-cmd/black-navalha
+
+Branch:
+
+main
+
+Framework detectado:
+
+Next.js.
+
+URL pública estável atual:
+
+https://black-navalha.vercel.app
+
+O deploy é integrado ao GitHub.
+
+Pushes em main geram novo deploy automaticamente.
+
+A conta Vercel recebeu configuração de 2FA durante a preparação.
+
+## ESCOPO DO AMBIENTE VERCEL ATUAL
+
+Objetivo:
+
+- deixar o projeto online;
+- permitir demonstração ao cliente;
+- substituir túneis temporários onde possível;
+- validar comportamento real em HTTPS;
+- continuar usando infraestrutura financeira de TESTE.
+
+Este ambiente NÃO deve ser confundido com produção financeira definitiva.
+
+Antes do go-live real ainda será necessário:
+
+- conta/credenciais Mercado Pago pertencentes à Black Navalha;
+- MERCADO_PAGO_TEST_MODE desligado/ausente;
+- revisão final de dados QA;
+- definição de domínio próprio, se desejado;
+- checklist final de produção.
+
+## VARIÁVEIS CONFIGURADAS NA VERCEL
+
+Foram configuradas sem expor valores:
+
+- NEXT_PUBLIC_SUPABASE_URL;
+- NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+- SUPABASE_SERVICE_ROLE_KEY;
+- MERCADO_PAGO_ACCESS_TOKEN;
+- MERCADO_PAGO_WEBHOOK_SECRET;
+- MERCADO_PAGO_TEST_MODE.
+
+Os valores secretos NÃO foram enviados ao chat.
+
+O ambiente de demonstração mantém:
+
+MERCADO_PAGO_TEST_MODE=true
+
+para preservar o sandbox.
+
+Não usar APRO em produção real.
+
+## AUDITORIA DE SEGREDOS VERSIONADOS
+
+Foi realizada busca segura nos arquivos versionados e no histórico Git.
+
+Resultado:
+
+- nenhum SUPABASE_SERVICE_ROLE_KEY real encontrado no contexto;
+- referências de Access Token/Webhook Secret no contexto são placeholders/curtas;
+- nenhum prefixo APP_USR real encontrado;
+- nenhum token TEST real encontrado;
+- nenhum sb_secret real encontrado;
+- histórico Git sem prefixo de credencial real detectado.
+
+Portanto não foi encontrada evidência de segredo ativo versionado que justificasse reescrita do histórico.
+
+.env.local permanece ignorado.
+
+## SUPABASE AUTH — URLS HTTPS
+
+Supabase Authentication → URL Configuration foi atualizado.
+
+Site URL atual para demonstração:
+
+https://black-navalha.vercel.app
+
+Redirect URLs preservadas para desenvolvimento local:
+
+http://localhost:3000/minha-assinatura/auth/callback
+
+http://localhost:3000/minha-assinatura/auth/recuperacao
+
+Redirect URLs adicionadas para Vercel:
+
+https://black-navalha.vercel.app/minha-assinatura/auth/callback
+
+https://black-navalha.vercel.app/minha-assinatura/auth/recuperacao
+
+Não foi alterado Rate Limit, provider, SMTP ou outra configuração de Auth nesta etapa.
+
+## VALIDAÇÃO PÚBLICA NA VERCEL
+
+Foram validadas diretamente em HTTPS:
+
+https://black-navalha.vercel.app/
+
+https://black-navalha.vercel.app/agendar
+
+https://black-navalha.vercel.app/assinaturas
+
+Resultado:
+
+APROVADO.
+
+Confirmado:
+
+- Home;
+- imagens;
+- identidade visual;
+- serviços reais;
+- serviços PLANO;
+- agendamento público;
+- Plano Mensal;
+- R$ 150,00;
+- serviços incluídos;
+- formulário de assinatura.
+
+Nenhum PIX foi criado apenas para essa validação.
+
+## MINHA ASSINATURA NA VERCEL
+
+Validado:
+
+https://black-navalha.vercel.app/minha-assinatura
+
+Login de identidade existente:
+
+APROVADO.
+
+Sessão/cookies em HTTPS:
+
+APROVADOS.
+
+Central do Cliente:
+
+APROVADA.
+
+Dados privados da identidade correta foram apresentados.
+
+Foram observados corretamente:
+
+- plano;
+- ciclo;
+- barbeiro;
+- renovação;
+- carência;
+- serviços;
+- próximo horário;
+- histórico de atendimentos.
+
+Nenhuma credencial foi enviada ao chat.
+
+## WEBHOOK MERCADO PAGO PERMANENTE DE TESTE
+
+O antigo Cloudflare Quick Tunnel deixou de ser necessário para demonstrações normais do webhook.
+
+No Mercado Pago, ambiente MODO DE TESTE, a URL foi atualizada para:
+
+https://black-navalha.vercel.app/api/mercado-pago/webhook
+
+Evento mantido:
+
+Order (Mercado Pago)
+
+Não foram habilitados:
+
+- Planos e assinaturas;
+- Pagamentos legacy.
+
+O segredo HMAC não foi regenerado.
+
+## SIMULAÇÃO OFICIAL DO WEBHOOK NA VERCEL
+
+Foi reutilizada uma Order sandbox já processada anteriormente:
+
+ORDTST01M2HZ39TZ187852ED7YM3BD4G
+
+Não foi criada nova Order.
+
+Não foi criado novo PIX.
+
+Não houve pagamento real.
+
+A ferramenta oficial:
+
+Simular notificações
+
+foi executada com:
+
+Order (Mercado Pago)
+
+Resultado:
+
+HTTP 200 OK.
+
+Isso validou em ambiente Vercel:
+
+Mercado Pago TESTE
+→ HTTPS permanente Vercel
+→ webhook
+→ HMAC
+→ GET Order server-side
+→ processamento idempotente
+→ HTTP 200.
+
+O body fictício do simulador continua não sendo autoridade financeira.
+
+A arquitetura financeira permanece preservada.
+
+## ADMIN NA VERCEL
+
+/admin foi validado com autenticação administrativa real.
+
+Dashboard carregou dados reais.
+
+Durante a validação foi identificado overflow horizontal na linha:
+
+Agenda de hoje.
+
+A causa era uma grade fixa com largura mínima superior ao espaço disponível ao lado da sidebar.
+
+## CORREÇÃO DE RESPONSIVIDADE DO DASHBOARD
+
+Commit:
+
+5b87e60 Corrige responsividade da agenda no dashboard
+
+Alterado somente:
+
+app/admin/page.tsx
+
+A grade fixa foi substituída por layout responsivo usando:
+
+repeat(auto-fit, minmax(140px, 1fr))
+
+Também foi removido alinhamento fixo do valor que prejudicava a reorganização.
+
+Build:
+
+APROVADO.
+
+Push:
+
+APROVADO.
+
+Redeploy automático Vercel:
+
+APROVADO.
+
+Validação na mesma largura onde ocorria overflow:
+
+APROVADA.
+
+## CORREÇÃO DE CLIENTE E PROFISSIONAL NO DASHBOARD
+
+Após corrigir o layout, foi observado que a Agenda de hoje apresentava:
+
+CLIENTE:
+Cliente
+
+PROFISSIONAL:
+-
+
+O appointment possuía customer_id/barber_id válidos.
+
+A causa era a dependência dos relacionamentos aninhados:
+
+customers(...)
+barbers(...)
+
+no dashboard.
+
+Foi reutilizado exatamente o padrão já validado anteriormente em:
+
+/admin/agenda
+
+O dashboard passou a:
+
+- selecionar customer_id;
+- selecionar barber_id;
+- carregar somente customers referenciados;
+- carregar somente barbers referenciados;
+- resolver nomes por Map usando os IDs autoritativos do appointment.
+
+Nenhuma alteração de banco foi necessária.
+
+Nenhuma regra de agendamento foi alterada.
+
+Build:
+
+APROVADO.
+
+Validação final na Vercel:
+
+APROVADA.
+
+A captura final confirmou:
+
+CLIENTE:
+Fixture Renovacao Autenticada
+
+PROFISSIONAL:
+Rodrigo Alves Correa
+
+SERVIÇO:
+Barba Assinante Mensal
+
+VALOR:
+R$ 0,00
+
+O card permaneceu responsivo e sem overflow.
+
+## DADOS QA VISÍVEIS
+
+O ambiente atual ainda utiliza o mesmo Supabase de desenvolvimento/testes.
+
+Existem dados explicitamente de QA, incluindo:
+
+Fixture Renovacao Autenticada
+
+Esses dados foram úteis para validar:
+
+- identidade;
+- renovação;
+- PIX sandbox;
+- webhook;
+- agendamentos;
+- cancelamento/remarcação.
+
+NÃO apagar automaticamente.
+
+Antes da apresentação final ao proprietário deve ser feita limpeza controlada dos dados de QA, após mapear vínculos e distinguir dados reais de dados de teste.
+
+Não realizar DELETE em cascata ou limpeza genérica.
+
+## ARQUITETURA FINANCEIRA PRESERVADA
+
+Plano Mensal:
+
+R$ 150 por pagamento mensal AVULSO via PIX.
+
+SEM recorrência automática Mercado Pago.
+
+Mercado Pago:
+
+Orders API.
+
+Browser NÃO confirma pagamento.
+
+Webhook HMAC + GET Order server-side continuam sendo autoridade.
+
+Polling continua apenas observacional.
+
+Capacidade:
+
+30 assinantes por barbeiro.
+
+SELECT ... FOR UPDATE permanece obrigatório.
+
+Hold PIX:
+
+30 minutos.
+
+Janela de renovação:
+
+7 dias antes do fim do ciclo.
+
+Carência:
+
+2 dias.
+
+Comissões administrativas:
+
+concluídas.
+
+## NÃO RECONSTRUIR
+
+Permanecem concluídos:
+
+- /agendar;
+- create_public_multi_appointment;
+- benefício/preço das assinaturas;
+- cancelamento;
+- remarcação;
+- troca de barbeiro;
+- Mercado Pago Orders;
+- PIX;
+- webhook/HMAC;
+- polling;
+- renovação voluntária;
+- renovação autenticada;
+- identidade segura;
+- recuperação de senha;
+- capacidade;
+- comissão administrativa;
+- deploy Vercel de demonstração.
+
+## PRÓXIMO CHAT — PRIORIDADE
+
+Continuar:
+
+PREPARAÇÃO FINAL PARA PRODUÇÃO / APRESENTAÇÃO AO CLIENTE.
+
+Primeiro:
+
+1. ler integralmente CONTEXTO-PROJETO.md;
+2. priorizar este checkpoint;
+3. confirmar Git;
+4. NÃO reaplicar migrations 007–032;
+5. NÃO criar novo PIX para repetir testes já aprovados;
+6. NÃO repetir webhook E2E já aprovado na Vercel;
+7. NÃO alterar Supabase Auth já configurado para Vercel sem necessidade.
+
+Próximo bloco recomendado:
+
+LIMPEZA CONTROLADA DOS DADOS DE QA PARA APRESENTAÇÃO.
+
+Antes de qualquer DELETE:
+
+- mapear somente registros explicitamente QA/teste;
+- mapear vínculos;
+- separar dados institucionais/reais;
+- apresentar plano de limpeza;
+- obter autorização explícita para operação destrutiva.
+
+Também pendente para go-live real futuro:
+
+- domínio próprio;
+- conta Mercado Pago da Black Navalha;
+- credenciais reais em ambiente Production;
+- MERCADO_PAGO_TEST_MODE=false/ausente;
+- webhook real de produção;
+- smoke test final sem cobrança real indevida;
+- decisão de plano comercial da Vercel após demonstração.
+
+# FIM DO CHECKPOINT — 2026-09-19

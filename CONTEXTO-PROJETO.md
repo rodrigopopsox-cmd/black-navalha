@@ -20683,3 +20683,253 @@ Após o checkpoint da Central do Cliente, a sequência planejada permanece:
 Não iniciar automaticamente nova frente antes de confirmar o checkpoint Git.
 
 # FIM DO CHECKPOINT — 2026-09-18
+---
+
+# CHECKPOINT FINAL — AUTENTICAÇÃO DO CLIENTE / NOVA IDENTIDADE VISUAL — 2026-09-18
+
+## PRIORIDADE
+
+Este é o checkpoint mais recente da frente visual da experiência autenticada do cliente.
+
+Preservar integralmente o checkpoint anterior:
+
+CENTRAL DO CLIENTE / NOVA IDENTIDADE VISUAL — 2026-09-18.
+
+A Central do Cliente em `/minha-assinatura` continua concluída e não foi reconstruída nesta frente.
+
+## OBJETIVO
+
+Foi concluído o refinamento visual das telas de autenticação do cliente para integrá-las à identidade aprovada da Central do Cliente / Black Navalha.
+
+Rotas trabalhadas:
+
+- `/minha-assinatura/entrar`;
+- `/minha-assinatura/recuperar-senha`;
+- `/minha-assinatura/redefinir-senha`.
+
+Nenhuma lógica de autenticação foi reconstruída.
+
+## IDENTIDADE VISUAL APROVADA
+
+A autenticação agora utiliza a mesma linguagem visual da Central do Cliente:
+
+- preto dominante;
+- dourado `#d29d4f`;
+- branco para informação principal;
+- logo real Black Navalha;
+- tipografia limpa e forte;
+- cards escuros;
+- bordas discretas;
+- poucos elementos;
+- hierarquia visual controlada;
+- aparência premium.
+
+O cabeçalho das telas utiliza:
+
+- logo Black Navalha;
+- `BLACK NAVALHA`;
+- `BARBEARIA`;
+- identificação `CENTRAL DO CLIENTE`;
+- ação utilitária `VOLTAR` no canto superior direito.
+
+A decisão visual aprovada é manter ações secundárias/utilitárias no cabeçalho, seguindo o padrão do `SAIR` existente na Central, evitando poluição no corpo da página.
+
+## LOGIN / CRIAÇÃO DE ACESSO
+
+Rota:
+
+`/minha-assinatura/entrar`
+
+Direção final aprovada:
+
+- label `ACESSO DO CLIENTE`;
+- título `SEU ESPAÇO BLACK NAVALHA.`;
+- apoio `Assinatura, horários e benefícios em um só lugar.`;
+- abas `JÁ TENHO ACESSO` e `CRIAR ACESSO`;
+- campos escuros;
+- labels dourados;
+- CTA dourado;
+- recuperação de senha discreta;
+- nota de segurança subordinada;
+- `VOLTAR` no cabeçalho.
+
+O título foi deliberadamente reduzido em peso/tamanho em relação às primeiras propostas para evitar aparência agressiva.
+
+Desktop:
+
+APROVADO.
+
+Mobile aproximadamente 385–390 px:
+
+APROVADO.
+
+Sem overflow observado.
+
+## RECUPERAÇÃO DE SENHA
+
+Rota:
+
+`/minha-assinatura/recuperar-senha`
+
+Foi aplicada a mesma identidade visual aprovada.
+
+Estrutura:
+
+- cabeçalho Black Navalha;
+- `CENTRAL DO CLIENTE`;
+- `VOLTAR`;
+- `ACESSO DO CLIENTE`;
+- título `RECUPERAR SENHA`;
+- texto curto;
+- card escuro;
+- campo de e-mail;
+- CTA dourado.
+
+Desktop:
+
+APROVADO.
+
+Mobile aproximadamente 385 x 823:
+
+APROVADO.
+
+Sem overflow observado.
+
+O rate limit e a lógica real de recuperação permaneceram inalterados.
+
+## REDEFINIÇÃO DE SENHA
+
+Rota:
+
+`/minha-assinatura/redefinir-senha`
+
+Foi aplicada a mesma linguagem visual.
+
+Estrutura:
+
+- cabeçalho Black Navalha;
+- `CENTRAL DO CLIENTE`;
+- `VOLTAR`;
+- `ACESSO DO CLIENTE`;
+- título `DEFINA SUA NOVA SENHA`;
+- formulário no mesmo sistema visual.
+
+A proteção server-side por sessão de recovery foi preservada.
+
+Não foi burlada a proteção apenas para abrir a página visualmente.
+
+Também foram corrigidos dois textos que estavam com caracteres corrompidos no arquivo:
+
+- `As senhas informadas não coincidem.`
+- `Não foi possível atualizar sua senha.`
+
+Nenhuma regra funcional foi alterada nessa correção textual.
+
+## FUNCIONAMENTO PRESERVADO
+
+Permaneceu integralmente preservado:
+
+- Supabase Auth;
+- login por e-mail/senha;
+- criação de acesso;
+- confirmação de e-mail;
+- callback;
+- claim seguro do customer;
+- identidade via `auth.uid()`;
+- recuperação de senha;
+- rate limit;
+- redefinição de senha;
+- logout após redefinição;
+- fluxo pós-reset.
+
+Não houve alteração de banco.
+
+## NÃO ALTERADO
+
+Não foi alterado:
+
+- `/minha-assinatura` funcional;
+- `/agendar`;
+- `create_public_multi_appointment`;
+- benefícios/preços das assinaturas;
+- cancelamento;
+- remarcação;
+- Mercado Pago Orders;
+- PIX;
+- webhook/HMAC;
+- polling;
+- renovação voluntária;
+- renovação autenticada;
+- identidade segura;
+- regras financeiras;
+- Admin.
+
+## BANCO
+
+Nenhuma alteração.
+
+Migrations `007–030` permanecem aplicadas.
+
+NÃO reaplicar nenhuma.
+
+## BUILD
+
+Executado:
+
+`npm.cmd run build`
+
+Resultado:
+
+APROVADO.
+
+- Next.js 16.3.4;
+- compilação concluída;
+- TypeScript sem erros;
+- rotas de autenticação reconhecidas normalmente.
+
+## DIFF CHECK
+
+Executado:
+
+`git diff --check`
+
+Resultado:
+
+APROVADO.
+
+Somente avisos conhecidos de futura conversão LF → CRLF no Windows.
+
+Nenhum erro de whitespace foi apresentado.
+
+## ARQUIVOS FUNCIONAIS ALTERADOS
+
+- `app/minha-assinatura/entrar/page.tsx`;
+- `app/minha-assinatura/page.module.css`;
+- `app/minha-assinatura/recuperar-senha/page.tsx`;
+- `app/minha-assinatura/redefinir-senha/page.tsx`;
+- `app/minha-assinatura/redefinir-senha/reset-password-form.tsx`.
+
+## REGRAS DE GIT
+
+Continuam proibidos de versionamento:
+
+- `ASSINATURAS-LOTE.txt`;
+- `CODIGO-COMPLETO.txt`;
+- `.env.local`.
+
+Nunca usar `git add .`.
+
+## PRÓXIMA SEQUÊNCIA PLANEJADA
+
+Com a frente de autenticação concluída, a sequência planejada permanece:
+
+1. `/assinaturas` e experiência PIX;
+2. `/agendar` somente visual;
+3. padronização de loading/erro/sucesso/vazios;
+4. troca de barbeiro na remarcação conforme regra já definida;
+5. comissão Admin;
+6. preparação para produção.
+
+Na próxima frente, preservar todas as regras financeiras e funcionais já aprovadas.
+
+# FIM DO CHECKPOINT — 2026-09-18

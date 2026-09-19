@@ -1,4 +1,5 @@
-﻿import Link from "next/link";
+import Image from "next/image";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
@@ -15,21 +16,39 @@ export default async function CustomerLoginPage() {
   }
 
   return (
-    <main className={styles.page}>
-      <div className={styles.narrow}>
-        <Link href="/assinaturas" className={styles.back}>
-          <ArrowLeft size={15} aria-hidden="true" />
-          Voltar para assinaturas
-        </Link>
+    <main className={`${styles.page} ${styles.authPage}`}>
+      <div className={`${styles.narrow} ${styles.authShell}`}>
+        <header className={styles.authBrand}>
+          <Link href="/" className={styles.authBrandIdentity}>
+            <Image
+              src="/black-navalha/logo.png"
+              alt=""
+              width={70}
+              height={56}
+              className={styles.authBrandLogo}
+              priority
+            />
 
-        <header className={styles.header}>
-          <span>Área do assinante</span>
-          <h1>Minha assinatura</h1>
-          <p>
-            Entre com seu acesso pessoal para consultar sua assinatura com
-            segurança.
-          </p>
+            <span className={styles.authBrandCopy}>
+              <strong>BLACK NAVALHA</strong>
+              <span>BARBEARIA</span>
+            </span>
+          </Link>
+
+          <div className={styles.authBrandActions}>
+            <span className={styles.authBrandArea}>CENTRAL DO CLIENTE</span>
+            <Link href="/assinaturas" className={styles.authHeaderBack}>
+              <ArrowLeft size={11} aria-hidden="true" />
+              VOLTAR
+            </Link>
+          </div>
         </header>
+
+        <section className={styles.authIntro}>
+          <span>ACESSO DO CLIENTE</span>
+          <h1>SEU ESPAÇO BLACK NAVALHA.</h1>
+          <p>Assinatura, horários e benefícios em um só lugar.</p>
+        </section>
 
         <CustomerAuthForm />
       </div>

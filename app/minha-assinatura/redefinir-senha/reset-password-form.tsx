@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -23,7 +23,7 @@ export default function ResetPasswordForm() {
     }
 
     if (password !== confirmation) {
-      setError("As senhas informadas nÃ£o coincidem.");
+      setError("As senhas informadas não coincidem.");
       return;
     }
 

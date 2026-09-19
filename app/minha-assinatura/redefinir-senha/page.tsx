@@ -1,4 +1,7 @@
+import Image from "next/image";
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
 
@@ -18,14 +21,45 @@ export default async function ResetPasswordPage() {
   }
 
   return (
-    <main className={styles.customerPage}>
-      <section className={styles.customerShell}>
-        <span className={styles.eyebrow}>Área do assinante</span>
-        <h1>NOVA SENHA</h1>
-        <p>Defina uma nova senha para seu acesso pessoal.</p>
+    <main className={`${styles.page} ${styles.authPage}`}>
+      <div className={`${styles.narrow} ${styles.authShell}`}>
+        <header className={styles.authBrand}>
+          <Link href="/" className={styles.authBrandIdentity}>
+            <Image
+              src="/black-navalha/logo.png"
+              alt=""
+              width={70}
+              height={56}
+              className={styles.authBrandLogo}
+              priority
+            />
+
+            <span className={styles.authBrandCopy}>
+              <strong>BLACK NAVALHA</strong>
+              <span>BARBEARIA</span>
+            </span>
+          </Link>
+
+          <div className={styles.authBrandActions}>
+            <span className={styles.authBrandArea}>CENTRAL DO CLIENTE</span>
+            <Link
+              href="/minha-assinatura/entrar"
+              className={styles.authHeaderBack}
+            >
+              <ArrowLeft size={11} aria-hidden="true" />
+              VOLTAR
+            </Link>
+          </div>
+        </header>
+
+        <section className={styles.authIntro}>
+          <span>ACESSO DO CLIENTE</span>
+          <h1>DEFINA SUA NOVA SENHA</h1>
+          <p>Escolha uma nova senha para seu acesso pessoal.</p>
+        </section>
 
         <ResetPasswordForm />
-      </section>
+      </div>
     </main>
   );
 }

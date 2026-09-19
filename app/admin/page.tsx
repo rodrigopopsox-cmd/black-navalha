@@ -10,19 +10,24 @@ import { createClient } from "@/lib/supabase/server";
 
 type TodayAppointment = {
   id: string;
+  customer_id: string;
+  barber_id: string;
   start_at: string;
   price: number | string;
   status: string;
-  customers: {
-    name: string;
-    phone: string | null;
-  }[];
-  barbers: {
-    name: string;
-  }[];
   appointment_services: {
     service_name: string;
   }[];
+};
+
+type TodayCustomer = {
+  id: string;
+  name: string;
+};
+
+type TodayBarber = {
+  id: string;
+  name: string;
 };
 
 const VALID_TODAY_STATUSES = [
@@ -45,16 +50,11 @@ export default async function AdminPage() {
       .from("appointments")
       .select(`
         id,
+        customer_id,
+        barber_id,
         start_at,
         price,
         status,
-        customers (
-          name,
-          phone
-        ),
-        barbers (
-          name
-        ),
         appointment_services (
           service_name
         )
@@ -112,6 +112,73 @@ export default async function AdminPage() {
         appointment.status
       )
     );
+
+  const customerIds = Array.from(
+    new Set(
+      validTodayAppointments.map(
+        (appointment) => appointment.customer_id
+      )
+    )
+  );
+
+  const barberIds = Array.from(
+    new Set(
+      validTodayAppointments.map(
+        (appointment) => appointment.barber_id
+      )
+    )
+  );
+
+  let todayCustomers: TodayCustomer[] = [];
+  let todayBarbers: TodayBarber[] = [];
+
+  if (customerIds.length > 0) {
+    const result = await supabase
+      .from("customers")
+      .select("id, name")
+      .in("id", customerIds);
+
+    if (result.error) {
+      console.error(
+        "Erro ao carregar clientes do dashboard:",
+        result.error
+      );
+    } else {
+      todayCustomers =
+        (result.data ?? []) as TodayCustomer[];
+    }
+  }
+
+  if (barberIds.length > 0) {
+    const result = await supabase
+      .from("barbers")
+      .select("id, name")
+      .in("id", barberIds);
+
+    if (result.error) {
+      console.error(
+        "Erro ao carregar profissionais do dashboard:",
+        result.error
+      );
+    } else {
+      todayBarbers =
+        (result.data ?? []) as TodayBarber[];
+    }
+  }
+
+  const customersById = new Map(
+    todayCustomers.map((customer) => [
+      customer.id,
+      customer.name,
+    ])
+  );
+
+  const barbersById = new Map(
+    todayBarbers.map((barber) => [
+      barber.id,
+      barber.name,
+    ])
+  );
 
   const todayRevenue =
     validTodayAppointments.reduce(
@@ -266,8 +333,9 @@ export default async function AdminPage() {
                     </small>
 
                     <strong>
-                      {appointment.customers[0]?.name ??
-                        "Cliente"}
+                      {customersById.get(
+                        appointment.customer_id
+                      ) ?? "Cliente"}
                     </strong>
                   </div>
 
@@ -283,8 +351,9 @@ export default async function AdminPage() {
                     </small>
 
                     <strong>
-                      {appointment.barbers[0]?.name ??
-                        "-"}
+                      {barbersById.get(
+                        appointment.barber_id
+                      ) ?? "-"}
                     </strong>
                   </div>
 

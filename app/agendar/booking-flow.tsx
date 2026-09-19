@@ -1,4 +1,6 @@
-﻿"use client";
+"use client";
+
+import Image from "next/image";
 
 import { useMemo, useState, useEffect} from "react";
 
@@ -835,21 +837,31 @@ export default function BookingFlow({
     <main className="booking-page">
 
       <div className="booking-top">
+        <div className="booking-top-inner">
+          <a href="/" className="booking-brand">
+            <Image
+              src="/black-navalha/logo.png"
+              alt="Black Navalha"
+              width={78}
+              height={58}
+              priority
+              className="booking-brand-logo"
+            />
 
-        <a
-          href="/"
-          className="booking-brand"
-        >
-          BLACK{" "}
-          <span>
-            NAVALHA
-          </span>
-        </a>
+            <span className="booking-brand-copy">
+              <strong>BLACK NAVALHA</strong>
+              <small>BARBEARIA</small>
+            </span>
+          </a>
 
-        <div className="booking-address">
-          PINHAIS • PARANÁ
+          <div className="booking-top-actions">
+            <span className="booking-area-badge">AGENDAMENTO</span>
+            <a href="/" className="booking-home-link">
+              <span aria-hidden="true">←</span>
+              VOLTAR
+            </a>
+          </div>
         </div>
-
       </div>
 
 

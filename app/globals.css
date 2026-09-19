@@ -3235,3 +3235,1093 @@ span {
   color: #fff;
   background: #111;
 }
+/* =========================================================
+   AGENDAR — barra inferior premium (somente visual)
+   ========================================================= */
+.booking-selection-footer {
+  bottom: 12px;
+  min-height: 66px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  background: rgba(10, 10, 10, 0.86);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(14px);
+}
+
+.booking-selection-footer > div {
+  padding: 14px 16px;
+  gap: 14px;
+}
+
+.booking-selection-footer span {
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.booking-selection-footer strong {
+  font-size: 10px;
+}
+
+.booking-selection-footer .selection-total-price {
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.booking-selection-footer button {
+  min-height: 42px;
+  border-radius: 9px;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+}
+
+@media (max-width: 600px) {
+  .booking-selection-footer {
+    bottom: 10px;
+  }
+
+  .booking-selection-footer > div {
+    padding: 14px;
+  }
+}
+
+/* === AGENDAR — VISUAL PREMIUM OVERRIDE START ===
+   Ajustes somente visuais (não muda lógica/fluxo)
+   Referência: Black Navalha (preto dominante + dourado #d29d4f)
+=== */
+
+.booking-top {
+  height: 74px;
+  background: radial-gradient(circle at 0% 0%, rgba(210, 157, 79, 0.08), transparent 34%), #070707;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.booking-progress {
+  min-height: 70px;
+  background: #090909;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  gap: 28px;
+}
+
+.progress-step {
+  color: #6f6962;
+}
+
+.progress-step > span {
+  width: 28px;
+  height: 28px;
+  border-color: rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.25);
+}
+
+.progress-step small {
+  letter-spacing: 0.12em;
+}
+
+.progress-step.active {
+  color: #d29d4f;
+}
+
+.progress-step.active > span {
+  border-color: rgba(210, 157, 79, 0.85);
+  box-shadow: 0 0 0 4px rgba(210, 157, 79, 0.06);
+}
+
+.progress-step.completed {
+  color: #8a8279;
+}
+
+.progress-step.completed > span {
+  background: #d29d4f;
+  border-color: #d29d4f;
+  box-shadow: 0 0 0 4px rgba(210, 157, 79, 0.07);
+}
+
+.booking-heading > div {
+  letter-spacing: 0.18em;
+}
+
+.booking-heading h1 {
+  letter-spacing: -0.02em;
+}
+
+.booking-category-title {
+  color: #d29d4f;
+}
+
+.booking-category-title h2 {
+  color: #bfb7ad;
+}
+
+.booking-service {
+  background: rgba(10,10,10,0.72);
+  border-bottom-color: rgba(255,255,255,0.06);
+}
+
+.booking-service:hover {
+  background: rgba(17,17,17,0.78);
+}
+
+.booking-selection-footer {
+  bottom: calc(10px + env(safe-area-inset-bottom));
+  min-height: 66px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: rgba(8, 8, 8, 0.84);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.58);
+  backdrop-filter: blur(14px);
+}
+
+.booking-selection-footer > div {
+  padding: 14px 16px;
+  gap: 14px;
+}
+
+.booking-selection-footer span {
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.booking-selection-footer strong {
+  font-size: 10px;
+}
+
+.booking-selection-footer .selection-total-price {
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.booking-selection-footer button {
+  min-height: 42px;
+  border-radius: 10px;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+}
+
+@media (max-width: 600px) {
+  .booking-progress {
+    gap: 18px;
+  }
+
+  .booking-selection-footer {
+    bottom: calc(8px + env(safe-area-inset-bottom));
+  }
+
+  .booking-selection-footer > div {
+    padding: 14px;
+  }
+}
+
+
+/* === AGENDAR — PASSO 1 REFINEMENT === */
+.booking-heading {
+  margin-bottom: 32px;
+}
+
+.booking-heading h1 {
+  margin-bottom: 9px;
+  font-size: clamp(30px, 4vw, 40px);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.08;
+}
+
+.booking-heading p {
+  color: #817a72;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.booking-service {
+  min-height: 96px;
+  padding: 17px 20px;
+  align-items: flex-start;
+}
+
+.booking-service-copy strong {
+  margin-bottom: 6px;
+}
+
+.booking-service-copy p {
+  margin-bottom: 9px;
+  line-height: 1.5;
+}
+
+.booking-selection-footer {
+  min-height: 0;
+  padding: 10px 12px;
+  border-radius: 11px;
+}
+
+.booking-selection-footer > div {
+  padding: 0;
+  gap: 13px;
+}
+
+.booking-selection-footer button {
+  min-height: 40px;
+  border-radius: 7px;
+}
+
+@media (max-width: 600px) {
+  .booking-heading {
+    margin-bottom: 26px;
+  }
+
+  .booking-heading h1 {
+    font-size: clamp(28px, 9vw, 36px);
+  }
+
+  .booking-service {
+    min-height: 88px;
+    padding: 15px 16px;
+  }
+
+  .booking-selection-footer {
+    padding: 10px;
+  }
+
+  .booking-selection-footer > div {
+    padding: 0;
+  }
+}
+/* === AGENDAR — PASSO 1 REFINEMENT END === */
+/* === AGENDAR — VISUAL PREMIUM OVERRIDE END === */
+
+/* =========================================================
+   AGENDAR — BLACK NAVALHA PRODUCT IDENTITY
+   Somente visual. Não altera fluxo ou regras.
+   ========================================================= */
+
+.booking-page {
+  min-height: 100vh;
+  color: #f5f1eb;
+  background:
+    radial-gradient(circle at 82% 2%, rgba(210, 157, 79, 0.055), transparent 25%),
+    #080808;
+}
+
+.booking-top {
+  height: auto;
+  min-height: 92px;
+  padding: 0 max(24px, calc((100% - 1080px) / 2));
+  border-bottom: 1px solid rgba(210, 157, 79, 0.22);
+  background: transparent;
+}
+
+.booking-top > div {
+  width: 100%;
+  min-height: 92px;
+}
+
+.booking-brand {
+  position: relative;
+  display: flex;
+  min-height: 58px;
+  padding-left: 78px;
+  align-items: center;
+  color: #f5f1eb;
+  font-size: 0;
+}
+
+.booking-brand::before {
+  position: absolute;
+  left: 0;
+  width: 66px;
+  height: 52px;
+  background: url("/black-navalha/logo.png") center / contain no-repeat;
+  filter: invert(1);
+  content: "";
+}
+
+.booking-brand::after {
+  color: #f5f1eb;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+  line-height: 1;
+  white-space: pre;
+  content: "BLACK NAVALHA\A\A BARBEARIA";
+}
+
+.booking-address {
+  color: #77716b;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.booking-progress {
+  width: min(1080px, calc(100% - 40px));
+  min-height: 72px;
+  margin: 0 auto;
+  padding: 0;
+  justify-content: flex-start;
+  gap: 36px;
+  border-bottom: 1px solid #202020;
+  background: transparent;
+}
+
+.progress-step {
+  flex: 0 0 auto;
+  gap: 9px;
+  color: #625d57;
+}
+
+.progress-step > span {
+  width: 29px;
+  height: 29px;
+  border: 1px solid #292929;
+  background: #0a0a0a;
+  font-size: 9px;
+}
+
+.progress-step small {
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+}
+
+.progress-step.active {
+  color: #d29d4f;
+}
+
+.progress-step.active > span {
+  border-color: rgba(210, 157, 79, 0.75);
+  background: rgba(210, 157, 79, 0.055);
+  box-shadow: 0 0 0 4px rgba(210, 157, 79, 0.045);
+}
+
+.progress-step.completed > span {
+  color: #080808;
+  background: #d29d4f;
+  border-color: #d29d4f;
+}
+
+.booking-container {
+  width: min(1080px, calc(100% - 40px));
+  margin-right: auto;
+  margin-left: auto;
+  padding-top: 54px;
+  padding-bottom: 110px;
+}
+
+.booking-heading {
+  max-width: 690px;
+  margin-bottom: 42px;
+}
+
+.booking-heading > div {
+  margin-bottom: 10px;
+  color: #d29d4f;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+}
+
+.booking-heading h1 {
+  margin: 0 0 12px;
+  color: #f5f1eb;
+  font-size: clamp(34px, 4vw, 48px);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.02;
+}
+
+.booking-heading p {
+  margin: 0;
+  color: #817a72;
+  font-size: 11px;
+  line-height: 1.65;
+}
+
+.booking-category {
+  margin-bottom: 28px;
+}
+
+.booking-category-title {
+  display: flex;
+  min-height: 42px;
+  margin: 0;
+  padding: 0 4px 11px;
+  align-items: center;
+  gap: 10px;
+  color: #d29d4f;
+}
+
+.booking-category-title h2 {
+  margin: 0;
+  color: #d4cec6;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.booking-services {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid #252525;
+  border-radius: 10px;
+  background: #0b0b0b;
+}
+
+.booking-service {
+  min-height: 94px;
+  padding: 17px 18px;
+  align-items: flex-start;
+  gap: 16px;
+  border-bottom: 1px solid #202020;
+  background: #0b0b0b;
+  transition:
+    background 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.booking-service:nth-child(odd) {
+  border-right: 1px solid #202020;
+}
+
+.booking-service:hover {
+  background: #0f0f0f;
+}
+
+.booking-service.selected-service {
+  background:
+    linear-gradient(135deg, rgba(210, 157, 79, 0.07), transparent 58%),
+    #0d0d0d;
+  box-shadow: inset 3px 0 0 #d29d4f;
+}
+
+.multi-service-check {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  border: 1px solid #393939;
+  border-radius: 5px;
+  background: #0d0d0d;
+}
+
+.booking-service.selected-service .multi-service-check {
+  border-color: #d29d4f;
+  background: #d29d4f;
+}
+
+.booking-service-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.booking-service-copy strong {
+  margin-bottom: 6px;
+  color: #eee9e2;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.booking-service-copy p {
+  max-width: 430px;
+  margin: 0 0 8px;
+  color: #716b64;
+  font-size: 9px;
+  line-height: 1.55;
+}
+
+.booking-service-copy span {
+  color: #5f5a54;
+  font-size: 8px;
+}
+
+.booking-price {
+  flex: 0 0 auto;
+  color: #d29d4f;
+  font-size: 11px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.booking-service .booking-price:has(+ *) {
+  color: #d29d4f;
+}
+
+.booking-selection-footer {
+  width: min(1080px, calc(100% - 40px));
+  min-height: 62px;
+  margin: 22px auto 0;
+  padding: 9px 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  border: 1px solid rgba(210, 157, 79, 0.18);
+  border-radius: 10px;
+  background: rgba(9, 9, 9, 0.94);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(16px);
+}
+
+.booking-selection-footer > div {
+  padding: 0;
+  gap: 15px;
+}
+
+.booking-selection-footer span {
+  color: #65605a;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+}
+
+.booking-selection-footer strong {
+  color: #aaa39b;
+  font-size: 9px;
+}
+
+.booking-selection-footer .selection-total-price {
+  color: #d29d4f;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.booking-selection-footer button {
+  min-width: 150px;
+  min-height: 42px;
+  border-radius: 6px;
+  background: #d29d4f;
+  color: #080808;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+}
+
+.booking-selection-footer button:disabled {
+  opacity: 0.38;
+}
+
+.booking-barbers,
+.booking-dates,
+.booking-times,
+.booking-summary,
+.booking-customer-form,
+.booking-empty,
+.booking-loading {
+  border-radius: 10px;
+}
+
+@media (max-width: 760px) {
+  .booking-top {
+    min-height: 72px;
+    padding: 0 14px;
+  }
+
+  .booking-top > div {
+    min-height: 72px;
+  }
+
+  .booking-brand {
+    min-height: 46px;
+    padding-left: 58px;
+  }
+
+  .booking-brand::before {
+    width: 48px;
+    height: 40px;
+  }
+
+  .booking-brand::after {
+    font-size: 13px;
+    letter-spacing: 0.08em;
+  }
+
+  .booking-address {
+    font-size: 6px;
+    letter-spacing: 0.12em;
+  }
+
+  .booking-progress {
+    width: calc(100% - 28px);
+    min-height: 61px;
+    gap: 0;
+    justify-content: space-between;
+  }
+
+  .progress-step {
+    gap: 5px;
+  }
+
+  .progress-step > span {
+    width: 26px;
+    height: 26px;
+    font-size: 8px;
+  }
+
+  .progress-step small {
+    display: none;
+  }
+
+  .progress-step.active small {
+    display: block;
+    font-size: 6px;
+  }
+
+  .booking-container {
+    width: calc(100% - 28px);
+    padding-top: 36px;
+    padding-bottom: 108px;
+  }
+
+  .booking-heading {
+    margin-bottom: 30px;
+  }
+
+  .booking-heading h1 {
+    font-size: clamp(30px, 9vw, 38px);
+  }
+
+  .booking-category {
+    margin-bottom: 24px;
+  }
+
+  .booking-services {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-service {
+    min-height: 86px;
+    padding: 15px;
+  }
+
+  .booking-service:nth-child(odd) {
+    border-right: 0;
+  }
+
+  .booking-selection-footer {
+    width: calc(100% - 28px);
+    min-height: 0;
+    padding: 9px;
+    bottom: calc(8px + env(safe-area-inset-bottom));
+  }
+
+  .booking-selection-footer > div {
+    gap: 10px;
+  }
+}
+
+@media (max-width: 430px) {
+  .booking-address {
+    display: none;
+  }
+
+  .booking-heading h1 {
+    font-size: 31px;
+  }
+
+  .booking-service {
+    gap: 12px;
+  }
+
+  .booking-selection-footer {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .booking-selection-footer > div {
+    justify-content: space-between;
+  }
+
+  .booking-selection-footer button {
+    width: 100%;
+    min-height: 40px;
+  }
+}
+
+/* =========================================================
+   AGENDAR — BLACK NAVALHA PRODUCT IDENTITY END
+   ========================================================= */
+
+/* =========================================================
+   AGENDAR - CENTRAL DO CLIENTE IDENTITY ALIGNMENT
+   Somente apresentação. Fluxo e regras permanecem intactos.
+   ========================================================= */
+
+.booking-page {
+  min-height: 100vh;
+  padding: 48px 20px 90px;
+  color: #f5f1eb;
+  background:
+    radial-gradient(circle at 75% 12%, rgba(210, 157, 79, 0.10), transparent 28%),
+    #090909;
+}
+
+.booking-top {
+  width: min(760px, 100%);
+  min-height: 82px;
+  height: auto;
+  margin: 0 auto;
+  padding: 12px 0 18px;
+  border-bottom: 1px solid rgba(210, 157, 79, 0.28);
+  background: transparent;
+}
+
+.booking-top-inner {
+  display: flex;
+  min-height: 58px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.booking-brand {
+  display: flex;
+  min-height: 0;
+  padding: 0;
+  align-items: center;
+  gap: 15px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.booking-brand::before,
+.booking-brand::after {
+  display: none;
+  content: none;
+}
+
+.booking-brand-logo {
+  width: 70px;
+  height: 56px;
+  flex: 0 0 auto;
+  object-fit: contain;
+  filter: invert(1);
+}
+
+.booking-brand-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.booking-brand-copy strong {
+  color: #f5f1eb;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.booking-brand-copy small {
+  color: #d29d4f;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.28em;
+  line-height: 1;
+}
+
+.booking-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.booking-area-badge {
+  padding: 9px 12px;
+  border: 1px solid rgba(210, 157, 79, 0.28);
+  border-radius: 999px;
+  color: #a9a29a;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  white-space: nowrap;
+}
+
+.booking-home-link {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  gap: 6px;
+  color: #77716b;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  line-height: normal;
+  text-decoration: none;
+  transition: color 160ms ease;
+}
+
+.booking-home-link span {
+  color: #6e6861;
+  font-size: 10px;
+  line-height: 1;
+}
+
+.booking-home-link:hover {
+  color: #d29d4f;
+}
+
+.booking-address {
+  display: none;
+}
+
+.booking-progress {
+  width: min(760px, 100%);
+  min-height: 66px;
+  margin: 0 auto;
+  padding: 0;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid #252525;
+  background: transparent;
+}
+
+.progress-step {
+  flex: 0 1 auto;
+  min-width: 0;
+  gap: 7px;
+}
+
+.progress-step > span {
+  width: 27px;
+  height: 27px;
+  flex: 0 0 27px;
+}
+
+.progress-step small {
+  font-size: 7px;
+  letter-spacing: 0.12em;
+}
+
+.booking-container {
+  width: min(760px, 100%);
+  margin: 0 auto;
+  padding: 42px 0 105px;
+}
+
+.booking-heading {
+  max-width: 620px;
+  margin-bottom: 34px;
+}
+
+.booking-heading > div {
+  margin-bottom: 10px;
+  color: #d29d4f;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.20em;
+}
+
+.booking-heading h1 {
+  margin: 0 0 12px;
+  color: #f5f1eb;
+  font-size: clamp(31px, 5vw, 42px);
+  font-weight: 900;
+  letter-spacing: 0.025em;
+  line-height: 1.05;
+}
+
+.booking-heading p {
+  max-width: 470px;
+  color: #77716b;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.booking-category {
+  margin-bottom: 22px;
+}
+
+.booking-category-title {
+  min-height: 38px;
+  padding: 0 2px 10px;
+  gap: 9px;
+}
+
+.booking-category-title h2 {
+  color: #c9c3bb;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.10em;
+}
+
+.booking-services {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-color: #292929;
+  border-radius: 10px;
+  background: #0f0f0f;
+}
+
+.booking-service {
+  min-height: 100px;
+  padding: 17px 18px;
+  border-bottom-color: #242424;
+  background: #0f0f0f;
+}
+
+.booking-service:nth-child(odd) {
+  border-right-color: #242424;
+}
+
+.booking-service:hover {
+  background: #111;
+}
+
+.booking-service.selected-service {
+  background:
+    linear-gradient(135deg, rgba(210, 157, 79, 0.055), transparent 60%),
+    #111;
+  box-shadow: inset 3px 0 0 #d29d4f;
+}
+
+.booking-service-copy strong {
+  color: #eee9e2;
+  font-size: 12px;
+}
+
+.booking-service-copy p {
+  color: #77716b;
+}
+
+.booking-service-copy span {
+  color: #6e6861;
+}
+
+.booking-selection-footer {
+  width: min(760px, 100%);
+  margin-right: auto;
+  margin-left: auto;
+  padding: 9px 11px;
+  border-color: rgba(210, 157, 79, 0.20);
+  border-radius: 10px;
+  background: rgba(9, 9, 9, 0.95);
+}
+
+.booking-selection-footer > div {
+  padding: 0;
+}
+
+.booking-selection-footer button {
+  min-height: 42px;
+  border-radius: 6px;
+}
+
+@media (max-width: 620px) {
+  .booking-page {
+    padding: 24px 14px 64px;
+  }
+
+  .booking-top {
+    min-height: 66px;
+    padding: 8px 0 14px;
+  }
+
+  .booking-top-inner {
+    min-height: 44px;
+    gap: 10px;
+  }
+
+  .booking-brand {
+    gap: 9px;
+  }
+
+  .booking-brand-logo {
+    width: 48px;
+    height: 42px;
+  }
+
+  .booking-brand-copy {
+    gap: 4px;
+  }
+
+  .booking-brand-copy strong {
+    font-size: 13px;
+    letter-spacing: 0.08em;
+  }
+
+  .booking-brand-copy small {
+    font-size: 6px;
+    letter-spacing: 0.20em;
+  }
+
+  .booking-top-actions {
+    gap: 8px;
+  }
+
+  .booking-area-badge {
+    padding: 7px 8px;
+    font-size: 6px;
+    letter-spacing: 0.10em;
+  }
+
+  .booking-home-link {
+    min-height: 24px;
+    gap: 4px;
+    font-size: 6px;
+    letter-spacing: 0.10em;
+    white-space: nowrap;
+  }
+
+  .booking-home-link span {
+    font-size: 8px;
+  }
+
+  .booking-progress {
+    min-height: 58px;
+  }
+
+  .progress-step {
+    gap: 5px;
+  }
+
+  .progress-step small {
+    display: none;
+  }
+
+  .progress-step.active small {
+    display: block;
+    font-size: 6px;
+  }
+
+  .progress-step > span {
+    width: 25px;
+    height: 25px;
+    flex-basis: 25px;
+  }
+
+  .booking-container {
+    padding: 32px 0 100px;
+  }
+
+  .booking-heading {
+    margin-bottom: 28px;
+  }
+
+  .booking-heading h1 {
+    font-size: clamp(28px, 8.5vw, 34px);
+    letter-spacing: 0.015em;
+  }
+
+  .booking-services {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-service {
+    min-height: 88px;
+    padding: 15px;
+  }
+
+  .booking-service:nth-child(odd) {
+    border-right: 0;
+  }
+
+  .booking-selection-footer {
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   AGENDAR - CENTRAL DO CLIENTE IDENTITY ALIGNMENT END
+   ========================================================= */

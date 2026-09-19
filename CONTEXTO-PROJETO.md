@@ -21570,3 +21570,192 @@ Depois concluir esta frente e somente então seguir para:
 5. preparação para produção.
 
 # FIM DO CHECKPOINT — 2026-09-19
+
+---
+
+# CHECKPOINT FINAL — AGENDAR / NOVA IDENTIDADE VISUAL — 2026-09-19
+
+## PRIORIDADE
+
+Este é o checkpoint mais recente da frente visual de `/agendar`.
+
+Preservar integralmente os checkpoints funcionais anteriores de:
+
+- agendamento público;
+- benefício/preço das assinaturas;
+- `create_public_multi_appointment`;
+- cancelamento;
+- remarcação;
+- Mercado Pago Orders/PIX;
+- identidade segura;
+- Central do Cliente.
+
+Esta frente foi SOMENTE VISUAL.
+
+## STATUS
+
+Refinamento visual de `/agendar`:
+
+CONCLUÍDO E APROVADO.
+
+As etapas visuais trabalhadas anteriormente nesta mesma frente e o refinamento final do cabeçalho são consideradas aprovadas.
+
+Nenhuma regra funcional do agendamento foi reconstruída.
+
+## IDENTIDADE VISUAL
+
+`/agendar` foi alinhado à identidade aprovada Black Navalha / Central do Cliente:
+
+- preto dominante;
+- dourado `#d29d4f`;
+- branco para informação principal;
+- logo real Black Navalha;
+- tipografia limpa, forte e espaçada;
+- cards escuros;
+- bordas discretas;
+- hierarquia visual forte;
+- poucos elementos;
+- linguagem visual consistente com `/minha-assinatura`.
+
+## CABEÇALHO
+
+O topo de `/agendar` foi alinhado ao padrão institucional da Central do Cliente.
+
+Composição final:
+
+- logo real Black Navalha;
+- `BLACK NAVALHA`;
+- `BARBEARIA`;
+- badge `AGENDAMENTO`;
+- ação utilitária `← VOLTAR`;
+- divisor institucional discreto.
+
+A ação anterior:
+
+`VOLTAR PARA A HOME`
+
+foi reduzida para:
+
+`VOLTAR`
+
+seguindo a mesma disciplina visual utilizada para ações utilitárias no cabeçalho da Central.
+
+No mobile, o contexto `AGENDAMENTO` permanece preservado no cabeçalho junto da ação `VOLTAR`.
+
+## GEOMETRIA
+
+O cabeçalho, progresso e conteúdo principal foram visualmente alinhados ao eixo de aproximadamente 760px utilizado como referência na experiência autenticada.
+
+A barra de progresso do agendamento permanece própria do fluxo e não foi removida.
+
+## PASSOS
+
+O fluxo funcional existente foi preservado.
+
+Continuam existindo:
+
+1. Serviços;
+2. Profissional;
+3. Data;
+4. Horário;
+5. Confirmar.
+
+A identidade premium foi aplicada sem reconstruir a lógica dessas etapas.
+
+## SERVIÇOS
+
+A apresentação visual dos serviços foi refinada mantendo:
+
+- serviços reais;
+- categorias;
+- seleção múltipla;
+- identificação de serviços de plano;
+- preços existentes;
+- duração;
+- resumo da seleção;
+- CTA de continuidade.
+
+Nenhuma regra de benefício foi alterada.
+
+## RESPONSIVIDADE
+
+Desktop:
+
+APROVADO.
+
+Mobile:
+
+APROVADO.
+
+O refinamento final do cabeçalho foi validado nos dois formatos no mesmo checkpoint visual.
+
+## FUNCIONAMENTO PRESERVADO
+
+Não foi alterado:
+
+- `create_public_multi_appointment`;
+- seleção de múltiplos serviços;
+- filtro de barbeiros;
+- duração;
+- disponibilidade;
+- jornadas;
+- bloqueios;
+- benefícios das assinaturas;
+- preços;
+- serviço de plano a R$ 0,00 quando elegível;
+- cliente autenticado;
+- preenchimento seguro de identidade;
+- criação do agendamento;
+- cancelamento;
+- remarcação.
+
+## BANCO
+
+Nenhuma alteração de banco nesta frente.
+
+Migrations `007–030` permanecem aplicadas.
+
+NÃO reaplicar nenhuma.
+
+## ARQUIVOS FUNCIONAIS
+
+Alterados nesta frente visual:
+
+- `app/agendar/booking-flow.tsx`;
+- `app/globals.css`.
+
+As alterações acumuladas nesses arquivos pertencem à frente visual já aprovada de `/agendar`.
+
+## VALIDAÇÃO FINAL
+
+Obrigatório e realizado antes do checkpoint:
+
+- validação visual desktop;
+- validação visual mobile;
+- `npm.cmd run build`;
+- `git diff --check`.
+
+## GIT / SEGURANÇA
+
+Nunca versionar:
+
+- `ASSINATURAS-LOTE.txt`;
+- `CODIGO-COMPLETO.txt`;
+- `.env.local`.
+
+Nunca usar:
+
+`git add .`
+
+## PRÓXIMA SEQUÊNCIA
+
+Com a frente visual de `/agendar` concluída, a sequência planejada segue para:
+
+1. padronização de loading/erro/sucesso/vazios;
+2. troca de barbeiro na remarcação conforme regra já definida;
+3. comissão Admin;
+4. preparação para produção.
+
+Não refazer `/agendar` visual sem nova necessidade concreta.
+
+# FIM DO CHECKPOINT — 2026-09-19

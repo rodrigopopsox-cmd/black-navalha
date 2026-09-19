@@ -429,66 +429,89 @@ export default function SubscriptionCheckoutForm({
     }
 
     return (
-      <div className={styles.checkoutSuccess} role="status">
-        <strong>Vaga reservada temporariamente.</strong>
-
-        <p>
-          Pagamento de {formatPrice(prepared.amount)} via Pix.
-        </p>
-
-        <div
-          aria-label={`Tempo restante da reserva: ${formatCountdown(
-            remainingSeconds
-          )}`}
-          style={{
-            fontSize: "2rem",
-            fontWeight: 800,
-            letterSpacing: "0.08em",
-          }}
-        >
-          {formatCountdown(remainingSeconds)}
+      <div className={styles.paymentJourney} role="status">
+        <div className={styles.paymentHeader}>
+          <span>Pagamento</span>
+          <strong>Finalize seu {plan.name}</strong>
+          <p>
+            Sua vaga está reservada. Conclua o pagamento via Pix dentro do
+            prazo abaixo.
+          </p>
         </div>
 
-        <p>
-          {expired
-            ? "A reserva de capacidade expirou. O pagamento não garante mais a vaga sem nova validação do servidor."
-            : "Este tempo acompanha a expiração real da reserva no servidor."}
-        </p>
+        <div className={styles.paymentSummary}>
+          <span>Você está contratando</span>
+          <strong>{plan.name}</strong>
+          <small>{formatPrice(prepared.amount)}</small>
+        </div>
+
+        <div className={styles.paymentTimer}>
+          <span>Prazo da reserva</span>
+          <strong
+            aria-label={`Tempo restante da reserva: ${formatCountdown(
+              remainingSeconds
+            )}`}
+          >
+            {formatCountdown(remainingSeconds)}
+          </strong>
+          <small>Tempo restante da sua reserva</small>
+        </div>
+
+        <p className={styles.reservationNote}>{expired
+            ? "O prazo da reserva terminou."
+            : "Sua vaga está garantida durante este prazo."}</p>
 
         {pix ? (
           <>
-            <img
-              src={`data:image/jpeg;base64,${pix.qrCodeBase64}`}
-              alt="QR Code para pagamento via Pix"
-              style={{
-                width: "min(320px, 100%)",
-                height: "auto",
-                display: "block",
-                margin: "1rem auto",
-                background: "#fff",
-                padding: "0.75rem",
-              }}
-            />
+            <div className={styles.pixHeading}>
+              <span>Pix gerado</span>
+              <strong>Pague com Pix</strong>
+              <p>
+                Escaneie o QR Code ou use o Pix Copia e Cola. A confirmação é
+                automática.
+              </p>
+            </div>
 
-            <label style={{ display: "grid", gap: "0.5rem", width: "100%" }}>
-              <span>Pix Copia e Cola</span>
-              <textarea
-                value={pix.qrCode}
-                readOnly
-                rows={5}
-                style={{ width: "100%", resize: "vertical" }}
-              />
-            </label>
+            <div className={styles.pixLayout}>
+              <div className={styles.pixQrPanel}>
+                <span>QR Code Pix</span>
+                <div className={styles.pixQrFrame}>
+                  <img
+                    src={`data:image/jpeg;base64,${pix.qrCodeBase64}`}
+                    alt="QR Code para pagamento via Pix"
+                  />
+                </div>
+              </div>
 
-            <button
-              type="button"
-              className={styles.checkoutButton}
-              onClick={handleCopyPix}
-            >
-              COPIAR CÓDIGO PIX
-            </button>
+              <div className={styles.pixCopyPanel}>
+                <span>Pix Copia e Cola</span>
+                <textarea value={pix.qrCode} readOnly rows={5} />
 
-            {copyMessage && <p>{copyMessage}</p>}
+                <button
+                  type="button"
+                  className={styles.checkoutButton}
+                  onClick={handleCopyPix}
+                >
+                  COPIAR CÓDIGO PIX
+                </button>
+
+                {copyMessage && (
+                  <p className={styles.copyMessage}>{copyMessage}</p>
+                )}
+
+                <div className={styles.paymentWaiting}>
+                  <span className={styles.waitingDot} aria-hidden="true" />
+                  <div>
+                    <strong>Aguardando confirmação</strong>
+                    <p>
+                      Assim que o pagamento for confirmado, seu plano será
+                      ativado automaticamente.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
 
             {pix.ticketUrl && (
               <a
@@ -500,20 +523,30 @@ export default function SubscriptionCheckoutForm({
               </a>
             )}
 
-            <p>
-              Após o pagamento, aguarde a confirmação automática. Esta tela não
-              ativa a assinatura.
+            <p className={styles.paymentNote}>
+              Após pagar, aguarde nesta tela enquanto confirmamos o Pix.
             </p>
           </>
         ) : (
-          <button
-            type="button"
-            className={styles.checkoutButton}
-            disabled={expired || paymentLoading}
-            onClick={handleGeneratePix}
-          >
-            {paymentLoading ? "GERANDO PIX..." : "GERAR PIX"}
-          </button>
+          <div className={styles.pixPrepare}>
+            <div className={styles.pixHeading}>
+              <span>Pix</span>
+              <strong>Pague com Pix</strong>
+              <p>
+                Um QR Code e o código Pix Copia e Cola serão gerados para esta
+                contratação.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              className={styles.checkoutButton}
+              disabled={expired || paymentLoading}
+              onClick={handleGeneratePix}
+            >
+              {paymentLoading ? "GERANDO PIX..." : "GERAR PIX"}
+            </button>
+          </div>
         )}
 
         {error && (
@@ -523,23 +556,35 @@ export default function SubscriptionCheckoutForm({
         )}
 
         <small className={styles.checkoutFootnote}>
-          Sua assinatura só será ativada após confirmação segura do pagamento
-          pelo Mercado Pago no servidor.
+          A ativação acontece automaticamente após a confirmação do Pix.
         </small>
       </div>
     );
   }
 
   return (
-    <form className={styles.checkoutForm} onSubmit={handleSubmit}>
-      <div className={styles.checkoutHeading}>
-        <span>Contratar {plan.name}</span>
-        <strong>Seus dados e barbeiro</strong>
-        <p>
-          Escolha o profissional que ficará vinculado à assinatura durante o
-          ciclo mensal. A disponibilidade pode mudar até a reserva.
-        </p>
+    <div className={styles.checkoutJourney}>
+      <div className={styles.existingCustomer}>
+        <div>
+          <span>Já é assinante?</span>
+          <strong>Entre direto na Central do Cliente</strong>
+          <p>
+            Consulte seu plano, agendamentos e renovação pela sua área segura.
+          </p>
+        </div>
+
+        <a href="/minha-assinatura">ACESSAR CENTRAL</a>
       </div>
+
+      <form className={styles.checkoutForm} onSubmit={handleSubmit}>
+        <div className={styles.checkoutHeading}>
+          <span>Finalizar contratação</span>
+          <strong>Complete seus dados</strong>
+          <p>
+            Informe seus dados e escolha o barbeiro que ficará vinculado ao
+            ciclo.
+          </p>
+        </div>
 
       <div className={styles.checkoutFields}>
         <label>
@@ -636,13 +681,13 @@ export default function SubscriptionCheckoutForm({
         className={styles.checkoutButton}
         disabled={loading || barbers.length === 0}
       >
-        {loading ? "RESERVANDO VAGA..." : "PREPARAR CONTRATAÇÃO"}
+        {loading ? "RESERVANDO VAGA..." : "RESERVAR VAGA E CONTINUAR"}
       </button>
 
-      <small className={styles.checkoutFootnote}>
-        Esta etapa reserva a vaga por 30 minutos. A assinatura só será ativada
-        após confirmação segura do pagamento.
-      </small>
-    </form>
+        <small className={styles.checkoutFootnote}>
+          A vaga fica reservada por 30 minutos para você concluir o Pix.
+        </small>
+      </form>
+    </div>
   );
 }

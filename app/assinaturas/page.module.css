@@ -457,3 +457,1280 @@
   font-size: 13px;
   line-height: 1.6;
 }
+
+/* ASSINATURAS — BLACK NAVALHA VISUAL REFINEMENT */
+.page {
+  background:
+    radial-gradient(circle at 82% 2%, rgba(210, 157, 79, 0.065), transparent 25%),
+    #080808;
+}
+
+.inner {
+  width: min(1080px, calc(100% - 40px));
+  padding-top: 34px;
+}
+
+.subscriptionBrand {
+  display: flex;
+  min-height: 82px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+  padding: 12px 0 18px;
+  border-bottom: 1px solid rgba(210, 157, 79, 0.28);
+}
+
+.subscriptionBrandIdentity {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.subscriptionBrandLogo {
+  width: 70px;
+  height: 56px;
+  flex: 0 0 auto;
+  object-fit: contain;
+  filter: invert(1);
+}
+
+.subscriptionBrandCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.subscriptionBrandCopy strong {
+  color: #f5f1eb;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.subscriptionBrandCopy span {
+  color: #d29d4f;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.28em;
+}
+
+.subscriptionBrandActions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.subscriptionBrandArea {
+  padding: 9px 12px;
+  border: 1px solid rgba(210, 157, 79, 0.28);
+  border-radius: 999px;
+  color: #a9a29a;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  white-space: nowrap;
+}
+
+.subscriptionCustomerLink {
+  color: #77716b;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 160ms ease;
+}
+
+.subscriptionCustomerLink:hover {
+  color: #d29d4f;
+}
+
+.back {
+  margin-bottom: 46px;
+  color: #77716b;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+}
+
+.header {
+  max-width: 760px;
+  margin-bottom: 38px;
+}
+
+.header h1 {
+  margin: 10px 0 14px;
+  color: #f5f1eb;
+  font-size: clamp(42px, 6vw, 68px);
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+}
+
+.header p {
+  max-width: 620px;
+  color: #817a72;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.plansGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 460px), 1fr));
+  gap: 22px;
+}
+
+.plan {
+  overflow: hidden;
+  border: 1px solid #282621;
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(210, 157, 79, 0.065), transparent 26%),
+    #0d0d0d;
+}
+
+.planTop {
+  align-items: flex-start;
+  padding: 30px 32px 28px;
+  border-bottom: 1px solid #232323;
+}
+
+.planIdentity {
+  min-width: 0;
+}
+
+.planTop h2 {
+  margin-top: 8px;
+  color: #f5f1eb;
+  font-size: clamp(25px, 3vw, 32px);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+.planIdentity > p {
+  max-width: 480px;
+  margin: 10px 0 0;
+  color: #7f7972;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.price strong {
+  color: #d29d4f;
+  font-size: 31px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.price span {
+  color: #756f68;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.planBody {
+  padding: 0 32px;
+}
+
+.benefits {
+  padding: 28px 0 24px;
+}
+
+.benefitsTitle {
+  align-items: flex-start;
+}
+
+.benefitsTitle > div {
+  display: grid;
+  gap: 4px;
+}
+
+.benefitsTitle span {
+  color: #756f68;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.benefitsTitle h3 {
+  color: #eee9e2;
+  font-size: 13px;
+}
+
+.benefits ul {
+  margin-top: 17px;
+}
+
+.benefits li {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  color: #c9c3bb;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.benefits li::before {
+  top: 17px;
+  width: 5px;
+  height: 5px;
+}
+
+.planFacts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid #232323;
+}
+
+.planFacts > div {
+  min-width: 0;
+  padding: 21px 14px 23px 0;
+}
+
+.planFacts > div + div {
+  padding-left: 18px;
+  border-left: 1px solid #232323;
+}
+
+.planFacts svg {
+  display: block;
+  margin-bottom: 12px;
+  color: #d29d4f;
+}
+
+.planFacts span,
+.planFacts strong {
+  display: block;
+}
+
+.planFacts span {
+  margin-bottom: 5px;
+  color: #6f6962;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.planFacts strong {
+  color: #c7c1b9;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.checkoutSection {
+  padding: 30px 32px 34px;
+  border-top: 1px solid rgba(210, 157, 79, 0.22);
+  background: #0a0a0a;
+}
+
+.checkoutSectionIntro {
+  max-width: 650px;
+}
+
+.checkoutSectionIntro > span {
+  display: block;
+  margin-bottom: 7px;
+  color: #d29d4f;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.checkoutSectionIntro > strong {
+  display: block;
+  color: #f5f1eb;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+}
+
+.checkoutSectionIntro > p {
+  margin: 7px 0 0;
+  color: #77716b;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.checkoutForm {
+  margin-top: 24px;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.checkoutHeading {
+  display: none;
+}
+
+.checkoutFields {
+  gap: 12px;
+}
+
+.checkoutFields label {
+  gap: 8px;
+}
+
+.checkoutFields label > span {
+  color: #d29d4f;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+
+.checkoutFields input {
+  min-height: 50px;
+  border-color: #2c2a27;
+  border-radius: 6px;
+  background: #080808;
+  color: #f5f1eb;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.checkoutFields input:focus {
+  border-color: rgba(210, 157, 79, 0.75);
+  box-shadow: 0 0 0 3px rgba(210, 157, 79, 0.06);
+}
+
+.barberList {
+  margin-top: 18px;
+}
+
+.barberList::before {
+  content: "02  ·  ESCOLHA SEU BARBEIRO";
+  display: block;
+  margin-bottom: 2px;
+  color: #d29d4f;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+
+.checkoutFields::before {
+  content: "01  ·  SEUS DADOS";
+  grid-column: 1 / -1;
+  display: block;
+  margin-bottom: 2px;
+  color: #d29d4f;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+
+.barberOption {
+  min-height: 62px;
+  padding: 13px 15px;
+  border-color: #2c2a27;
+  border-radius: 7px;
+  background: #080808;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.barberSelected {
+  border-color: rgba(210, 157, 79, 0.72);
+  background: rgba(210, 157, 79, 0.055);
+}
+
+.barberOption strong {
+  color: #e8e3dc;
+  font-size: 13px;
+}
+
+.barberOption small {
+  color: #77716b;
+  font-size: 9px;
+}
+
+.checkoutButton {
+  min-height: 50px;
+  margin-top: 18px;
+  border-radius: 6px;
+  background: #d29d4f;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  transition: background 160ms ease;
+}
+
+.checkoutButton:hover:not(:disabled) {
+  background: #dfab5e;
+}
+
+.checkoutFootnote {
+  margin-top: 11px;
+  color: #625d57;
+  font-size: 9px;
+}
+
+@media (max-width: 620px) {
+  .inner {
+    width: min(100% - 28px, 1080px);
+    padding: 18px 0 56px;
+  }
+
+  .subscriptionBrand {
+    min-height: 66px;
+    gap: 10px;
+    margin-bottom: 24px;
+    padding: 8px 0 14px;
+  }
+
+  .subscriptionBrandIdentity {
+    gap: 9px;
+  }
+
+  .subscriptionBrandLogo {
+    width: 48px;
+    height: 42px;
+  }
+
+  .subscriptionBrandCopy {
+    gap: 4px;
+  }
+
+  .subscriptionBrandCopy strong {
+    font-size: 13px;
+    letter-spacing: 0.08em;
+  }
+
+  .subscriptionBrandCopy span {
+    font-size: 6px;
+    letter-spacing: 0.2em;
+  }
+
+  .subscriptionBrandActions {
+    gap: 9px;
+  }
+
+  .subscriptionBrandArea {
+    display: none;
+  }
+
+  .subscriptionCustomerLink {
+    max-width: 92px;
+    font-size: 6px;
+    line-height: 1.35;
+    text-align: right;
+  }
+
+  .back {
+    margin-bottom: 34px;
+  }
+
+  .header {
+    margin-bottom: 28px;
+  }
+
+  .header h1 {
+    font-size: clamp(38px, 12vw, 52px);
+  }
+
+  .header p {
+    font-size: 11px;
+  }
+
+  .plansGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .planTop {
+    gap: 24px;
+    padding: 24px 20px;
+  }
+
+  .planIdentity > p {
+    font-size: 10px;
+  }
+
+  .price strong {
+    font-size: 29px;
+  }
+
+  .planBody {
+    padding: 0 20px;
+  }
+
+  .benefits {
+    padding: 24px 0 20px;
+  }
+
+  .benefits ul {
+    gap: 0;
+  }
+
+  .planFacts {
+    grid-template-columns: 1fr;
+    padding: 6px 0 10px;
+  }
+
+  .planFacts > div {
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr);
+    column-gap: 8px;
+    padding: 12px 0;
+  }
+
+  .planFacts > div + div {
+    padding-left: 0;
+    border-top: 1px solid #202020;
+    border-left: 0;
+  }
+
+  .planFacts svg {
+    grid-row: 1 / 3;
+    margin: 1px 0 0;
+  }
+
+  .planFacts span,
+  .planFacts strong {
+    grid-column: 2;
+  }
+
+  .checkoutSection {
+    padding: 25px 20px 28px;
+  }
+
+  .checkoutSectionIntro > strong {
+    font-size: 17px;
+  }
+
+  .checkoutFields {
+    grid-template-columns: 1fr;
+  }
+
+  .checkoutFields::before,
+  .barberList::before {
+    font-size: 7px;
+  }
+
+  .fullField {
+    grid-column: auto;
+  }
+}
+
+/* ASSINATURAS — CUSTOMER ACCESS + UTILITY NAVIGATION */
+.subscriptionHomeLink {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  gap: 6px;
+  color: #77716b;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 160ms ease;
+}
+
+.subscriptionHomeLink:hover {
+  color: #d29d4f;
+}
+
+.subscriptionHomeLink svg {
+  color: #6e6861;
+}
+
+.customerAccess {
+  display: flex;
+  min-height: 104px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  margin: 8px 0 48px;
+  padding: 20px 22px 20px 24px;
+  border: 1px solid #252525;
+  border-left: 2px solid #d29d4f;
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(210, 157, 79, 0.045), transparent 42%),
+    #0b0b0b;
+}
+
+.customerAccessCopy {
+  min-width: 0;
+}
+
+.customerAccessCopy > span {
+  display: block;
+  margin-bottom: 5px;
+  color: #d29d4f;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.customerAccessCopy > strong {
+  display: block;
+  color: #eee9e2;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.customerAccessCopy > p {
+  margin: 5px 0 0;
+  color: #6f6962;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.customerAccessLink {
+  display: inline-flex;
+  min-height: 40px;
+  flex: 0 0 auto;
+  padding: 0 17px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(210, 157, 79, 0.45);
+  border-radius: 6px;
+  color: #d29d4f;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    color 160ms ease;
+}
+
+.customerAccessLink:hover {
+  border-color: #d29d4f;
+  background: rgba(210, 157, 79, 0.08);
+  color: #e6b96d;
+}
+
+.customerAccessLink:focus-visible,
+.subscriptionHomeLink:focus-visible {
+  outline: 2px solid #d29d4f;
+  outline-offset: 3px;
+}
+
+@media (max-width: 620px) {
+  .subscriptionBrandActions {
+    gap: 8px;
+  }
+
+  .subscriptionHomeLink {
+    max-width: 78px;
+    min-height: 24px;
+    gap: 4px;
+    font-size: 6px;
+    line-height: 1.35;
+    text-align: right;
+  }
+
+  .subscriptionHomeLink svg {
+    width: 10px;
+    height: 10px;
+    flex: 0 0 auto;
+  }
+
+  .customerAccess {
+    min-height: 0;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+    margin: 4px 0 36px;
+    padding: 18px;
+  }
+
+  .customerAccessCopy > strong {
+    font-size: 14px;
+  }
+
+  .customerAccessCopy > p {
+    max-width: 310px;
+    font-size: 9px;
+  }
+
+  .customerAccessLink {
+    width: 100%;
+    min-height: 42px;
+  }
+}
+
+/* ASSINATURAS — PLAN SELECTION + PIX EXPERIENCE */
+.plansGrid {
+  margin-bottom: 22px;
+}
+
+.planSelected {
+  border-color: rgba(210, 157, 79, 0.42);
+}
+
+.selectPlanLink {
+  display: flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  border-top: 1px solid #242424;
+  color: #d29d4f;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.checkoutSection {
+  margin-top: 0;
+  padding: 30px 32px 34px;
+  border: 1px solid #282621;
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(210, 157, 79, 0.05), transparent 28%),
+    #0b0b0b;
+}
+
+.checkoutSectionTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 28px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #242424;
+}
+
+.checkoutPlanSummary {
+  min-width: 190px;
+  padding-left: 22px;
+  border-left: 1px solid #28251f;
+  text-align: right;
+}
+
+.checkoutPlanSummary span,
+.checkoutPlanSummary strong,
+.checkoutPlanSummary small {
+  display: block;
+}
+
+.checkoutPlanSummary span {
+  margin-bottom: 6px;
+  color: #756f68;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.checkoutPlanSummary strong {
+  color: #f5f1eb;
+  font-size: 14px;
+}
+
+.checkoutPlanSummary small {
+  margin-top: 5px;
+  color: #d29d4f;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.checkoutSuccess,
+.checkoutExpired {
+  overflow: hidden;
+  margin-top: 26px;
+  padding: 26px;
+  border: 1px solid #2b2925;
+  border-radius: 9px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(210, 157, 79, 0.08), transparent 32%),
+    #0a0a0a;
+}
+
+.checkoutSuccess > strong,
+.checkoutExpired > strong {
+  display: block;
+  color: #f5f1eb;
+  font-size: 21px;
+  letter-spacing: -0.015em;
+}
+
+.checkoutSuccess > p,
+.checkoutExpired > p {
+  max-width: 650px;
+  margin: 8px 0 0;
+  color: #817a72;
+  font-size: 11px;
+  line-height: 1.65;
+}
+
+.stateEyebrow {
+  display: block;
+  margin-bottom: 7px;
+  color: #d29d4f;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+}
+
+.paymentTimer {
+  display: grid;
+  width: fit-content;
+  min-width: 210px;
+  margin: 22px 0 18px;
+  padding: 17px 20px;
+  border: 1px solid rgba(210, 157, 79, 0.28);
+  border-radius: 8px;
+  background: rgba(210, 157, 79, 0.035);
+}
+
+.paymentTimer > span {
+  color: #827b73;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.paymentTimer > strong {
+  margin: 5px 0 3px;
+  color: #f5f1eb;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.paymentTimer > small {
+  color: #615c56;
+  font-size: 8px;
+}
+
+.pixPrepare {
+  margin-top: 24px;
+  padding-top: 23px;
+  border-top: 1px solid #242424;
+}
+
+.pixHeading > span,
+.pixQrPanel > span,
+.pixCopyPanel > span {
+  display: block;
+  color: #d29d4f;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.pixHeading > strong {
+  display: block;
+  margin-top: 6px;
+  color: #f5f1eb;
+  font-size: 17px;
+}
+
+.pixHeading > p {
+  max-width: 610px;
+  margin: 6px 0 0;
+  color: #77716b;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.pixLayout {
+  display: grid;
+  grid-template-columns: minmax(230px, 0.72fr) minmax(0, 1.28fr);
+  gap: 26px;
+  margin-top: 22px;
+  padding-top: 22px;
+  border-top: 1px solid #242424;
+}
+
+.pixQrPanel,
+.pixCopyPanel {
+  min-width: 0;
+}
+
+.pixQrFrame {
+  display: grid;
+  width: min(260px, 100%);
+  margin-top: 12px;
+  padding: 12px;
+  place-items: center;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.pixQrFrame img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.pixCopyPanel textarea {
+  width: 100%;
+  min-height: 116px;
+  margin-top: 12px;
+  padding: 13px;
+  border: 1px solid #2b2926;
+  border-radius: 6px;
+  outline: none;
+  resize: vertical;
+  background: #070707;
+  color: #bdb6ae;
+  font: inherit;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.pixCopyPanel textarea:focus {
+  border-color: rgba(210, 157, 79, 0.7);
+}
+
+.copyMessage {
+  margin: 9px 0 0;
+  color: #d29d4f;
+  font-size: 9px;
+}
+
+.paymentWaiting {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  margin-top: 18px;
+  padding: 14px 15px;
+  border: 1px solid #242424;
+  border-radius: 7px;
+  background: #080808;
+}
+
+.waitingDot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  margin-top: 4px;
+  border-radius: 50%;
+  background: #d29d4f;
+  box-shadow: 0 0 0 5px rgba(210, 157, 79, 0.08);
+}
+
+.paymentWaiting strong {
+  display: block;
+  color: #d8d2ca;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.paymentWaiting p {
+  margin: 5px 0 0;
+  color: #6d6760;
+  font-size: 9px;
+  line-height: 1.55;
+}
+
+.paymentConfirmed {
+  border-color: rgba(210, 157, 79, 0.42);
+}
+
+.paymentExpired {
+  border-color: #302c27;
+  background: #0a0a0a;
+}
+
+.checkoutButtonLink {
+  min-height: 48px;
+  border-radius: 6px;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+}
+
+@media (max-width: 620px) {
+  .checkoutSection {
+    padding: 23px 18px 26px;
+  }
+
+  .checkoutSectionTop {
+    display: grid;
+    gap: 18px;
+  }
+
+  .checkoutPlanSummary {
+    min-width: 0;
+    padding: 14px 0 0;
+    border-top: 1px solid #252525;
+    border-left: 0;
+    text-align: left;
+  }
+
+  .paymentTimer {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .paymentTimer > strong {
+    font-size: 31px;
+  }
+
+  .pixLayout {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+
+  .pixQrFrame {
+    width: min(270px, 100%);
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .checkoutSuccess,
+  .checkoutExpired {
+    padding: 21px 18px;
+  }
+}
+
+/* ASSINATURAS — PAYMENT CONTENT HIERARCHY */
+.checkoutSectionTop {
+  display: block;
+}
+
+.checkoutSectionIntro {
+  max-width: 560px;
+}
+
+.checkoutPlanSummary {
+  display: none;
+}
+
+.paymentSummary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 24px;
+  row-gap: 5px;
+  margin-top: 20px;
+  padding: 16px 18px;
+  border: 1px solid #282621;
+  border-radius: 7px;
+  background: #080808;
+}
+
+.paymentSummary > span {
+  grid-column: 1 / -1;
+  color: #756f68;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.paymentSummary > strong {
+  color: #eee9e2;
+  font-size: 14px;
+}
+
+.paymentSummary > small {
+  align-self: center;
+  color: #d29d4f;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.paymentNote {
+  margin: 16px 0 0;
+  color: #77716b;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+@media (max-width: 620px) {
+  .paymentSummary {
+    grid-template-columns: 1fr;
+  }
+
+  .paymentSummary > strong,
+  .paymentSummary > small {
+    grid-column: 1;
+  }
+}
+
+/* ASSINATURAS — CHECKOUT JOURNEY */
+.checkoutSection {
+  padding: 0;
+  border-color: #282621;
+  background: #0b0b0b;
+}
+
+.checkoutJourney {
+  display: grid;
+}
+
+.existingCustomer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 22px 26px;
+  border-bottom: 1px solid #242424;
+  background:
+    linear-gradient(90deg, rgba(210, 157, 79, 0.04), transparent 48%),
+    #0a0a0a;
+}
+
+.existingCustomer > div {
+  min-width: 0;
+}
+
+.existingCustomer span,
+.existingCustomer strong,
+.existingCustomer p {
+  display: block;
+}
+
+.existingCustomer span {
+  margin-bottom: 5px;
+  color: #d29d4f;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+}
+
+.existingCustomer strong {
+  color: #eee9e2;
+  font-size: 14px;
+}
+
+.existingCustomer p {
+  margin: 5px 0 0;
+  color: #6f6962;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.existingCustomer > a {
+  display: inline-flex;
+  min-height: 40px;
+  flex: 0 0 auto;
+  padding: 0 17px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(210, 157, 79, 0.42);
+  border-radius: 6px;
+  color: #d29d4f;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.checkoutForm {
+  margin: 0;
+  padding: 26px;
+}
+
+.checkoutHeading {
+  display: block;
+  max-width: 570px;
+  margin-bottom: 24px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid #242424;
+}
+
+.checkoutHeading span {
+  margin-bottom: 7px;
+  color: #d29d4f;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.17em;
+}
+
+.checkoutHeading strong {
+  color: #f5f1eb;
+  font-size: 19px;
+  letter-spacing: -0.01em;
+}
+
+.checkoutHeading p {
+  margin: 7px 0 0;
+  color: #77716b;
+  font-size: 10px;
+}
+
+.paymentJourney {
+  padding: 28px 30px 30px;
+}
+
+.paymentHeader {
+  padding-bottom: 22px;
+  border-bottom: 1px solid #242424;
+}
+
+.paymentHeader > span {
+  display: block;
+  margin-bottom: 7px;
+  color: #d29d4f;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+}
+
+.paymentHeader > strong {
+  display: block;
+  color: #f5f1eb;
+  font-size: 21px;
+  letter-spacing: -0.015em;
+}
+
+.paymentHeader > p {
+  max-width: 570px;
+  margin: 7px 0 0;
+  color: #77716b;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.paymentJourney .paymentSummary {
+  margin-top: 22px;
+}
+
+.paymentJourney .paymentTimer {
+  margin-top: 18px;
+}
+
+@media (max-width: 620px) {
+  .existingCustomer {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 15px;
+    padding: 18px;
+  }
+
+  .existingCustomer > a {
+    width: 100%;
+  }
+
+  .checkoutForm {
+    padding: 22px 18px 24px;
+  }
+
+  .paymentJourney {
+    padding: 22px 18px 24px;
+  }
+}
+
+.reservationNote {
+  margin: 10px 0 0 !important;
+  color: #77716b !important;
+  font-size: 10px !important;
+  line-height: 1.55 !important;
+}
+  
+/* Visual: ocultamos a faixa "Já é assinante?" porque o acesso já existe no cabeçalho */
+.existingCustomer { display: none !important; }

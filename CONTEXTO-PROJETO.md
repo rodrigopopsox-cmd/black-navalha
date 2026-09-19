@@ -20933,3 +20933,640 @@ Com a frente de autenticação concluída, a sequência planejada permanece:
 Na próxima frente, preservar todas as regras financeiras e funcionais já aprovadas.
 
 # FIM DO CHECKPOINT — 2026-09-18
+
+---
+
+# CHECKPOINT DE CONTINUIDADE — /ASSINATURAS + EXPERIÊNCIA PIX / REFINAMENTO VISUAL — 2026-09-19
+
+## PRIORIDADE
+
+Este é o checkpoint mais recente desta frente visual.
+
+Deve ser lido em conjunto com:
+
+- AUTENTICAÇÃO DO CLIENTE / NOVA IDENTIDADE VISUAL — 2026-09-18;
+- os checkpoints recentes de Mercado Pago PIX Orders;
+- os checkpoints de acompanhamento automático do PIX;
+- renovação voluntária/autenticada;
+- Central do Cliente.
+
+A frente atual permanece:
+
+REFINAMENTO VISUAL DE /ASSINATURAS E EXPERIÊNCIA PIX.
+
+NÃO iniciar /agendar visual antes de concluir esta frente.
+
+## GIT OFICIAL NO INÍCIO
+
+Branch confirmada:
+
+main
+
+HEAD:
+
+81b813293c973af08f2f1a00c97aa2c757866d9b
+
+origin/main:
+
+81b813293c973af08f2f1a00c97aa2c757866d9b
+
+Commit:
+
+81b8132 Refina autenticacao visual da Central do Cliente
+
+Working tree inicial confirmado:
+
+?? ASSINATURAS-LOTE.txt
+?? CODIGO-COMPLETO.txt
+
+Nunca versionar:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt;
+- .env.local.
+
+Nunca usar git add .
+
+Commit/push somente com autorização explícita.
+
+## ARQUIVOS INSPECIONADOS
+
+Foram inspecionados somente os arquivos necessários para a frente:
+
+- AGENTS.md;
+- app/assinaturas/page.tsx;
+- app/assinaturas/page.module.css;
+- app/assinaturas/subscription-checkout-form.tsx;
+- app/minha-assinatura/page.tsx;
+- app/minha-assinatura/page.module.css.
+
+Minha Assinatura foi consultada somente como referência da identidade visual já aprovada.
+
+Nenhuma API/convenção nova do Next.js 16 surgiu nesta frente e não foi necessário repetir documentação local.
+
+## ESTADO VISUAL ANTERIOR DE /ASSINATURAS
+
+A página foi observada no Chrome antes das alterações.
+
+Problemas identificados:
+
+- título ASSINATURAS excessivamente dominante;
+- plano, benefícios e contratação formavam um único bloco muito grande;
+- estrutura não escalava visualmente bem para futuros múltiplos planos;
+- formulário parecia parte interna do card do plano;
+- hierarquia entre plano, benefícios, contratação e pagamento era fraca;
+- identidade ainda não estava no mesmo nível visual da Central do Cliente;
+- estados PIX utilizavam bastante estilo inline;
+- mesmo container/moldura tentava representar formulário e pagamento.
+
+## DIREÇÃO VISUAL APROVADA
+
+Foi aprovada a direção:
+
+- preto dominante;
+- dourado #d29d4f;
+- branco para informação principal;
+- logo real Black Navalha;
+- tipografia forte e limpa;
+- cards escuros;
+- bordas discretas;
+- menos dourado estrutural;
+- forte separação entre produto, contratação e pagamento;
+- cabeçalho inspirado na Central do Cliente;
+- ações utilitárias discretas no topo;
+- preparação visual para múltiplos planos reais sem inventar novos planos.
+
+## CABEÇALHO
+
+Foi adicionada identidade Black Navalha no topo de /assinaturas usando:
+
+public/black-navalha/logo.png
+
+O cabeçalho atual inclui:
+
+- logo real;
+- BLACK NAVALHA;
+- BARBEARIA;
+- identificação ASSINATURAS;
+- MINHA ASSINATURA;
+- VOLTAR PARA A HOME.
+
+Foi decidido que VOLTAR PARA A HOME deve permanecer como ação utilitária no canto superior direito e não como linha isolada no conteúdo.
+
+Acesso à Minha Assinatura também ficou como ação discreta no cabeçalho.
+
+## TOPO COMERCIAL
+
+O label foi evoluído para:
+
+ASSINATURAS BLACK NAVALHA
+
+Título:
+
+ASSINATURAS
+
+Texto atual:
+
+Escolha o plano ideal para sua rotina e aproveite os serviços incluídos durante todo o ciclo.
+
+A linguagem deixou de descrever etapas técnicas da interface.
+
+## PLANOS
+
+A página foi preparada visualmente para múltiplos planos reais.
+
+Nenhum plano fictício foi criado.
+
+Plano real preservado:
+
+Plano Mensal
+R$ 150,00
+
+Pagamento continua:
+
+mensal AVULSO.
+
+SEM renovação automática Mercado Pago.
+
+A grade usa os planos reais carregados de subscription_plans.
+
+Foi adicionada seleção por query string:
+
+?plano=<id>
+
+somente entre IDs de planos efetivamente carregados do banco.
+
+Plano solicitado que não corresponde a um plano real disponível não se torna autoridade.
+
+Fallback:
+
+primeiro plano real disponível.
+
+O backend continua sendo autoridade sobre preço e checkout.
+
+Com apenas um plano real, Plano Mensal aparece como selecionado.
+
+## IMPORTANTE — SERVIÇOS E FUTUROS PLANOS
+
+Os serviços atualmente apresentados continuam baseados em:
+
+services.active = true
+services.subscriber_service = true
+
+Eles não estão modelados nesta tela como benefícios específicos por subscription_plan.
+
+Portanto NÃO assumir futuramente que diferentes planos possuem listas diferentes de serviços sem evolução explícita do modelo.
+
+Nenhum banco foi alterado para isso nesta frente.
+
+## CARD DO PLANO
+
+O card foi refinado com:
+
+- PLANO SELECIONADO;
+- nome do plano;
+- preço;
+- informação de pagamento mensal avulso;
+- serviços incluídos;
+- pagamento: Pix mensal avulso;
+- profissional: cliente escolhe o barbeiro;
+- ativação: após confirmação segura.
+
+A apresentação foi separada da área de checkout.
+
+## CONTRATAÇÃO
+
+O formulário deixou de ficar visualmente incorporado ao card do plano.
+
+Existe área própria de contratação abaixo da grade.
+
+Foi identificada durante o refinamento uma confusão estrutural importante:
+
+o mesmo componente Client Component controla:
+
+- dados;
+- barbeiro;
+- preparação;
+- cronômetro;
+- geração PIX;
+- espera;
+- confirmação;
+- expiração.
+
+Por isso uma moldura estática no Server Component ficava incorreta após mudar de estado.
+
+A direção atual é permitir que SubscriptionCheckoutForm controle a linguagem visual da etapa atual utilizando os estados já existentes.
+
+Nenhum novo motor de checkout foi criado.
+
+## CENTRAL DO CLIENTE
+
+Foi testada uma faixa grande "Já tem assinatura?".
+
+Posteriormente foi decidido não manter esse card permanentemente no topo comercial.
+
+Minha Assinatura permanece como ação utilitária no cabeçalho.
+
+Na reorganização mais recente também foi preparada uma apresentação "Já é assinante?" dentro da jornada inicial do checkout para desaparecer naturalmente quando prepared existir.
+
+ESTE PONTO VISUAL AINDA DEVE SER REVISTO NO PRÓXIMO CHAT.
+
+O responsável indicou que a composição ainda não estava exatamente como desejada e optou por não perder mais tempo naquele momento.
+
+Não considerar essa microdecisão visual encerrada definitivamente sem observar o estado atual real.
+
+## FORMULÁRIO
+
+A estrutura visual foi refinada para:
+
+01 · SEUS DADOS
+
+- Nome;
+- WhatsApp;
+- E-mail.
+
+02 · ESCOLHA SEU BARBEIRO
+
+Disponibilidade pública continua mostrando apenas:
+
+Vagas disponíveis
+
+ou:
+
+Indisponível.
+
+Quantidade numérica não é exibida.
+
+Botão atual:
+
+RESERVAR VAGA E CONTINUAR
+
+Nota:
+
+A vaga fica reservada por 30 minutos para você concluir o Pix.
+
+Nenhuma regra de capacidade foi alterada.
+
+## ESTADO PREPARADO / PAGAMENTO
+
+Foi validado visualmente um estado preparado sem gerar nova Order PIX.
+
+Uma preparação controlada criou somente o fluxo interno já existente:
+
+hold
++
+subscription_charge pending
+
+Não foi clicado GERAR PIX nessa validação.
+
+Nenhuma cobrança Mercado Pago foi criada apenas para validar aparência.
+
+O estado preparado exibiu:
+
+PAGAMENTO
+
+Finalize seu Plano Mensal
+
+Resumo:
+
+Você está contratando
+Plano Mensal
+R$ 150,00
+
+Cronômetro baseado exclusivamente em:
+
+reservation_expires_at
+
+Exemplo visual observado:
+
+29:44
+
+O cronômetro não foi reconstruído.
+
+## LINGUAGEM DO CRONÔMETRO
+
+A linguagem técnica foi reduzida.
+
+Atual:
+
+PRAZO DA RESERVA
+
+Tempo restante da sua reserva
+
+Nota operacional:
+
+Sua vaga está garantida durante este prazo.
+
+Foi criada a classe visual:
+
+reservationNote
+
+para manter essa mensagem subordinada e evitar aparência de novo título.
+
+## ETAPA PIX ANTES DA GERAÇÃO
+
+Foi preparada visualmente:
+
+PIX
+
+Pague com Pix
+
+Ação:
+
+GERAR PIX
+
+A ativação continua sendo apresentada como automática após a confirmação do Pix.
+
+A geração PIX real NÃO foi repetida para validar aparência.
+
+## PIX GERADO — IMPLEMENTAÇÃO VISUAL PREPARADA
+
+O JSX/CSS foi preparado para:
+
+- título Pague com Pix;
+- QR Code em painel branco;
+- Pix Copia e Cola;
+- botão COPIAR CÓDIGO PIX;
+- feedback de cópia;
+- layout em duas colunas no desktop;
+- empilhamento no mobile;
+- estado AGUARDANDO CONFIRMAÇÃO;
+- mensagem de atualização automática;
+- ticket_url preservado quando existente.
+
+Os estilos inline anteriores do:
+
+- cronômetro;
+- QR Code;
+- textarea;
+
+foram migrados para CSS Module.
+
+IMPORTANTE:
+
+Não foi criada nova Order PIX apenas para rever visualmente esse estado.
+
+O motor PIX já possui E2E financeiro aprovado em checkpoints anteriores.
+
+## PAGAMENTO CONFIRMADO
+
+A lógica existente foi preservada.
+
+Estado continua baseado exclusivamente em:
+
+paid = true
+e
+activated = true
+
+retornados pelo backend observacional.
+
+A interface mantém:
+
+Pagamento confirmado.
+
+Plano ativo.
+
+AGENDAR HORÁRIO.
+
+Nenhuma condição financeira foi alterada.
+
+## EXPIRAÇÃO
+
+Preservado:
+
+00:00
+→ consulta final ao backend
+→ somente depois expiração visual se não houver paid + activated.
+
+Estado existente:
+
+Esta reserva expirou.
+
+Ação:
+
+PREPARAR NOVA CONTRATAÇÃO.
+
+Nenhum timer financeiro independente foi criado.
+
+## POLLING
+
+INTEGRALMENTE PRESERVADO.
+
+O polling continua somente observacional.
+
+Não confirma pagamento.
+
+Não chama RPC financeira.
+
+Não altera charge.
+
+Não altera assinatura.
+
+Não altera ciclo.
+
+Não altera hold.
+
+## MERCADO PAGO — INALTERADO
+
+Preservado integralmente:
+
+Orders API.
+
+POST /v1/orders.
+
+GET /v1/orders/{id}.
+
+PIX.
+
+external_reference = subscription_charge.id.
+
+provider_charge_id = Order ID.
+
+Webhook HMAC.
+
+data.id ORIGINAL preservando maiúsculas.
+
+Consulta server-side da Order.
+
+Processamento transacional/idempotente.
+
+Nenhuma alteração em:
+
+- webhook;
+- HMAC;
+- confirmação financeira;
+- polling;
+- RPCs financeiras.
+
+Nenhuma cobrança real foi realizada.
+
+## CAPACIDADE — INALTERADA
+
+Permanece:
+
+30 assinantes por barbeiro.
+
+SELECT ... FOR UPDATE obrigatório.
+
+Hold PIX:
+
+30 minutos.
+
+Order expiration_time:
+
+PT30M.
+
+Carência pós-ciclo:
+
+2 dias.
+
+Nenhuma dessas regras foi modificada.
+
+## RENOVAÇÃO — INALTERADA
+
+Permanece:
+
+- voluntária;
+- janela antecipada de 7 dias;
+- mesmo barbeiro não consome segunda vaga;
+- troca de barbeiro exige capacidade;
+- pagamento pendente não libera/transfere antecipadamente a vaga.
+
+Nenhuma lógica de renovação foi alterada.
+
+## COMISSÃO
+
+Continua NÃO definida.
+
+NÃO inventar percentual.
+
+Nenhuma comissão foi implementada nesta frente.
+
+## NÃO ALTERADO
+
+Não foi alterado:
+
+- /agendar;
+- create_public_multi_appointment;
+- benefício/preço das assinaturas;
+- cancelamento;
+- remarcação;
+- identidade segura;
+- recuperação de senha;
+- renovação voluntária;
+- renovação autenticada;
+- Admin;
+- banco.
+
+Migrations 007–030 permanecem aplicadas.
+
+NÃO reaplicar nenhuma.
+
+## ARQUIVOS FUNCIONAIS ALTERADOS
+
+Atualmente modificados:
+
+- app/assinaturas/page.tsx;
+- app/assinaturas/page.module.css;
+- app/assinaturas/subscription-checkout-form.tsx.
+
+Nenhum outro arquivo funcional desta frente deve ser incluído automaticamente.
+
+## BUILD
+
+Build final executado após os refinamentos:
+
+npm.cmd run build
+
+Resultado:
+
+APROVADO.
+
+Next.js:
+
+16.3.4
+
+Compiled successfully.
+
+TypeScript:
+
+sem erros.
+
+Rota /assinaturas reconhecida como dinâmica.
+
+## DIFF CHECK
+
+Executado:
+
+git diff --check
+
+Resultado:
+
+APROVADO.
+
+Somente avisos conhecidos:
+
+LF será convertido para CRLF futuramente pelo Git no Windows.
+
+Nenhum erro de whitespace.
+
+## WORKING TREE ATUAL ESPERADO
+
+M app/assinaturas/page.module.css
+M app/assinaturas/page.tsx
+M app/assinaturas/subscription-checkout-form.tsx
+?? ASSINATURAS-LOTE.txt
+?? CODIGO-COMPLETO.txt
+
+ASSINATURAS-LOTE.txt e CODIGO-COMPLETO.txt não podem ser versionados.
+
+.env.local também não pode ser versionado.
+
+## IMPORTANTE — FRENTE AINDA NÃO ENCERRADA
+
+NÃO considerar /assinaturas + experiência PIX totalmente concluída ainda.
+
+Antes do checkpoint funcional final falta:
+
+1. ler este checkpoint;
+2. confirmar Git real;
+3. observar o estado visual atual após as últimas mudanças;
+4. revisar o diff real de:
+   - app/assinaturas/page.tsx;
+   - app/assinaturas/subscription-checkout-form.tsx;
+   - app/assinaturas/page.module.css;
+5. garantir que as várias substituições visuais não introduziram alteração acidental de lógica;
+6. revisar visualmente desktop e mobile do estado inicial atual;
+7. decidir se a posição/apresentação de "Já é assinante?" será mantida, simplificada ou removida;
+8. revisar os estados PIX pelo código/estados existentes sem criar novo PIX apenas por aparência;
+9. se surgir problema visual real, corrigir somente ele;
+10. npm.cmd run build novamente somente se houver nova alteração;
+11. git diff --check;
+12. revisar Git;
+13. commit/push somente com autorização explícita.
+
+## PRÓXIMO CHAT — PRIMEIRO PASSO
+
+NÃO iniciar /agendar visual.
+
+NÃO repetir E2E financeiro.
+
+NÃO criar nova Order PIX só para aparência.
+
+Primeiro:
+
+- confirmar Git;
+- abrir /assinaturas no estado atual;
+- revisar a composição atual após a última reorganização;
+- revisar o diff dos três arquivos funcionais;
+- fazer somente os ajustes visuais finais necessários.
+
+Depois concluir esta frente e somente então seguir para:
+
+1. /agendar somente visual;
+2. padronização loading/erro/sucesso/vazios;
+3. troca de barbeiro na remarcação conforme regra já definida;
+4. comissão Admin;
+5. preparação para produção.
+
+# FIM DO CHECKPOINT — 2026-09-19

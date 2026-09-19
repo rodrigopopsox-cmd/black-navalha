@@ -21759,3 +21759,576 @@ Com a frente visual de `/agendar` concluída, a sequência planejada segue para:
 Não refazer `/agendar` visual sem nova necessidade concreta.
 
 # FIM DO CHECKPOINT — 2026-09-19
+---
+
+# CHECKPOINT DE CONTINUIDADE — ESTADOS VISUAIS + TROCA DE BARBEIRO NA REMARCAÇÃO + PRÓXIMA FRENTE COMISSÃO — 2026-09-19
+
+## PRIORIDADE
+
+Este é o checkpoint mais recente e deve ter prioridade sobre checkpoints anteriores quando houver divergência.
+
+Preservar integralmente os checkpoints funcionais já aprovados de:
+
+- Central do Cliente / Minha Assinatura;
+- autenticação e recuperação de senha;
+- assinaturas e renovação voluntária/autenticada;
+- Mercado Pago Orders + PIX;
+- webhook/HMAC;
+- polling observacional;
+- cancelamento;
+- remarcação;
+- agendamento público;
+- Admin financeiro/capacidade.
+
+## GIT OFICIAL
+
+Branch:
+
+main
+
+HEAD/origin:
+
+c8a77ef Permite troca segura de barbeiro na remarcacao
+
+Push realizado com sucesso:
+
+main → origin/main
+
+Commit imediatamente anterior desta continuidade:
+
+d23fd54 Padroniza estados visuais da interface
+
+Working tree após o último push:
+
+?? ASSINATURAS-LOTE.txt
+?? CODIGO-COMPLETO.txt
+
+Esses arquivos devem continuar fora do Git.
+
+.env.local nunca deve ser versionado.
+
+Nunca usar:
+
+git add .
+
+Staging somente com caminhos explícitos.
+
+Commit/push somente com autorização explícita.
+
+## PADRONIZAÇÃO VISUAL DOS ESTADOS
+
+Status:
+
+CONCLUÍDA, VALIDADA E VERSIONADA.
+
+Commit:
+
+d23fd54 Padroniza estados visuais da interface
+
+Foram trabalhadas somente as experiências públicas/do cliente prioritárias:
+
+- /minha-assinatura;
+- autenticação do cliente;
+- recuperação/redefinição de senha;
+- /assinaturas e experiência PIX;
+- /agendar.
+
+Admin não foi incluído nessa frente.
+
+## LINGUAGEM VISUAL DOS ESTADOS
+
+Direção consolidada:
+
+- preto dominante;
+- dourado #d29d4f para contexto/progresso/sucesso coerente com a marca;
+- branco para informação principal;
+- cinza para informação secundária;
+- vermelho queimado discreto para erro;
+- cards escuros;
+- bordas discretas;
+- loading sem poluição;
+- vazio discreto;
+- indisponível/expirado neutro;
+- sucesso claro sem caixa verde genérica.
+
+## CENTRAL DO CLIENTE
+
+Foram padronizados:
+
+- erro;
+- sucesso;
+- loading;
+- indisponibilidade;
+- renovação preparada;
+- verificação final de pagamento;
+- renovação confirmada;
+- reserva expirada.
+
+Estados vazios de agenda/histórico que já estavam coerentes foram preservados.
+
+A lógica financeira não foi alterada.
+
+Polling continua apenas observacional.
+
+Confirmação continua exigindo estado interno server-side:
+
+paid = true
+e
+activated = true.
+
+Cronômetros continuam baseados em:
+
+reservation_expires_at.
+
+## AUTENTICAÇÃO / RECUPERAÇÃO
+
+Erro e sucesso passaram a seguir a nova linguagem visual.
+
+Botões em processamento receberam tratamento visual coerente.
+
+Foi corrigida uma mojibake REAL existente em:
+
+app/minha-assinatura/redefinir-senha/reset-password-form.tsx
+
+Antes:
+
+NÃ£o foi possÃvel atualizar sua senha.
+
+Depois:
+
+Não foi possível atualizar sua senha.
+
+A lógica Supabase Auth, recuperação, rate limit e proteção anti-enumeração foram preservadas.
+
+Validações desktop/mobile realizadas.
+
+## ASSINATURAS / PIX
+
+Estados financeiros receberam diferenciação visual sem alterar autoridade financeira.
+
+Separado visualmente:
+
+- pagamento confirmado;
+- verificando pagamento;
+- reserva expirada;
+- erro;
+- aguardando confirmação.
+
+IMPORTANTE:
+
+"Verificando pagamento..." não usa mais aparência de sucesso confirmado.
+
+Pagamento confirmado continua sendo apresentado somente após confirmação server-side já existente.
+
+Nenhum PIX foi criado apenas para fabricar estado visual.
+
+Nenhuma cobrança real foi realizada.
+
+## AGENDAR
+
+Foram ajustados somente:
+
+- booking-loading;
+- booking-form-error.
+
+Sucesso e vazios existentes já estavam alinhados e foram preservados.
+
+Não foi alterado:
+
+- /agendar funcional;
+- create_public_multi_appointment;
+- preço;
+- benefício de assinatura;
+- disponibilidade;
+- criação de appointment.
+
+## VALIDAÇÃO DA FRENTE VISUAL
+
+npm.cmd run build:
+
+APROVADO.
+
+TypeScript:
+
+APROVADO.
+
+git diff --check:
+
+APROVADO.
+
+Desktop/mobile:
+
+APROVADOS nos estados disponíveis sem fabricação desnecessária de dados.
+
+Banco:
+
+INALTERADO nessa frente.
+
+## TROCA DE BARBEIRO NA REMARCAÇÃO
+
+Status:
+
+IMPLEMENTADA, VALIDADA PARA REGRA DE ASSINATURA E VERSIONADA.
+
+Commit:
+
+c8a77ef Permite troca segura de barbeiro na remarcacao
+
+Migration:
+
+supabase/sql/031-customer-appointment-rescheduling-barber.sql
+
+Aplicada no Supabase em 2026-09-19.
+
+Resultado:
+
+Success. No rows returned
+
+NÃO reaplicar.
+
+Migrations aplicadas agora:
+
+007–031.
+
+NÃO reaplicar nenhuma migration já aplicada.
+
+## REGRA DE PRODUTO — TROCA DE BARBEIRO NA REMARCAÇÃO
+
+Se qualquer serviço do appointment utilizou benefício de assinatura através de:
+
+appointment_services.subscription_id
+
+o atendimento permanece preso ao barbeiro atual.
+
+A troca de barbeiro da assinatura continua ocorrendo somente na renovação.
+
+Se o appointment NÃO utilizou benefício de assinatura:
+
+o cliente autenticado pode trocar de barbeiro durante a remarcação somente quando o novo profissional:
+
+- está ativo;
+- realiza TODOS os mesmos serviços históricos do appointment;
+- possui jornada compatível;
+- não possui bloqueio no período;
+- possui disponibilidade real no novo horário.
+
+PostgreSQL continua sendo autoridade final.
+
+## PRESERVAÇÃO HISTÓRICA
+
+A troca de barbeiro NÃO utiliza cancelamento + novo agendamento.
+
+Permanece o mesmo:
+
+appointments.id.
+
+São preservados:
+
+- customer_id;
+- appointment_services;
+- service_id;
+- service_name;
+- appointment_services.price;
+- appointment_services.subscription_id;
+- appointments.price;
+- created_at;
+- status, exceto regras já existentes externas a esta frente.
+
+A remarcação altera atomicamente somente quando necessário:
+
+- appointments.barber_id;
+- appointments.start_at;
+- appointments.end_at.
+
+Não foi criado histórico adicional de remarcações, conforme decisão anterior.
+
+## SEGURANÇA DA REMARCAÇÃO
+
+A RPC:
+
+reschedule_my_appointment
+
+agora recebe:
+
+- p_appointment_id;
+- p_barber_id;
+- p_start_at.
+
+Continua:
+
+- derivando cliente por auth.uid();
+- exigindo e-mail confirmado;
+- bloqueando appointment com FOR UPDATE;
+- validando propriedade do appointment;
+- validando status;
+- validando antecedência de 1 hora;
+- usando duração histórica de appointment_services;
+- validando jornada;
+- validando blocked_times;
+- preservando atomicidade.
+
+A constraint existente:
+
+prevent_overlapping_appointments
+
+continua sendo a proteção concorrente final contra overlap de scheduled/confirmed.
+
+Em conflito concorrente, a operação aborta e o appointment anterior permanece intacto.
+
+## BARBEIROS CANDIDATOS
+
+A migration 031 criou:
+
+get_my_appointment_reschedule_barbers(p_appointment_id uuid)
+
+RPC privada somente para authenticated.
+
+Ela:
+
+- deriva identidade por auth.uid();
+- exige e-mail confirmado;
+- garante appointment próprio;
+- não recebe customer_id;
+- não expõe subscription_id;
+- não expõe service IDs;
+- para appointment com benefício retorna somente o barbeiro atual;
+- para appointment comum retorna somente barbeiros ativos capazes de executar todos os serviços históricos.
+
+A Server Action também revalida se o barberId recebido pertence aos candidatos autorizados antes de consultar disponibilidade.
+
+A escrita final revalida novamente tudo no PostgreSQL.
+
+## DTO PRIVADO
+
+get_my_appointments() passou a retornar também:
+
+barber_change_allowed
+
+como booleano semântico.
+
+subscription_id continua privado.
+
+Esse booleano serve apenas para UX.
+
+Não é autoridade de autorização.
+
+## VALIDAÇÃO REAL — APPOINTMENT COM ASSINATURA
+
+Foi validado appointment real com:
+
+Barba Assinante Mensal
+
+e benefício de assinatura.
+
+Resultado:
+
+- remarcação abre normalmente;
+- nenhum seletor de troca de profissional é apresentado;
+- interface informa que o atendimento usa benefício da assinatura;
+- Rodrigo Alves Correa permanece como profissional;
+- datas/horários continuam disponíveis;
+- regra de assinatura preservada.
+
+Desktop:
+
+APROVADO.
+
+Mobile aproximadamente 385 px:
+
+APROVADO.
+
+## CENÁRIO POSITIVO DE TROCA
+
+A implementação está pronta para appointment comum.
+
+No estado atual conhecido do projeto, existe apenas um barbeiro ativo/elegível observado na experiência.
+
+Não foi criado barbeiro artificial nem appointment artificial apenas para forçar uma troca positiva.
+
+A troca efetiva depende naturalmente da existência de outro barbeiro ativo que execute todos os mesmos serviços.
+
+Não confundir ausência de segundo candidato real com falha da implementação.
+
+## UX DOS CONTROLES
+
+Foi refinado o card de próximo horário.
+
+Desktop:
+
+- REMARCAR AGENDAMENTO e CANCELAR AGENDAMENTO ficam lado a lado;
+- quando remarcação é aberta, formulário ocupa largura total abaixo das ações.
+
+Mobile:
+
+- ações ficam empilhadas;
+- formulário permanece contido;
+- sem overflow observado.
+
+Foi removido texto redundante que aparecia junto ao botão cancelar.
+
+Foi adicionado aviso único e discreto:
+
+Cancelamentos e remarcações online estão disponíveis até 1 hora antes do atendimento.
+
+A regra server-side de 1 hora continua sendo autoridade.
+
+## BUILD FINAL DA REMARCAÇÃO
+
+npm.cmd run build:
+
+APROVADO.
+
+TypeScript:
+
+APROVADO.
+
+git diff --check:
+
+APROVADO.
+
+## REGRAS FINANCEIRAS PRESERVADAS
+
+Plano Mensal:
+
+R$ 150 por pagamento mensal AVULSO via PIX.
+
+SEM recorrência automática Mercado Pago.
+
+Mercado Pago:
+
+Orders API.
+
+Browser NÃO confirma pagamento.
+
+Webhook/HMAC permanece autoridade de entrada de evento.
+
+GET Order server-side permanece obrigatório.
+
+Polling permanece apenas observacional.
+
+Hold PIX:
+
+30 minutos.
+
+Order expiration_time:
+
+PT30M.
+
+Capacidade:
+
+30 assinantes por barbeiro.
+
+SELECT ... FOR UPDATE permanece preservado onde já implementado.
+
+Janela de renovação:
+
+7 dias antes do fim do ciclo.
+
+Carência:
+
+2 dias.
+
+## NÃO ALTERADO
+
+Não foi reconstruído ou alterado nesta continuidade:
+
+- create_public_multi_appointment;
+- benefício/preço das assinaturas;
+- Mercado Pago Orders;
+- PIX;
+- webhook;
+- HMAC;
+- renovação voluntária;
+- renovação autenticada;
+- identidade segura;
+- recuperação de senha;
+- Admin financeiro;
+- capacidade de assinatura;
+- comissão.
+
+## PRÓXIMA FRENTE — COMISSÃO ADMINISTRATIVA
+
+Direção de produto APROVADA em 2026-09-19.
+
+A comissão de assinatura será controlada pelo Admin individualmente por barbeiro.
+
+Regra aprovada:
+
+- cada barbeiro possui percentual próprio de comissão de assinatura;
+- Admin escolhe/altera o percentual;
+- novos barbeiros começam com 0% como padrão seguro;
+- comissão incide SOMENTE sobre mensalidade de assinatura efetivamente paga;
+- não incide sobre agendamentos/cortes comuns;
+- pending não gera comissão;
+- failed não gera comissão;
+- cancelled não gera comissão;
+- expired não gera comissão;
+- cada renovação voluntária paga pode gerar nova comissão;
+- a comissão pertence ao barbeiro vinculado ao ciclo pago correspondente;
+- se a renovação trocar de barbeiro, a nova comissão pertence ao novo profissional;
+- percentual aplicado deve ficar CONGELADO historicamente no lançamento;
+- mudança futura do percentual afeta somente pagamentos futuros;
+- lançamentos financeiros antigos não são recalculados;
+- futuro refund/estorno não deve apagar histórico;
+- estorno deverá gerar reversão/ajuste auditável;
+- não inventar nem fixar percentual global no código.
+
+Estrutura existente:
+
+subscription_commission_entries
+
+deve ser reaproveitada quando compatível.
+
+Não criar estrutura paralela antes de inspecionar seu contrato atual.
+
+## PRÓXIMO PASSO EXATO — NOVO CHAT
+
+Antes de qualquer ação:
+
+1. ler integralmente CONTEXTO-PROJETO.md;
+2. priorizar este checkpoint;
+3. confirmar Git real;
+4. HEAD/origin esperado:
+   c8a77ef Permite troca segura de barbeiro na remarcacao
+5. working tree esperado:
+   ?? ASSINATURAS-LOTE.txt
+   ?? CODIGO-COMPLETO.txt
+6. migrations 007–031 já aplicadas;
+7. NÃO reaplicar nenhuma;
+8. iniciar diretamente a frente:
+   COMISSÃO ADMINISTRATIVA.
+
+Primeiro inspecionar somente os contratos necessários já versionados de:
+
+- barbers;
+- subscription_commission_entries;
+- RPC confirm_mercado_pago_subscription_payment;
+- cadastro/edição administrativa de barbeiros.
+
+Objetivo:
+
+desenhar a menor migration 032 necessária para:
+
+- percentual configurável por barbeiro;
+- padrão 0%;
+- lançamento auditável da comissão após pagamento confirmado;
+- percentual e valor congelados historicamente;
+- idempotência;
+- preparação para futura reversão de estorno.
+
+Antes de aplicar a migration 032:
+
+- apresentar modelagem;
+- obter autorização explícita.
+
+Não realizar cobrança real.
+
+Não criar PIX apenas para testar comissão sem necessidade.
+
+Não alterar /agendar ou remarcação nesta frente sem defeito concreto.
+
+Depois da comissão:
+
+preparação final para produção.
+
+# FIM DO CHECKPOINT — 2026-09-19

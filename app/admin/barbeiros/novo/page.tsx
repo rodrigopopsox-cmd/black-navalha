@@ -14,6 +14,8 @@ export default function NovoBarbeiroPage() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [active, setActive] = useState(true);
+  const [subscriptionCommissionRate, setSubscriptionCommissionRate] =
+    useState("0");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -30,6 +32,21 @@ export default function NovoBarbeiroPage() {
       return;
     }
 
+    const commissionRate = Number(
+      subscriptionCommissionRate.replace(",", ".")
+    );
+
+    if (
+      !Number.isFinite(commissionRate) ||
+      commissionRate < 0 ||
+      commissionRate > 100
+    ) {
+      setError(
+        "Informe uma comissão de assinatura entre 0% e 100%."
+      );
+      return;
+    }
+
     setLoading(true);
 
     const { error } = await supabase
@@ -38,6 +55,7 @@ export default function NovoBarbeiroPage() {
         name: name.trim(),
         phone: phone.trim() || null,
         active,
+        subscription_commission_rate: commissionRate,
       });
 
     if (error) {
@@ -58,7 +76,6 @@ export default function NovoBarbeiroPage() {
 
   return (
     <main className="admin-page">
-
       <div style={{ marginBottom: "25px" }}>
         <Link
           href="/admin/barbeiros"
@@ -76,31 +93,22 @@ export default function NovoBarbeiroPage() {
         </Link>
       </div>
 
-
       <div className="admin-header">
-
         <div>
-          <div className="admin-eyebrow">
-            EQUIPE
-          </div>
+          <div className="admin-eyebrow">EQUIPE</div>
 
-          <h1 className="admin-title">
-            Novo barbeiro
-          </h1>
+          <h1 className="admin-title">Novo barbeiro</h1>
 
           <p className="admin-subtitle">
             Cadastre um novo profissional da Black Navalha.
           </p>
         </div>
-
       </div>
-
 
       <form
         className="admin-form"
         onSubmit={handleSubmit}
       >
-
         <div
           style={{
             display: "flex",
@@ -137,18 +145,14 @@ export default function NovoBarbeiroPage() {
           </div>
         </div>
 
-
         {error && (
           <div className="admin-error">
             {error}
           </div>
         )}
 
-
         <div className="form-grid">
-
           <div className="form-group full">
-
             <label htmlFor="name">
               NOME DO BARBEIRO *
             </label>
@@ -164,12 +168,9 @@ export default function NovoBarbeiroPage() {
               required
               disabled={loading}
             />
-
           </div>
 
-
           <div className="form-group full">
-
             <label htmlFor="phone">
               WHATSAPP
             </label>
@@ -188,15 +189,36 @@ export default function NovoBarbeiroPage() {
             <span className="form-help">
               Telefone profissional. Este campo é opcional.
             </span>
-
           </div>
 
+          <div className="form-group full">
+            <label htmlFor="subscription-commission-rate">
+              COMISSÃO DE ASSINATURA (%) *
+            </label>
+
+            <input
+              id="subscription-commission-rate"
+              type="number"
+              min="0"
+              max="100"
+              step="0.01"
+              inputMode="decimal"
+              value={subscriptionCommissionRate}
+              onChange={(event) =>
+                setSubscriptionCommissionRate(event.target.value)
+              }
+              required
+              disabled={loading}
+            />
+
+            <span className="form-help">
+              Incide somente sobre mensalidades de assinatura
+              efetivamente pagas. Novos barbeiros começam em 0%.
+            </span>
+          </div>
 
           <div className="form-group full">
-
-            <label>
-              STATUS
-            </label>
+            <label>STATUS</label>
 
             <label
               style={{
@@ -208,7 +230,6 @@ export default function NovoBarbeiroPage() {
                 marginTop: "7px",
               }}
             >
-
               <input
                 type="checkbox"
                 checked={active}
@@ -226,21 +247,16 @@ export default function NovoBarbeiroPage() {
               <span style={{ color: "#bbb" }}>
                 Barbeiro ativo
               </span>
-
             </label>
 
             <span className="form-help">
               Somente profissionais ativos poderão receber
               novos agendamentos.
             </span>
-
           </div>
-
         </div>
 
-
         <div className="form-actions">
-
           <Link
             href="/admin/barbeiros"
             className="admin-button-secondary"
@@ -259,11 +275,8 @@ export default function NovoBarbeiroPage() {
               ? "SALVANDO..."
               : "SALVAR BARBEIRO"}
           </button>
-
         </div>
-
       </form>
-
     </main>
   );
 }

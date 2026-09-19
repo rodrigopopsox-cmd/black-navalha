@@ -1,4 +1,4 @@
-﻿"use server";
+"use server";
 
 import { revalidatePath } from "next/cache";
 
@@ -9,6 +9,7 @@ export type UpdateBarberInput = {
   name: string;
   phone: string;
   active: boolean;
+  subscriptionCommissionRate: number;
 };
 
 export type UpdateBarberResult = {
@@ -23,6 +24,8 @@ export async function updateBarber(
   const name = input.name?.trim();
   const phone = input.phone?.trim() ?? "";
   const phoneDigits = phone.replace(/\D/g, "");
+  const subscriptionCommissionRate =
+    input.subscriptionCommissionRate;
 
   if (!id) {
     return {
@@ -45,6 +48,18 @@ export async function updateBarber(
     return {
       success: false,
       message: "Informe um WhatsApp válido.",
+    };
+  }
+
+  if (
+    !Number.isFinite(subscriptionCommissionRate) ||
+    subscriptionCommissionRate < 0 ||
+    subscriptionCommissionRate > 100
+  ) {
+    return {
+      success: false,
+      message:
+        "Informe uma comissão de assinatura entre 0% e 100%.",
     };
   }
 
@@ -112,6 +127,8 @@ export async function updateBarber(
       name,
       phone: phone || null,
       active: input.active,
+      subscription_commission_rate:
+        subscriptionCommissionRate,
     })
     .eq("id", id);
 

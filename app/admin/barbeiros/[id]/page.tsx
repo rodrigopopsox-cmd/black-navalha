@@ -1,4 +1,4 @@
-﻿import { notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 import BarberEditForm from "./barber-edit-form";
@@ -22,7 +22,8 @@ export default async function EditarBarbeiroPage({
       id,
       name,
       phone,
-      active
+      active,
+      subscription_commission_rate
     `)
     .eq("id", id)
     .single();
@@ -38,6 +39,8 @@ export default async function EditarBarbeiroPage({
         name: barber.name,
         phone: barber.phone,
         active: barber.active,
+        subscriptionCommissionRate:
+          Number(barber.subscription_commission_rate),
       }}
     />
   );

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { FormEvent, useState, useTransition } from "react";
 import Link from "next/link";
@@ -16,6 +16,7 @@ type Barber = {
   name: string;
   phone: string | null;
   active: boolean;
+  subscriptionCommissionRate: number;
 };
 
 export default function BarberEditForm({
@@ -26,6 +27,10 @@ export default function BarberEditForm({
   const [name, setName] = useState(barber.name);
   const [phone, setPhone] = useState(barber.phone ?? "");
   const [active, setActive] = useState(barber.active);
+  const [
+    subscriptionCommissionRate,
+    setSubscriptionCommissionRate,
+  ] = useState(String(barber.subscriptionCommissionRate));
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -102,12 +107,28 @@ export default function BarberEditForm({
       return;
     }
 
+    const commissionRate = Number(
+      subscriptionCommissionRate.replace(",", ".")
+    );
+
+    if (
+      !Number.isFinite(commissionRate) ||
+      commissionRate < 0 ||
+      commissionRate > 100
+    ) {
+      setError(
+        "Informe uma comissão de assinatura entre 0% e 100%."
+      );
+      return;
+    }
+
     startTransition(async () => {
       const result = await updateBarber({
         id: barber.id,
         name: trimmedName,
         phone: trimmedPhone,
         active,
+        subscriptionCommissionRate: commissionRate,
       });
 
       if (!result.success) {
@@ -230,6 +251,39 @@ export default function BarberEditForm({
 
               <span style={helpStyle}>
                 Telefone profissional. Este campo é opcional.
+              </span>
+            </div>
+
+            <div>
+              <label
+                htmlFor="barber-subscription-commission-rate"
+                style={fieldLabelStyle}
+              >
+                COMISSÃO DE ASSINATURA (%) *
+              </label>
+
+              <input
+                id="barber-subscription-commission-rate"
+                type="number"
+                min="0"
+                max="100"
+                step="0.01"
+                inputMode="decimal"
+                required
+                value={subscriptionCommissionRate}
+                onChange={(event) => {
+                  setSubscriptionCommissionRate(
+                    event.target.value
+                  );
+                  clearFeedback();
+                }}
+                style={inputStyle}
+              />
+
+              <span style={helpStyle}>
+                Incide somente sobre mensalidades de assinatura
+                efetivamente pagas. Alterações afetam apenas
+                pagamentos futuros.
               </span>
             </div>
 

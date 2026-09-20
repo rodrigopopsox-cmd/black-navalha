@@ -143,17 +143,43 @@ export default async function MinhaAssinaturaPage() {
     return (
       <main className={styles.page}>
         <div className={styles.narrow}>
+          <div className={styles.customerBrand}>
+            <Link href="/" className={styles.customerBrandIdentity}>
+              <Image
+                src="/black-navalha/logo.png"
+                alt="Black Navalha"
+                width={78}
+                height={58}
+                priority
+                className={styles.customerBrandLogo}
+              />
+
+              <div className={styles.customerBrandCopy}>
+                <strong>BLACK NAVALHA</strong>
+                <span>BARBEARIA</span>
+              </div>
+            </Link>
+
+            <div className={styles.customerBrandActions}>
+              <div className={styles.customerBrandArea}>
+                CENTRAL DO CLIENTE
+              </div>
+
+              <form action={signOutCustomer}>
+                <button className={styles.customerLogout} type="submit">
+                  <LogOut size={12} aria-hidden="true" />
+                  Sair
+                </button>
+              </form>
+            </div>
+          </div>
+
           <section className={styles.panel}>
-            <span className={styles.eyebrow}>Área do assinante</span>
-            <h1>Confirme seu e-mail</h1>
+            <span className={styles.eyebrow}>Acesso do cliente</span>
+            <h1 className={styles.identityStateTitle}>Confirme seu e-mail</h1>
             <p>
               Confirme seu endereço de e-mail antes de acessar dados privados.
             </p>
-            <form action={signOutCustomer}>
-              <button className={styles.secondaryButton} type="submit">
-                Sair
-              </button>
-            </form>
           </section>
         </div>
       </main>
@@ -164,19 +190,53 @@ export default async function MinhaAssinaturaPage() {
     return (
       <main className={styles.page}>
         <div className={styles.narrow}>
-          <section className={styles.panel}>
+          <div className={styles.customerBrand}>
+            <Link href="/" className={styles.customerBrandIdentity}>
+              <Image
+                src="/black-navalha/logo.png"
+                alt="Black Navalha"
+                width={78}
+                height={58}
+                priority
+                className={styles.customerBrandLogo}
+              />
+
+              <div className={styles.customerBrandCopy}>
+                <strong>BLACK NAVALHA</strong>
+                <span>BARBEARIA</span>
+              </div>
+            </Link>
+
+            <div className={styles.customerBrandActions}>
+              <div className={styles.customerBrandArea}>
+                CENTRAL DO CLIENTE
+              </div>
+
+              <form action={signOutCustomer}>
+                <button className={styles.customerLogout} type="submit">
+                  <LogOut size={12} aria-hidden="true" />
+                  Sair
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <section className={`${styles.panel} ${styles.identityStatePanel}`}>
             <span className={styles.eyebrow}>Identidade confirmada</span>
-            <h1>Vincule seu cadastro</h1>
-            <p>
-              Seu e-mail foi confirmado. Agora valide a correspondência com o
-              cadastro existente da Black Navalha.
-            </p>
+            <h1 className={styles.identityStateTitle}>Vincule seu cadastro</h1>
+
+            <div className={styles.identityStateMessage}>
+              <strong>Seu e-mail está confirmado.</strong>
+              <p>
+                Conecte sua conta ao cadastro da Black Navalha para acessar sua
+                assinatura, benefícios e agendamentos.
+              </p>
+              <span className={styles.identityStateSecurity}>
+                Vinculação segura com o seu cadastro existente
+              </span>
+            </div>
+
             <LinkCustomerButton />
-            <form action={signOutCustomer}>
-              <button className={styles.secondaryButton} type="submit">
-                Sair
-              </button>
-            </form>
           </section>
         </div>
       </main>

@@ -2500,3 +2500,187 @@
     animation: none;
   }
 }
+
+/* CENTRAL DO CLIENTE — ESTADOS DE IDENTIDADE */
+
+.identityStatePanel {
+  position: relative;
+  max-width: 760px;
+  padding: 38px 42px 40px;
+  overflow: hidden;
+  border: 1px solid #2b2926;
+  border-top: 2px solid #d29d4f;
+  border-radius: 0;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(210, 157, 79, 0.055), transparent 34%),
+    #0d0d0d;
+}
+
+.identityStatePanel::after {
+  position: absolute;
+  right: -60px;
+  bottom: -90px;
+  width: 220px;
+  height: 220px;
+  border: 1px solid rgba(210, 157, 79, 0.06);
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+
+.identityStatePanel .eyebrow {
+  display: block;
+  margin-bottom: 14px;
+  color: #d29d4f;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.identityStateTitle {
+  max-width: 610px;
+  margin: 0;
+  color: #f5f1eb;
+  font-size: clamp(32px, 4.4vw, 48px);
+  font-weight: 900;
+  letter-spacing: -0.025em;
+  line-height: 0.98;
+  text-transform: uppercase;
+}
+
+.identityStateText {
+  max-width: 570px;
+  margin: 18px 0 26px;
+  color: #8d8780;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.identityStatePanel form {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+}
+
+.identityStatePanel .primaryButton {
+  min-height: 52px;
+  border-radius: 6px;
+  background: #d29d4f;
+  color: #080808;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+}
+
+.identityStatePanel .primaryButton:hover:not(:disabled) {
+  background: #dfab5e;
+}
+
+@media (max-width: 620px) {
+  .identityStatePanel {
+    padding: 28px 22px 26px;
+  }
+
+  .identityStatePanel .eyebrow {
+    margin-bottom: 12px;
+    font-size: 8px;
+    letter-spacing: 0.17em;
+  }
+
+  .identityStateTitle {
+    max-width: 310px;
+    font-size: clamp(29px, 10vw, 38px);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  .identityStateText {
+    margin: 15px 0 22px;
+    font-size: 11px;
+    line-height: 1.65;
+  }
+
+  .identityStatePanel .primaryButton {
+    width: 100%;
+    min-height: 50px;
+    font-size: 9px;
+  }
+}
+/* CENTRAL DO CLIENTE — MENSAGEM DE VÍNCULO */
+.identityStateMessage {
+  position: relative;
+  z-index: 1;
+  max-width: 590px;
+  margin: 22px 0 26px;
+  padding: 17px 20px;
+  border-left: 2px solid #d29d4f;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(210, 157, 79, 0.075),
+      rgba(210, 157, 79, 0.018) 72%,
+      transparent
+    );
+}
+
+.identityStateMessage strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #f5f1eb;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+}
+
+.identityStateMessage p {
+  max-width: 500px;
+  margin: 0;
+  color: #999188;
+  font-size: 11px;
+  line-height: 1.65;
+}
+
+.identityStateSecurity {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 12px;
+  color: #6f6962;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.identityStateSecurity::before {
+  width: 5px;
+  height: 5px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #d29d4f;
+  content: "";
+}
+
+@media (max-width: 620px) {
+  .identityStateMessage {
+    margin: 18px 0 22px;
+    padding: 15px 16px;
+  }
+
+  .identityStateMessage strong {
+    font-size: 12px;
+  }
+
+  .identityStateMessage p {
+    font-size: 10px;
+  }
+
+  .identityStateSecurity {
+    margin-top: 11px;
+    font-size: 7px;
+    letter-spacing: 0.07em;
+  }
+}

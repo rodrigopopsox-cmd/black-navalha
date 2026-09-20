@@ -23329,3 +23329,641 @@ Também pendente para go-live real futuro:
 - decisão de plano comercial da Vercel após demonstração.
 
 # FIM DO CHECKPOINT — 2026-09-19
+---
+
+# CHECKPOINT DE CONTINUIDADE — LIMPEZA QA / CENTRAL DO CLIENTE / PREPARAÇÃO PARA APRESENTAÇÃO — 2026-09-20
+
+## PRIORIDADE
+
+Este é o checkpoint mais recente e deve prevalecer sobre checkpoints anteriores quando houver conflito.
+
+A frente continua:
+
+PREPARAÇÃO FINAL PARA PRODUÇÃO / APRESENTAÇÃO AO CLIENTE.
+
+O ambiente público permanece:
+
+https://black-navalha.vercel.app
+
+Vercel permanece integrada ao GitHub/main e realiza redeploy automático após push.
+
+Mercado Pago continua em TESTE/SANDBOX.
+
+Não realizar cobrança real.
+
+Não criar PIX apenas para repetir testes financeiros já aprovados.
+
+## GIT
+
+Branch:
+
+main
+
+HEAD/origin após o último refinamento funcional:
+
+3b5ce22 Refina estados de identidade da Central do Cliente
+
+Push:
+
+APROVADO.
+
+Estado esperado do working tree antes desta atualização documental:
+
+?? ASSINATURAS-LOTE.txt
+?? CODIGO-COMPLETO.txt
+
+Nunca versionar:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt;
+- .env.local.
+
+Nunca usar:
+
+git add .
+
+Staging somente com caminhos explícitos.
+
+Commit/push continuam exigindo autorização explícita.
+
+## MIGRATIONS
+
+Migrations 007–032 permanecem aplicadas.
+
+NÃO reaplicar nenhuma.
+
+Nenhuma migration foi criada ou aplicada durante a limpeza QA ou o refinamento visual registrado neste checkpoint.
+
+## LIMPEZA CONTROLADA DE QA — CONCLUÍDA
+
+Foi concluída a limpeza controlada dos dados de desenvolvimento/QA antes da apresentação ao cliente.
+
+A limpeza foi precedida por:
+
+- confirmação do Git real;
+- mapeamento somente leitura;
+- identificação explícita dos registros QA;
+- levantamento de vínculos;
+- levantamento das foreign keys necessárias;
+- separação entre dados QA e dados institucionais;
+- autorização explícita antes de cada lote destrutivo.
+
+Não foi realizada limpeza genérica/cascata do banco.
+
+### PRIMEIRO LOTE QA
+
+Foram identificados e removidos os conjuntos:
+
+- Teste Black Navalha;
+- Fixture Renovacao Autenticada.
+
+Foram removidos, conforme vínculos mapeados:
+
+- customers QA;
+- subscriptions QA;
+- subscription_services correspondentes;
+- subscription_cycles QA;
+- subscription_charges sandbox correspondentes;
+- subscription_capacity_reservations correspondentes;
+- payment_events correspondentes;
+- appointments QA;
+- appointment_services correspondentes.
+
+Nenhuma comissão existia nesses conjuntos.
+
+As identidades Supabase Auth QA correspondentes também foram removidas conscientemente através da área administrativa do Supabase.
+
+Auditoria pós-limpeza dos IDs exatos confirmou zero registros restantes em:
+
+- customers;
+- subscriptions;
+- cycles;
+- charges;
+- reservations;
+- payment_events;
+- appointments;
+- auth.users;
+- subscription_commission_entries.
+
+### SEGUNDO LOTE — CLIENTES HISTÓRICOS DE DESENVOLVIMENTO
+
+Após validação visual de /admin/clientes, foi decidido conscientemente limpar também os sete customers históricos restantes utilizados durante desenvolvimento e testes.
+
+O mapeamento confirmou:
+
+- 7 customers;
+- 11 appointments;
+- 14 appointment_services;
+- 1 assinatura legada de desenvolvimento;
+- zero subscription_cycles;
+- zero subscription_charges;
+- zero reservations;
+- zero payment_events;
+- zero commissions.
+
+A assinatura legada não possuía plan_id, ciclo ou cobrança comercial.
+
+Após autorização explícita foram removidos:
+
+- os 14 appointment_services mapeados;
+- os 11 appointments mapeados;
+- subscription_services da assinatura legada;
+- a assinatura legada;
+- os 7 customers.
+
+Validação final retornou:
+
+clientes_restantes = 0
+appointments_do_lote_restantes = 0
+assinatura_legada_restante = 0
+
+A única identidade Auth vinculada nesse segundo lote também foi removida conscientemente pela área Authentication do Supabase.
+
+## DADOS INSTITUCIONAIS PRESERVADOS
+
+A limpeza NÃO removeu ou alterou:
+
+- Rodrigo Alves Correa enquanto registro de barbers;
+- serviços reais;
+- serviços de assinatura;
+- Plano Mensal;
+- business_settings;
+- jornadas/horários;
+- configurações da barbearia;
+- estrutura financeira;
+- RPCs;
+- policies;
+- migrations;
+- capacidade;
+- regras de renovação;
+- comissão administrativa.
+
+Customers chamados Rodrigo Alves Correa que existiam historicamente eram registros de clientes de desenvolvimento distintos do registro institucional de barbers e foram removidos somente após mapeamento e autorização explícita.
+
+## ESTADO ESPERADO APÓS LIMPEZA
+
+Para apresentação limpa:
+
+/admin/clientes:
+0 clientes.
+
+/admin/assinantes:
+0 assinaturas.
+
+/admin/comissoes:
+R$ 0,00 e nenhum lançamento.
+
+/admin/agenda:
+sem os appointments históricos removidos.
+
+/admin/barbeiros:
+Rodrigo Alves Correa preservado e capacidade liberada.
+
+Serviços, Plano Mensal e configurações institucionais permanecem preservados.
+
+Nenhum novo cliente, assinatura, appointment, PIX ou cobrança foi criado apenas para preencher telas após a limpeza.
+
+## MERCADO PAGO / FINANCEIRO
+
+A arquitetura financeira continua preservada:
+
+Plano Mensal:
+R$ 150 por pagamento mensal AVULSO via PIX.
+
+SEM recorrência automática Mercado Pago.
+
+Orders API.
+
+Browser NÃO confirma pagamento.
+
+Webhook HMAC + GET Order server-side continuam autoridade.
+
+confirm_mercado_pago_subscription_payment continua sendo fronteira transacional/idempotente.
+
+Polling continua apenas observacional.
+
+Capacidade:
+
+30 assinantes por barbeiro.
+
+Preservar SELECT ... FOR UPDATE.
+
+Hold PIX:
+
+30 minutos.
+
+Janela antecipada de renovação:
+
+7 dias.
+
+Carência:
+
+2 dias.
+
+Mercado Pago continua em TESTE/SANDBOX no ambiente de demonstração.
+
+MERCADO_PAGO_TEST_MODE=true deve permanecer enquanto o ambiente não for produção financeira real.
+
+Não repetir E2E financeiro já aprovado sem necessidade.
+
+## CENTRAL DO CLIENTE — REFINAMENTO DOS ESTADOS DE IDENTIDADE
+
+Foi refinada a experiência visual dos estados anteriores ao vínculo completo do customer em:
+
+/minha-assinatura
+
+Arquivos alterados:
+
+- app/minha-assinatura/page.tsx;
+- app/minha-assinatura/page.module.css.
+
+Commit funcional:
+
+3b5ce22 Refina estados de identidade da Central do Cliente
+
+A lógica de autenticação/vínculo NÃO foi alterada.
+
+Não foram alterados:
+
+- claim_customer_identity;
+- Supabase Auth;
+- customers.auth_user_id;
+- migrations de identidade;
+- regras de assinatura;
+- regras financeiras.
+
+### ESTADO UNVERIFIED
+
+O estado de e-mail ainda não confirmado passou a reutilizar a identidade visual consolidada da Central do Cliente:
+
+- logo oficial;
+- BLACK NAVALHA;
+- BARBEARIA;
+- CENTRAL DO CLIENTE;
+- ação Sair discreta no cabeçalho;
+- apresentação consistente com a experiência autenticada.
+
+### ESTADO UNLINKED — VINCULE SEU CADASTRO
+
+O estado:
+
+VINCULE SEU CADASTRO
+
+foi redesenhado para seguir a identidade premium da Black Navalha.
+
+A apresentação agora possui:
+
+- cabeçalho institucional da Central;
+- label IDENTIDADE CONFIRMADA;
+- título forte e pesado;
+- hierarquia tipográfica consistente;
+- card escuro;
+- destaque dourado;
+- mensagem guiada;
+- CTA principal dourado;
+- ação Sair discreta no cabeçalho.
+
+Mensagem principal:
+
+Seu e-mail está confirmado.
+
+Explicação:
+
+Conecte sua conta ao cadastro da Black Navalha para acessar sua assinatura, benefícios e agendamentos.
+
+Indicação de segurança:
+
+VINCULAÇÃO SEGURA COM O SEU CADASTRO EXISTENTE
+
+CTA:
+
+VINCULAR MEU CADASTRO
+
+A lógica segura de vinculação existente foi integralmente preservada.
+
+## VALIDAÇÃO DO REFINAMENTO
+
+Desktop:
+
+APROVADO visualmente.
+
+Mobile:
+
+APROVADO visualmente.
+
+Build:
+
+npm.cmd run build
+
+APROVADO.
+
+Next.js:
+
+16.3.4.
+
+TypeScript:
+
+sem erros.
+
+git diff --check:
+
+APROVADO.
+
+Somente avisos conhecidos de LF/CRLF.
+
+## VERCEL
+
+O commit funcional 3b5ce22 foi enviado para main.
+
+A integração Vercel/GitHub deve realizar redeploy automático.
+
+Após o redeploy, validar oportunamente o estado refinado da Central em HTTPS sem criar dados artificiais desnecessários.
+
+## NÃO RECONSTRUIR
+
+Permanecem concluídos e não devem ser refeitos sem defeito concreto:
+
+- /agendar;
+- create_public_multi_appointment;
+- benefício/preço das assinaturas;
+- cancelamento;
+- remarcação;
+- troca de barbeiro;
+- Mercado Pago Orders;
+- PIX;
+- webhook/HMAC;
+- polling;
+- renovação voluntária;
+- renovação autenticada;
+- identidade segura;
+- recuperação de senha;
+- capacidade;
+- comissão administrativa;
+- deploy Vercel;
+- limpeza QA já executada.
+
+## PRÓXIMA DIREÇÃO
+
+Continuar os acertos finais de apresentação antes do go-live financeiro.
+
+Pode-se revisar gradualmente outras telas/estados visuais que ainda estejam destoando da identidade Black Navalha, sem reconstruir funcionalidades concluídas.
+
+Pendente para produção financeira real:
+
+- decisão sobre domínio próprio;
+- conta Mercado Pago pertencente à Black Navalha;
+- credenciais reais somente com autorização;
+- MERCADO_PAGO_TEST_MODE=false/ausente somente no go-live;
+- webhook real de produção;
+- revisão do Supabase Auth para domínio definitivo;
+- smoke test final seguro;
+- decisão sobre plano comercial da Vercel.
+
+O ambiente atual continua sendo DEMONSTRAÇÃO, não produção financeira definitiva.
+
+# FIM DO CHECKPOINT — 2026-09-20
+---
+
+# CHECKPOINT DE CONTINUIDADE — LIMPEZA QA / CENTRAL DO CLIENTE / PREPARAÇÃO PARA APRESENTAÇÃO — 2026-09-20
+
+## PRIORIDADE
+
+Este é o checkpoint mais recente e prevalece sobre checkpoints anteriores quando houver conflito.
+
+Frente atual: PREPARAÇÃO FINAL PARA PRODUÇÃO / APRESENTAÇÃO AO CLIENTE.
+
+Ambiente público de demonstração: https://black-navalha.vercel.app
+
+Vercel permanece integrada ao GitHub/main com redeploy automático após push. Mercado Pago permanece em TESTE/SANDBOX. Não realizar cobrança real nem criar PIX apenas para repetir testes já aprovados.
+
+## GIT
+
+Branch: main
+
+HEAD/origin após o último refinamento funcional:
+
+3b5ce22 Refina estados de identidade da Central do Cliente
+
+Push aprovado.
+
+Working tree esperado antes deste checkpoint documental:
+
+?? ASSINATURAS-LOTE.txt
+?? CODIGO-COMPLETO.txt
+
+Nunca versionar ASSINATURAS-LOTE.txt, CODIGO-COMPLETO.txt ou .env.local. Nunca usar git add .. Staging somente com caminhos explícitos. Commit/push somente com autorização explícita.
+
+## MIGRATIONS
+
+Migrations 007–032 permanecem aplicadas. NÃO reaplicar nenhuma.
+
+Nenhuma migration foi criada ou aplicada durante a limpeza QA ou o refinamento visual deste checkpoint.
+
+## LIMPEZA CONTROLADA DE QA — CONCLUÍDA
+
+A limpeza foi precedida por confirmação do Git, consultas somente leitura, mapeamento de vínculos/FKs, separação entre QA e dados institucionais e autorização explícita para cada lote destrutivo. Não foi executada limpeza genérica do banco.
+
+Primeiro lote removido:
+- Teste Black Navalha;
+- Fixture Renovacao Autenticada;
+- customers, subscriptions e subscription_services correspondentes;
+- subscription_cycles;
+- subscription_charges sandbox;
+- subscription_capacity_reservations;
+- payment_events;
+- appointments e appointment_services;
+- identidades Supabase Auth QA correspondentes.
+
+Nenhuma comissão existia nesses conjuntos. Auditoria dos IDs exatos após a operação confirmou zero registros restantes em customers, subscriptions, cycles, charges, reservations, payment_events, appointments, auth.users e subscription_commission_entries.
+
+Segundo lote: após revisão de /admin/clientes foi decidido remover também os sete customers históricos restantes usados durante desenvolvimento/testes.
+
+Mapeamento anterior à exclusão:
+- 7 customers;
+- 11 appointments;
+- 14 appointment_services;
+- 1 assinatura legada de desenvolvimento;
+- 0 cycles;
+- 0 charges;
+- 0 reservations;
+- 0 payment_events;
+- 0 commissions.
+
+A assinatura legada não possuía plan_id, ciclo ou cobrança comercial.
+
+Após autorização foram removidos os appointment_services, appointments, subscription_services da assinatura legada, a assinatura e os sete customers. A identidade Auth vinculada ao segundo lote também foi removida pela área Authentication do Supabase.
+
+Validação final:
+- clientes_restantes = 0;
+- appointments_do_lote_restantes = 0;
+- assinatura_legada_restante = 0.
+
+## DADOS PRESERVADOS
+
+A limpeza NÃO removeu ou alterou:
+- Rodrigo Alves Correa em public.barbers;
+- serviços reais e serviços de assinatura;
+- Plano Mensal;
+- business_settings;
+- jornadas/horários;
+- configurações institucionais;
+- estrutura financeira;
+- RPCs/policies/migrations;
+- regras de capacidade e renovação;
+- comissão administrativa.
+
+Os customers históricos chamados Rodrigo Alves Correa eram registros de cliente de desenvolvimento distintos do registro institucional em barbers e só foram removidos após mapeamento e autorização.
+
+Estado esperado para apresentação:
+- /admin/clientes: 0 clientes;
+- /admin/assinantes: 0 assinaturas;
+- /admin/comissoes: R$ 0,00 e nenhum lançamento;
+- /admin/agenda: sem appointments históricos removidos;
+- /admin/barbeiros: Rodrigo Alves Correa preservado e capacidade liberada.
+
+Nenhum novo cliente, assinatura, appointment, PIX ou cobrança foi criado apenas para preencher telas após a limpeza.
+
+## ARQUITETURA FINANCEIRA PRESERVADA
+
+Plano Mensal: R$ 150 por pagamento mensal AVULSO via PIX, sem recorrência automática Mercado Pago.
+
+Preservar:
+- Orders API;
+- browser NÃO confirma pagamento;
+- webhook HMAC + GET Order server-side como autoridade;
+- confirm_mercado_pago_subscription_payment como fronteira transacional/idempotente;
+- polling somente observacional;
+- capacidade de 30 assinantes por barbeiro;
+- SELECT ... FOR UPDATE;
+- hold PIX de 30 minutos;
+- janela de renovação de 7 dias;
+- carência de 2 dias;
+- comissão somente após mensalidade efetivamente paga conforme migration 032.
+
+Mercado Pago continua em TESTE/SANDBOX. MERCADO_PAGO_TEST_MODE=true deve permanecer enquanto não houver go-live financeiro. Não repetir E2E financeiro sem necessidade.
+
+## CENTRAL DO CLIENTE — ESTADOS DE IDENTIDADE
+
+Foi refinada a apresentação visual dos estados anteriores ao vínculo completo do customer em /minha-assinatura.
+
+Arquivos:
+- app/minha-assinatura/page.tsx;
+- app/minha-assinatura/page.module.css.
+
+Commit funcional:
+
+3b5ce22 Refina estados de identidade da Central do Cliente
+
+Não foram alterados Auth, claim_customer_identity, customers.auth_user_id, migrations, regras de assinatura ou regras financeiras.
+
+O estado unverified passou a reutilizar a identidade consolidada da Central do Cliente: logo oficial, BLACK NAVALHA, BARBEARIA, CENTRAL DO CLIENTE e ação Sair discreta.
+
+O estado unlinked / VINCULE SEU CADASTRO foi redesenhado com:
+- cabeçalho institucional;
+- label IDENTIDADE CONFIRMADA;
+- título forte;
+- card escuro e destaque dourado;
+- mensagem guiada;
+- indicação de segurança;
+- CTA principal dourado;
+- ação Sair discreta.
+
+Conteúdo aprovado:
+
+"Seu e-mail está confirmado."
+
+"Conecte sua conta ao cadastro da Black Navalha para acessar sua assinatura, benefícios e agendamentos."
+
+"VINCULAÇÃO SEGURA COM O SEU CADASTRO EXISTENTE"
+
+CTA:
+
+VINCULAR MEU CADASTRO
+
+A lógica segura de vínculo foi integralmente preservada.
+
+Validação:
+- desktop: APROVADO;
+- mobile: APROVADO;
+- npm.cmd run build: APROVADO;
+- Next.js 16.3.4;
+- TypeScript sem erros;
+- git diff --check aprovado, somente avisos conhecidos LF/CRLF.
+
+## VERCEL
+
+O commit funcional 3b5ce22 foi enviado para main e deve gerar redeploy automático na Vercel.
+
+Validar oportunamente o estado refinado em HTTPS sem criar dados artificiais apenas para teste.
+
+## NÃO RECONSTRUIR
+
+Permanecem concluídos e não devem ser refeitos sem defeito concreto:
+- /agendar e create_public_multi_appointment;
+- benefício/preço das assinaturas;
+- cancelamento e remarcação;
+- troca de barbeiro;
+- Mercado Pago Orders / PIX / webhook HMAC / polling;
+- renovação voluntária e autenticada;
+- identidade segura e recuperação de senha;
+- capacidade;
+- comissão administrativa;
+- deploy Vercel;
+- limpeza QA já concluída.
+
+## PRÓXIMA DIREÇÃO
+
+Continuar acertos finais de apresentação em telas/estados que ainda destoem da identidade Black Navalha, sem reconstruir funcionalidades concluídas.
+
+Para go-live financeiro real ainda permanecem:
+- decisão de domínio próprio;
+- conta Mercado Pago pertencente à Black Navalha;
+- credenciais reais somente com autorização;
+- MERCADO_PAGO_TEST_MODE=false/ausente somente no go-live;
+- webhook real de produção;
+- revisão do Supabase Auth para domínio definitivo;
+- smoke test final seguro;
+- decisão sobre plano comercial da Vercel.
+
+O ambiente atual continua sendo DEMONSTRAÇÃO, não produção financeira definitiva.
+
+
+## SERVIÇOS — DESCRIÇÕES COMPLETADAS PARA APRESENTAÇÃO
+
+Durante a revisão final de /agendar foi identificado que 13 dos 24 serviços ativos ainda possuíam description NULL.
+
+Foi feita alteração controlada somente de conteúdo em public.services.description, usando IDs exatos e preservando descrições existentes.
+
+Foram preenchidos:
+- Barba Assinante Mensal;
+- Cabelo + Barba Assinante Mensal;
+- Cabelo Assinante Mensal;
+- Raspado + Barba Assinante Mensal;
+- Barba + Sobrancelha;
+- Bigode;
+- Pigmentação Barba;
+- Cabelo + Luzes;
+- Matização;
+- Pézinho;
+- Pigmentação Cabelo;
+- Raspado;
+- Sobrancelha.
+
+Os serviços de assinatura receberam descrições coerentes com os serviços correspondentes. Raspado + Barba recebeu descrição compatível com a composição dos dois serviços.
+
+Validação final confirmou os 24 serviços ativos com description preenchida.
+
+Não foram alterados:
+- preço;
+- duração;
+- categoria;
+- active;
+- subscriber_service;
+- benefício/preço das assinaturas;
+- create_public_multi_appointment;
+- código de /agendar.
+
+Nenhuma migration foi necessária, pois foi atualização de conteúdo institucional em registros existentes.
+
+A seleção múltipla de serviços em /agendar foi revisada visualmente, mas nenhuma nova regra de incompatibilidade entre serviços foi implementada. O comportamento existente foi conscientemente preservado nesta etapa para evitar introduzir uma nova regra de negócio sem modelagem específica.
+# FIM DO CHECKPOINT — 2026-09-20

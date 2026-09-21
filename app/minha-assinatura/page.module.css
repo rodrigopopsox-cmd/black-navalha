@@ -2684,3 +2684,104 @@
     letter-spacing: 0.07em;
   }
 }
+/* CENTRAL DO CLIENTE — CONVITE PARA O PLANO */
+
+.noSubscriptionCard {
+  position: relative;
+  margin-bottom: 22px;
+  padding: 30px 32px;
+  overflow: hidden;
+  border: 1px solid rgba(210, 157, 79, 0.28);
+  border-top: 2px solid #d29d4f;
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(210, 157, 79, 0.11), transparent 34%),
+    linear-gradient(135deg, #12110f, #0c0c0c 68%);
+}
+
+.noSubscriptionCard::after {
+  position: absolute;
+  top: -78px;
+  right: -46px;
+  width: 170px;
+  height: 170px;
+  border: 1px solid rgba(210, 157, 79, 0.12);
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+
+.noSubscriptionCard .eyebrow {
+  position: relative;
+  z-index: 1;
+  display: block;
+  margin-bottom: 10px;
+  color: #d29d4f;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.noSubscriptionCard h2 {
+  position: relative;
+  z-index: 1;
+  max-width: 520px;
+  margin: 0;
+  color: #f5f1eb;
+  font-size: clamp(25px, 3.4vw, 34px);
+  font-weight: 900;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+.noSubscriptionCard p {
+  position: relative;
+  z-index: 1;
+  max-width: 520px;
+  margin: 12px 0 22px;
+  color: #918a82;
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.noSubscriptionCard .primaryLink {
+  position: relative;
+  z-index: 1;
+  width: auto;
+  min-width: 210px;
+  min-height: 48px;
+  padding: 0 26px;
+  border-radius: 6px;
+  background: #d29d4f;
+  color: #080808;
+}
+
+.noSubscriptionCard .primaryLink:hover {
+  background: #dfab5e;
+}
+
+@media (max-width: 620px) {
+  .noSubscriptionCard {
+    margin-bottom: 18px;
+    padding: 24px 20px;
+    border-radius: 8px;
+  }
+
+  .noSubscriptionCard h2 {
+    max-width: 290px;
+    font-size: 25px;
+  }
+
+  .noSubscriptionCard p {
+    margin: 10px 0 20px;
+    font-size: 11px;
+  }
+
+  .noSubscriptionCard .primaryLink {
+    width: 100%;
+    min-width: 0;
+    min-height: 50px;
+  }
+}

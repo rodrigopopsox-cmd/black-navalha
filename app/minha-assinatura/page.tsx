@@ -339,17 +339,32 @@ export default async function MinhaAssinaturaPage() {
         </header>
 
         {!data || !data.has_subscription ? (
-          <section className={styles.panel}>
-            <span className={styles.eyebrow}>Assinatura</span>
-            <h2>Você ainda não possui uma assinatura comercial.</h2>
-            <p>
-              Quando você contratar um plano, o ciclo e a renovação aparecerão
-              aqui com segurança.
-            </p>
-            <a href="/assinaturas" className={styles.primaryLink}>
-              Conhecer planos
-            </a>
-          </section>
+          <>
+            <section className={`${styles.panel} ${styles.noSubscriptionCard}`}>
+              <span className={styles.eyebrow}>Plano Black Navalha</span>
+              <h2>Eleve sua experiência.</h2>
+              <p>
+                Conheça o Plano Mensal e tenha acesso aos benefícios exclusivos
+                para assinantes da Black Navalha.
+              </p>
+              <Link href="/assinaturas" className={styles.primaryLink}>
+                Conhecer planos
+              </Link>
+            </section>
+
+            <UpcomingAppointments appointments={upcomingAppointments} />
+
+            <div className={styles.actions}>
+              <Link href="/agendar" className={styles.primaryLink}>
+                Agendar horário
+              </Link>
+            </div>
+
+            <UpcomingAppointments
+              appointments={appointmentHistory}
+              variant="history"
+            />
+          </>
         ) : (
           <SubscriptionView
             data={data}

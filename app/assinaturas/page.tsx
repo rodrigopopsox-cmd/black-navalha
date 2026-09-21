@@ -1,12 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  BadgeCheck,
-  CreditCard,
-  ShieldCheck,
-  UserRound,
-} from "lucide-react";
+import { ArrowLeft, BadgeCheck } from "lucide-react";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -21,6 +15,54 @@ type SubscriptionPlan = {
   billing_interval_months: number;
   grace_days: number;
 };
+
+type PlanService = {
+  plan_id: string;
+  service_id: string;
+};
+
+type CatalogService = {
+  id: string;
+  name: string;
+};
+
+function getPlanPresentation(name: string, index: number) {
+  const normalizedName = name.toLocaleLowerCase("pt-BR");
+
+  if (normalizedName.includes("premium")) {
+    return {
+      description:
+        "A experiência máxima Black Navalha, com serviços premium e tratamentos para um cuidado completo.",
+      tier: "premium",
+      badge: "Experiência máxima",
+    };
+  }
+
+  if (normalizedName.includes("navalha")) {
+    return {
+      description:
+        "Uma experiência completa de cabelo e barba para manter o visual sempre no nível Black Navalha.",
+      tier: "navalha",
+      badge: "Experiência completa",
+    };
+  }
+
+  if (normalizedName.includes("essencial")) {
+    return {
+      description:
+        "Os cuidados essenciais da sua rotina com praticidade e o padrão Black Navalha.",
+      tier: "essencial",
+      badge: "Cuidados essenciais",
+    };
+  }
+
+  return {
+    description:
+      "Cuidados Black Navalha para manter seu visual sempre em dia.",
+    tier: index === 0 ? "essencial" : index === 1 ? "navalha" : "premium",
+    badge: "Plano Black Navalha",
+  };
+}
 
 type SubscriptionBarber = {
   id: string;
@@ -46,56 +88,98 @@ export default async function AssinaturasPage({
   const admin = createAdminClient();
 
   const [
-    { data: services, error: servicesError },
     { data: plans, error: plansError },
-    { data: barbers, error: barbersError },
+    { data: planServices, error: planServicesError },
+    { data: catalogServices, error: catalogServicesError },
   ] = await Promise.all([
-    supabase
-      .from("services")
-      .select("id, name")
-      .eq("active", true)
-      .eq("subscriber_service", true)
-      .order("name"),
-
     admin
       .from("subscription_plans")
       .select("id, name, price, billing_interval_months, grace_days")
       .eq("active", true)
       .order("price"),
 
-    supabase.rpc("get_public_subscription_barbers"),
+    admin
+      .from("subscription_plan_services")
+      .select("plan_id, service_id")
+      .order("created_at"),
+
+    admin
+      .from("services")
+      .select("id, name")
+      .eq("active", true),
   ]);
+
+  const servicesError = planServicesError ?? catalogServicesError;
 
   const availablePlans: SubscriptionPlan[] =
     !plansError && plans
       ? plans.map((plan) => ({
-          id: plan.id,
-          name: plan.name,
+          id: String(plan.id),
+          name: String(plan.name),
           price: Number(plan.price),
-          billing_interval_months: plan.billing_interval_months,
-          grace_days: plan.grace_days,
+          billing_interval_months: Number(plan.billing_interval_months),
+          grace_days: Number(plan.grace_days),
         }))
       : [];
 
-  const availableBarbers: SubscriptionBarber[] =
-    !barbersError && barbers
-      ? barbers.map((barber: SubscriptionBarber) => ({
-          id: barber.id,
-          name: barber.name,
-          photo_url: barber.photo_url ?? null,
-          capacity: Number(barber.capacity),
-          available_slots: Number(barber.available_slots),
-        }))
-      : [];
+  const servicesByPlan = new Map<string, { id: string; name: string }[]>();
+
+  if (
+    !servicesError &&
+    Array.isArray(planServices) &&
+    Array.isArray(catalogServices)
+  ) {
+    const serviceCatalog = new Map(
+      (catalogServices as CatalogService[]).map((service) => [
+        String(service.id),
+        {
+          id: String(service.id),
+          name: String(service.name),
+        },
+      ]),
+    );
+
+    for (const relation of planServices as PlanService[]) {
+      const service = serviceCatalog.get(String(relation.service_id));
+
+      if (!service) continue;
+
+      const planId = String(relation.plan_id);
+      const current = servicesByPlan.get(planId) ?? [];
+      current.push(service);
+      servicesByPlan.set(planId, current);
+    }
+  }
 
   const params = await searchParams;
   const requestedPlanId =
     typeof params.plano === "string" ? params.plano : null;
 
   const selectedPlan =
-    availablePlans.find((plan) => plan.id === requestedPlanId) ??
-    availablePlans[0] ??
-    null;
+    requestedPlanId !== null
+      ? availablePlans.find((plan) => plan.id === requestedPlanId) ?? null
+      : null;
+
+  let availableBarbers: SubscriptionBarber[] = [];
+  let barbersError = null;
+
+  if (selectedPlan) {
+    const result = await supabase.rpc("get_public_subscription_barbers", {
+      p_plan_id: selectedPlan.id,
+    });
+
+    barbersError = result.error;
+
+    if (!result.error && Array.isArray(result.data)) {
+      availableBarbers = result.data.map((barber: SubscriptionBarber) => ({
+        id: String(barber.id),
+        name: String(barber.name),
+        photo_url: barber.photo_url ?? null,
+        capacity: Number(barber.capacity),
+        available_slots: Number(barber.available_slots),
+      }));
+    }
+  }
 
   return (
     <main className={styles.page}>
@@ -119,12 +203,14 @@ export default async function AssinaturasPage({
 
           <div className={styles.subscriptionBrandActions}>
             <span className={styles.subscriptionBrandArea}>ASSINATURAS</span>
+
             <Link
               href="/minha-assinatura"
               className={styles.subscriptionCustomerLink}
             >
               Minha assinatura
             </Link>
+
             <Link href="/" className={styles.subscriptionHomeLink}>
               <ArrowLeft size={11} aria-hidden="true" />
               Voltar para a Home
@@ -134,10 +220,10 @@ export default async function AssinaturasPage({
 
         <header className={styles.header}>
           <span className={styles.eyebrow}>Assinaturas Black Navalha</span>
-          <h1>Assinaturas</h1>
+          <h1>Escolha sua experiência.</h1>
           <p>
-            Escolha o plano ideal para sua rotina e aproveite os serviços
-            incluídos durante todo o ciclo.
+            Três planos, benefícios diferentes e pagamento mensal avulso via
+            Pix. Você escolhe o nível ideal para sua rotina.
           </p>
         </header>
 
@@ -152,100 +238,99 @@ export default async function AssinaturasPage({
         ) : (
           <>
             <div className={styles.plansGrid}>
-              {availablePlans.map((plan) => {
+              {availablePlans.map((plan, index) => {
                 const selected = selectedPlan?.id === plan.id;
+                const services = servicesByPlan.get(plan.id) ?? [];
+                const presentation = getPlanPresentation(plan.name, index);
+                const tierClass =
+                  presentation.tier === "premium"
+                    ? styles.planPremium
+                    : presentation.tier === "navalha"
+                      ? styles.planNavalha
+                      : styles.planEssencial;
 
                 return (
-                  <article
+                  <Link
                     key={plan.id}
-                    className={`${styles.plan} ${
-                      selected ? styles.planSelected : ""
-                    }`}
-                    aria-labelledby={`plano-${plan.id}`}
+                    href={`/assinaturas?plano=${plan.id}#contratacao`}
+                    className={styles.planLink}
+                    aria-label={`Selecionar ${plan.name}`}
+                    aria-current={selected ? "true" : undefined}
                   >
-                    <div className={styles.planTop}>
-                      <div className={styles.planIdentity}>
-                        <span className={styles.planLabel}>
-                          {selected ? "Plano selecionado" : "Plano disponível"}
-                        </span>
-                        <h2 id={`plano-${plan.id}`}>{plan.name}</h2>
-                        <p>
-                          Pagamento mensal avulso. Você decide quando deseja
-                          contratar um novo ciclo.
-                        </p>
+                    <article
+                      className={`${styles.plan} ${tierClass} ${
+                        selected ? styles.planSelected : ""
+                      }`}
+                      aria-labelledby={`plano-${plan.id}`}
+                    >
+                      <div className={styles.planTop}>
+                        <div className={styles.planIdentity}>
+                          <span className={styles.planLabel}>
+                            {presentation.badge}
+                          </span>
+
+                          <h2 id={`plano-${plan.id}`}>{plan.name}</h2>
+
+                          <p>{presentation.description}</p>
+                        </div>
+
+                        <div className={styles.price}>
+                          <strong>{formatPrice(plan.price)}</strong>
+                          <span>
+                            {plan.billing_interval_months === 1
+                              ? "por mês"
+                              : `a cada ${plan.billing_interval_months} meses`}
+                          </span>
+                        </div>
                       </div>
 
-                      <div className={styles.price}>
-                        <strong>{formatPrice(plan.price)}</strong>
-                        <span>
-                          {plan.billing_interval_months === 1
-                            ? "por mês"
-                            : `a cada ${plan.billing_interval_months} meses`}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className={styles.planBody}>
-                      <div className={styles.benefits}>
-                        <div className={styles.benefitsTitle}>
-                          <BadgeCheck size={18} aria-hidden="true" />
-                          <div>
-                            <span>Benefícios da assinatura</span>
-                            <h3>Serviços incluídos</h3>
+                      <div className={styles.planBody}>
+                        <div className={styles.benefits}>
+                          <div className={styles.benefitsTitle}>
+                            <BadgeCheck size={18} aria-hidden="true" />
+                            <div>
+                              <span>{services.length} benefícios</span>
+                              <h3>Serviços incluídos</h3>
+                            </div>
                           </div>
+
+                          {servicesError ? (
+                            <p className={styles.message}>
+                              Não foi possível carregar os serviços incluídos no
+                              momento.
+                            </p>
+                          ) : services.length > 0 ? (
+                            <ul>
+                              {services.map((service) => (
+                                <li key={service.id}>{service.name}</li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className={styles.message}>
+                              Os serviços incluídos serão apresentados em breve.
+                            </p>
+                          )}
                         </div>
 
-                        {servicesError ? (
-                          <p className={styles.message}>
-                            Não foi possível carregar os serviços incluídos no
-                            momento.
-                          </p>
-                        ) : services && services.length > 0 ? (
-                          <ul>
-                            {services.map((service) => (
-                              <li key={service.id}>{service.name}</li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <p className={styles.message}>
-                            Os serviços incluídos serão apresentados em breve.
-                          </p>
-                        )}
+                        <div className={styles.planRule}>
+                          Um ciclo mensal pago por vez. Sem renovação automática.
+                        </div>
                       </div>
 
-                      <div className={styles.planFacts}>
-                        <div>
-                          <CreditCard size={17} aria-hidden="true" />
-                          <span>Pagamento</span>
-                          <strong>Pix mensal avulso</strong>
-                        </div>
-                        <div>
-                          <UserRound size={17} aria-hidden="true" />
-                          <span>Profissional</span>
-                          <strong>Você escolhe o barbeiro</strong>
-                        </div>
-                        <div>
-                          <ShieldCheck size={17} aria-hidden="true" />
-                          <span>Ativação</span>
-                          <strong>Após confirmação segura</strong>
-                        </div>
-                      </div>
-                    </div>
-
-                    {!selected && (
-                      <Link
-                        href={`/assinaturas?plano=${plan.id}#contratacao`}
-                        className={styles.selectPlanLink}
+                      <div
+                        className={`${styles.selectPlanLink} ${
+                          selected ? styles.selectPlanLinkSelected : ""
+                        }`}
                       >
-                        Escolher este plano
-                      </Link>
-                    )}
-                  </article>
+                        {selected ? "Escolhido" : "Escolher este plano"}
+                      </div>
+                    </article>
+                  </Link>
                 );
               })}
             </div>
 
-            {selectedPlan && (
+            {selectedPlan ? (
               <section
                 id="contratacao"
                 className={styles.checkoutSection}
@@ -258,6 +343,7 @@ export default async function AssinaturasPage({
                   </p>
                 ) : (
                   <SubscriptionCheckoutForm
+                    key={selectedPlan.id}
                     plan={{
                       id: selectedPlan.id,
                       name: selectedPlan.name,
@@ -267,8 +353,9 @@ export default async function AssinaturasPage({
                   />
                 )}
               </section>
-            )}
-          </>        )}
+            ) : null}
+          </>
+        )}
       </div>
     </main>
   );

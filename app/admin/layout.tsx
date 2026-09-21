@@ -9,7 +9,8 @@ import {
   Ban,
   Settings,
   BadgeCheck,
-  BadgeDollarSign
+  BadgeDollarSign,
+  Layers3
 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
@@ -76,6 +77,11 @@ export default async function AdminLayout({
           <Link href="/admin/comissoes">
             <BadgeDollarSign size={19} />
             Comissões
+          </Link>
+
+          <Link href="/admin/planos">
+            <Layers3 size={19} />
+            Planos
           </Link>
 
           <Link href="/admin/servicos">

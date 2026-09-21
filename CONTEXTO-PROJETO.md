@@ -23967,3 +23967,1875 @@ Nenhuma migration foi necessária, pois foi atualização de conteúdo instituci
 
 A seleção múltipla de serviços em /agendar foi revisada visualmente, mas nenhuma nova regra de incompatibilidade entre serviços foi implementada. O comportamento existente foi conscientemente preservado nesta etapa para evitar introduzir uma nova regra de negócio sem modelagem específica.
 # FIM DO CHECKPOINT — 2026-09-20
+---
+
+# CHECKPOINT DE CONTINUIDADE — CENTRAL DO CLIENTE / CATÁLOGO MULTIPLANO EM PREPARAÇÃO — 2026-09-20
+
+## PRIORIDADE
+
+Este é o checkpoint mais recente e deve ter PRIORIDADE ABSOLUTA no próximo chat.
+
+ANTES DE QUALQUER AÇÃO:
+
+- ler integralmente CONTEXTO-PROJETO.md;
+- respeitar AGENTS.md;
+- confirmar o Git real;
+- NÃO reaplicar migrations 007–032;
+- NÃO aplicar 033/034 automaticamente;
+- NÃO validar /assinaturas em runtime antes de concluir/aplicar a evolução de banco;
+- NÃO realizar cobrança real;
+- NÃO criar PIX;
+- NÃO repetir E2E financeiro já aprovado;
+- commit/push somente com autorização explícita.
+
+## GIT OFICIAL DE REFERÊNCIA
+
+Branch:
+
+main
+
+HEAD/origin confirmado no início desta continuidade:
+
+dc325ce Registra limpeza QA e refinamentos finais
+
+Working tree inicialmente confirmado:
+
+?? ASSINATURAS-LOTE.txt
+?? CODIGO-COMPLETO.txt
+
+Durante esta continuidade foram criadas alterações locais ainda NÃO versionadas.
+
+Nunca versionar:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt;
+- .env.local.
+
+Nunca usar:
+
+git add .
+
+## CUSTOMER CRIADO APÓS LIMPEZA
+
+Foi criado deliberadamente um novo customer real para permitir o acesso da identidade Auth já existente:
+
+Nome:
+Rodrigo Alves Correa
+
+WhatsApp:
+41998254529
+
+E-mail:
+rodrigopopsox@gmail.com
+
+Customer ID:
+3d13eec4-d1fd-4961-abbf-f686c882495c
+
+O registro foi criado inicialmente com:
+
+auth_user_id = NULL
+
+Depois foi utilizado normalmente:
+
+VINCULAR MEU CADASTRO
+
+e claim_customer_identity() realizou o vínculo pela identidade/e-mail confirmado.
+
+NÃO foi alterada a segurança da RPC.
+
+NÃO foi criado vínculo manual por auth_user_id.
+
+## UX DE VÍNCULO
+
+Arquivos alterados localmente:
+
+- app/minha-assinatura/actions.ts
+- app/minha-assinatura/link-customer-button.tsx
+
+O retorno funcional:
+
+unavailable
+
+de claim_customer_identity() passou a ser separado de erro técnico.
+
+Estado orientativo:
+
+Cadastro ainda não encontrado.
+
+A mensagem informa que:
+
+- acesso/e-mail estão confirmados;
+- ainda não foi possível localizar cadastro disponível para vínculo;
+- cliente deve conferir se utiliza o mesmo e-mail do cadastro;
+- pode tentar novamente.
+
+Falhas técnicas continuam usando:
+
+Não foi possível validar seu acesso agora.
+
+Não foi alterado:
+
+- claim_customer_identity();
+- Auth;
+- migrations;
+- segurança do vínculo.
+
+Build após essa frente:
+
+APROVADO.
+
+git diff --check:
+
+APROVADO.
+
+## CENTRAL DO CLIENTE SEM ASSINATURA
+
+Foi identificado que a Central não deve existir somente para assinantes.
+
+Cliente autenticado/vinculado sem plano agora mantém acesso a:
+
+- identidade;
+- próximos agendamentos;
+- AGENDAR HORÁRIO;
+- histórico de atendimentos;
+- cancelamento/remarcação quando houver appointment elegível.
+
+O card de assinatura permanece como convite para conhecer os planos.
+
+Arquivo alterado:
+
+- app/minha-assinatura/page.tsx
+
+Foi reutilizado:
+
+UpcomingAppointments
+
+sem reconstruir agenda, cancelamento ou remarcação.
+
+Não houve alteração de banco.
+
+## IDENTIDADE VISUAL DO CARD DE PLANOS NA CENTRAL
+
+Arquivo alterado:
+
+- app/minha-assinatura/page.module.css
+
+O card para cliente sem assinatura recebeu identidade premium Black Navalha:
+
+- preto profundo;
+- detalhe/borda dourada;
+- tipografia forte;
+- composição coerente com a Central;
+- CTA dourado;
+- elemento gráfico discreto.
+
+Texto atual:
+
+PLANO BLACK NAVALHA
+
+ELEVE SUA EXPERIÊNCIA.
+
+Conheça o Plano Mensal e tenha acesso aos benefícios exclusivos para assinantes da Black Navalha.
+
+Esse texto ainda poderá ser ajustado posteriormente para refletir os três novos planos.
+
+Validação desktop:
+
+APROVADA pelo responsável.
+
+## NOVA DIREÇÃO COMERCIAL — TRÊS PLANOS
+
+Foi decidido substituir comercialmente o antigo Plano Mensal por três novos planos.
+
+### Black Essencial
+
+Preço:
+
+R$ 85,00 por ciclo mensal.
+
+Benefícios:
+
+- Barba;
+- Raspado;
+- Raspado + Barba;
+- Sobrancelha.
+
+### Black Navalha
+
+Preço:
+
+R$ 145,00 por ciclo mensal.
+
+Inclui tudo do Black Essencial mais:
+
+- Cabelo;
+- Cabelo + Barba.
+
+### Black Premium
+
+Preço:
+
+R$ 200,00 por ciclo mensal.
+
+Inclui tudo do Black Navalha mais:
+
+- Barba Premium;
+- Hidratação Capilar;
+- Pigmentação Barba;
+- Pigmentação Cabelo.
+
+Pagamento continua:
+
+MENSAL AVULSO via PIX.
+
+SEM recorrência automática Mercado Pago.
+
+## SERVIÇOS DE ASSINATURA
+
+Já existem quatro serviços subscriber_service:
+
+- Barba Assinante Mensal;
+- Cabelo + Barba Assinante Mensal;
+- Cabelo Assinante Mensal;
+- Raspado + Barba Assinante Mensal.
+
+Foram identificadas seis novas variantes necessárias:
+
+- Raspado Assinante Mensal;
+- Sobrancelha Assinante Mensal;
+- Barba Premium Assinante Mensal;
+- Hidratação Capilar Assinante Mensal;
+- Pigmentação Barba Assinante Mensal;
+- Pigmentação Cabelo Assinante Mensal.
+
+Direção definida:
+
+- categoria Assinatura;
+- price = 0;
+- subscriber_service = true;
+- mesma duração do serviço-base;
+- serviço comum correspondente permanece intacto.
+
+Após a futura aplicação, o catálogo deverá possuir 10 serviços de assinatura.
+
+## PLANO MENSAL LEGADO
+
+Plano existente:
+
+ID:
+27fcd639-ddb5-43ab-8ddc-3fd141424fb5
+
+Nome:
+Plano Mensal
+
+Preço:
+R$ 150,00
+
+Estado consultado antes da evolução:
+
+subscriptions_count = 0
+cycles_count = 0
+charges_count = 22
+
+Decisão:
+
+NÃO apagar.
+
+O plano deve ser apenas:
+
+active = false
+
+preservando as 22 charges históricas.
+
+O antigo mercado_pago_preapproval_plan_id também permanece como histórico legado.
+
+## CAPACIDADE — NOVA REGRA
+
+Cada barbeiro continua com:
+
+30 vagas totais.
+
+Essas 30 vagas serão divididas em dois grupos:
+
+BLACK_STANDARD:
+25 vagas compartilhadas entre:
+
+- Black Essencial;
+- Black Navalha.
+
+Não existe divisão fixa entre Essencial/Navalha dentro das 25.
+
+Exemplos válidos:
+
+25/0
+15/10
+5/20
+
+BLACK_PREMIUM:
+5 vagas reservadas ao Black Premium.
+
+Portanto:
+
+25 Standard + 5 Premium = 30.
+
+Premium não deve consumir vaga Standard.
+
+Essencial/Navalha não devem consumir as 5 vagas Premium.
+
+Preservar obrigatoriamente:
+
+SELECT ... FOR UPDATE
+
+na linha do barbeiro.
+
+## ADMIN / CATÁLOGO
+
+Direção aprovada:
+
+os planos NÃO devem ficar hardcoded no frontend.
+
+O Admin deverá futuramente poder:
+
+- criar plano;
+- editar plano;
+- ativar/desativar;
+- alterar nome;
+- alterar preço;
+- selecionar benefícios;
+- retirar/adicionar serviços para ciclos futuros;
+- administrar capacidades com validação.
+
+Rota administrativa planejada:
+
+/admin/planos
+
+Não foi implementada ainda.
+
+## REGRA DE CONTRATO CONGELADO
+
+Decisão de produto fundamental:
+
+uma alteração administrativa NÃO pode retirar ou alterar o que já foi pago durante o ciclo vigente.
+
+Ficam congelados no ciclo:
+
+- preço;
+- barbeiro;
+- benefícios;
+- grupo de capacidade.
+
+Mudanças passam a valer somente em NOVO CICLO após NOVO PAGAMENTO confirmado.
+
+Também vale para:
+
+- troca de barbeiro;
+- alteração dos benefícios;
+- upgrade de plano;
+- downgrade de plano.
+
+Upgrade/downgrade no meio do ciclo NÃO será implementado agora.
+
+Renovação atual continua do mesmo plano.
+
+Troca de plano futura deverá ser fluxo explícito com vigência no próximo ciclo.
+
+## SNAPSHOT DE BENEFÍCIOS
+
+Foi decidido criar:
+
+subscription_cycle_services
+
+para congelar os benefícios de cada ciclo pago.
+
+Motivo:
+
+subscription_plan_services representa o catálogo atual e pode ser editado pelo Admin.
+
+subscription_cycle_services representa exatamente o que foi contratado naquele ciclo.
+
+A confirmação financeira deve copiar:
+
+subscription_plan_services
+→ subscription_cycle_services
+
+no momento do pagamento confirmado.
+
+A carência preserva vaga/capacidade, mas NÃO estende benefício além de period_end.
+
+## CREATE_PUBLIC_MULTI_APPOINTMENT
+
+A definição ATUAL real foi consultada diretamente do banco porque não existe versionada nas migrations antigas.
+
+Ela continua:
+
+create_public_multi_appointment(
+  p_customer_name text,
+  p_customer_phone text,
+  p_barber_id uuid,
+  p_service_ids uuid[],
+  p_start_at timestamptz
+)
+returns uuid
+
+A função atual usa:
+
+subscriptions
+→ subscription_services
+
+em dois pontos para conceder benefício subscriber_service.
+
+Decisão futura já definida:
+
+alterar SOMENTE esses pontos para usar o snapshot do ciclo:
+
+subscriptions
+→ subscription_cycles
+→ subscription_cycle_services
+
+considerando:
+
+period_start <= data do atendimento
+period_end >= data do atendimento.
+
+Não reconstruir outras regras da RPC.
+
+Preservar:
+
+- múltiplos serviços;
+- jornada;
+- blocked_times;
+- preço comum;
+- conflito;
+- barbeiro;
+- duração;
+- appointment_services;
+- subscription_id histórico.
+
+## MIGRATION 033 — ESTADO LOCAL
+
+Criada localmente:
+
+supabase/sql/033-multi-subscription-plans.sql
+
+IMPORTANTE:
+
+NÃO FOI APLICADA.
+
+Ela ainda termina com:
+
+rollback;
+
+e contém marcador:
+
+__RPC_DEFINITIONS_PENDING__
+
+Portanto deve ser considerada deliberadamente INERTE.
+
+Já contém preparação para:
+
+- subscription_capacity_groups;
+- BLACK_STANDARD = 25;
+- BLACK_PREMIUM = 5;
+- subscription_plans.capacity_group_id;
+- subscription_capacity_reservations.plan_id;
+- subscription_capacity_reservations.capacity_group_id;
+- subscription_cycles.capacity_group_id;
+- subscription_plan_services;
+- subscription_cycle_services;
+- policies administrativas iniciais;
+- trigger de validação dos serviços de plano;
+- inativação futura do Plano Mensal legado;
+- criação futura dos três planos;
+- criação futura dos seis serviços subscriber_service;
+- composição dos três planos;
+- cópia de barber_services dos serviços-base;
+- helpers internos de ocupação;
+- nova reserva transacional por plano/grupo;
+- create_subscription_checkout atualizado;
+- confirmação financeira multiplano derivada da migration 032;
+- preservação da comissão administrativa;
+- snapshot de benefícios;
+- get_public_subscription_barbers(p_plan_id uuid).
+
+A confirmação foi derivada de:
+
+supabase/sql/032-subscription-barber-commission.sql
+
+para preservar a comissão administrativa atual.
+
+Invariantes locais verificadas:
+
+- 30 total preservado;
+- Standard 25;
+- Premium 5;
+- hold 30 minutos;
+- SELECT ... FOR UPDATE preservado;
+- comissão preservada;
+- plano legado não é apagado;
+- benefícios por ciclo preparados;
+- disponibilidade pública preparada por plano.
+
+NÃO remover rollback/marcador sem concluir revisão.
+
+NÃO aplicar 033 no Supabase ainda.
+
+## MIGRATION 034 — ESTADO LOCAL
+
+Criada localmente:
+
+supabase/sql/034-appointment-cycle-benefits.sql
+
+IMPORTANTE:
+
+NÃO FOI APLICADA.
+
+Ela termina com:
+
+rollback;
+
+e contém:
+
+__CREATE_PUBLIC_MULTI_APPOINTMENT_PENDING__
+
+Já foi criado o helper:
+
+get_subscription_for_appointment_service(
+  p_customer_id uuid,
+  p_service_id uuid,
+  p_appointment_date date
+)
+
+O helper usa:
+
+subscriptions
+→ subscription_cycles
+→ subscription_cycle_services
+
+e restringe benefício ao período pago.
+
+Ainda falta inserir no arquivo a definição integral atual de:
+
+create_public_multi_appointment
+
+alterando somente as duas buscas de benefício para usar o helper.
+
+NÃO aplicar 034 enquanto o marcador existir.
+
+## /ASSINATURAS — CÓDIGO PREPARADO LOCALMENTE
+
+Arquivo alterado:
+
+app/assinaturas/page.tsx
+
+Foi preparado para o contrato FUTURO da 033.
+
+Agora:
+
+- carrega planos ativos;
+- carrega subscription_plan_services;
+- monta serviços por plano;
+- exibe benefícios específicos em cada card;
+- seleciona plano via ?plano=;
+- chama get_public_subscription_barbers com p_plan_id;
+- consulta disponibilidade especificamente para o plano selecionado.
+
+IMPORTANTE:
+
+o banco atual ainda NÃO possui essas estruturas da 033.
+
+Portanto NÃO validar /assinaturas em runtime antes de concluir/aplicar as migrations.
+
+Arquivo também alterado:
+
+app/assinaturas/subscription-checkout-form.tsx
+
+Mensagem de sucesso deixou de ser fixa:
+
+Seu Plano Mensal está ativo.
+
+e passou a utilizar:
+
+Seu {plan.name} está ativo.
+
+O motor PIX NÃO foi alterado.
+
+## MOTOR FINANCEIRO — PRESERVAR
+
+Permanece aprovado:
+
+Orders API.
+
+POST /v1/orders.
+
+GET /v1/orders/{id}.
+
+external_reference = subscription_charge.id.
+
+Webhook HMAC.
+
+data.id ORIGINAL, inclusive maiúsculas.
+
+GET Order server-side como autoridade.
+
+confirm_mercado_pago_subscription_payment como fronteira transacional/idempotente.
+
+Polling somente observacional.
+
+Nenhuma cobrança real.
+
+Não criar PIX apenas para testar catálogo.
+
+## RENOVAÇÃO
+
+Preservar:
+
+janela de 7 dias.
+
+Carência:
+
+2 dias.
+
+Hold PIX:
+
+30 minutos.
+
+Mesmo barbeiro no mesmo plano/grupo não consome segunda vaga.
+
+Troca de barbeiro somente passa a valer após pagamento confirmado do novo ciclo.
+
+Pagamento pendente não libera a vaga anterior.
+
+## COMISSÃO
+
+Comissão administrativa já está concluída pela migration 032.
+
+Cada barbeiro possui:
+
+subscription_commission_rate.
+
+A confirmação financeira da 033 foi preparada a partir da 032 para preservar:
+
+- percentual;
+- cálculo;
+- ledger;
+- idempotência;
+- barbeiro do ciclo.
+
+Não reconstruir comissão.
+
+## MIGRATIONS
+
+Aplicadas atualmente no banco:
+
+007–032.
+
+NÃO reaplicar nenhuma.
+
+NÃO considerar 033/034 aplicadas.
+
+## WORKING TREE ESPERADO NO PRÓXIMO CHAT
+
+Arquivos modificados relacionados à Central:
+
+- app/minha-assinatura/actions.ts;
+- app/minha-assinatura/link-customer-button.tsx;
+- app/minha-assinatura/page.tsx;
+- app/minha-assinatura/page.module.css.
+
+Arquivos modificados relacionados aos novos planos:
+
+- app/assinaturas/page.tsx;
+- app/assinaturas/subscription-checkout-form.tsx.
+
+Novos arquivos SQL locais:
+
+- supabase/sql/033-multi-subscription-plans.sql;
+- supabase/sql/034-appointment-cycle-benefits.sql.
+
+Continuam fora do Git:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt;
+- .env.local.
+
+CONTEXTO-PROJETO.md ficará modificado por este checkpoint.
+
+Nenhum commit/push foi autorizado.
+
+## TESTES REALIZADOS NESTA CONTINUIDADE
+
+Central do cliente sem assinatura:
+
+desktop APROVADO.
+
+Card premium de convite aos planos:
+
+desktop APROVADO.
+
+Build executado antes da preparação multiplano:
+
+APROVADO.
+
+git diff --check:
+
+APROVADO.
+
+Depois que app/assinaturas/page.tsx passou a depender das estruturas futuras da migration 033, NÃO foi executado teste runtime dessa rota.
+
+## PRÓXIMO PASSO EXATO — NOVO CHAT
+
+1. Ler integralmente CONTEXTO-PROJETO.md.
+2. Respeitar AGENTS.md.
+3. Confirmar Git real.
+4. Priorizar este checkpoint.
+5. NÃO aplicar 033/034 inicialmente.
+6. NÃO abrir /assinaturas em runtime inicialmente.
+7. NÃO criar PIX.
+8. NÃO repetir E2E financeiro.
+9. Revisar/completar migration 034:
+   - versionar definição atual de create_public_multi_appointment;
+   - mudar SOMENTE as duas consultas de benefício;
+   - preservar todo o restante.
+10. Revisar 033:
+    - capacidade total 30;
+    - Standard 25;
+    - Premium 5;
+    - SELECT ... FOR UPDATE;
+    - renovação;
+    - hold 30;
+    - comissão da 032;
+    - snapshots;
+    - policies.
+11. Somente após 033/034 estarem completas, retirar marcadores/rollback conscientemente.
+12. Preparar /admin/planos.
+13. Consultar documentação local Next.js 16 relevante antes de nova rota/admin.
+14. npm.cmd run build.
+15. git diff --check.
+16. Obter autorização antes de aplicar migrations 033/034.
+17. Aplicar na ordem:
+    033
+    034
+18. Validar catálogo e disponibilidade sem pagamento real.
+19. Validar desktop/mobile de /assinaturas.
+20. Não executar novo PIX sem necessidade concreta.
+21. Commit/push somente com autorização explícita.
+
+# FIM DO CHECKPOINT — 2026-09-20
+---
+
+# CHECKPOINT DE CONTINUIDADE — CATÁLOGO MULTIPLANO APLICADO / ADMIN DE PLANOS / REFINAMENTO PÚBLICO PENDENTE — 2026-09-21
+
+## PRIORIDADE ABSOLUTA
+
+Este é o checkpoint mais recente e prevalece sobre checkpoints anteriores quando houver divergência.
+
+NÃO reiniciar a análise.
+
+Ler integralmente CONTEXTO-PROJETO.md e respeitar AGENTS.md antes de qualquer nova alteração.
+
+## GIT DE REFERÊNCIA
+
+Branch:
+
+main
+
+HEAD/origin confirmado no início desta continuidade:
+
+dc325ce Registra limpeza QA e refinamentos finais
+
+Não houve commit/push nesta continuidade.
+
+Commit/push continuam exigindo autorização explícita.
+
+Nunca usar:
+
+git add .
+
+Staging somente com caminhos explícitos.
+
+Nunca versionar:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt;
+- .env.local.
+
+## MIGRATIONS — ESTADO ATUAL REAL
+
+Migrations 007–032 já estavam aplicadas.
+
+Nesta continuidade foram concluídas e APLICADAS, nesta ordem:
+
+- 033-multi-subscription-plans.sql
+- 034-appointment-cycle-benefits.sql
+- 035-subscription-capacity-admin-validation.sql
+
+As três aplicações concluíram com:
+
+Success. No rows returned
+
+Portanto:
+
+MIGRATIONS 007–035 ESTÃO APLICADAS.
+
+NÃO reaplicar nenhuma.
+
+Os antigos marcadores e rollbacks deliberadamente inertes de 033/034 foram removidos conscientemente antes da aplicação.
+
+033/034/035 terminam com commit.
+
+## MIGRATION 033 — MULTIPLANO
+
+Arquivo:
+
+supabase/sql/033-multi-subscription-plans.sql
+
+Aplicada com sucesso.
+
+Implementa/prepara operacionalmente:
+
+- subscription_capacity_groups;
+- BLACK_STANDARD;
+- BLACK_PREMIUM;
+- capacidade por grupo;
+- subscription_plans.capacity_group_id;
+- reservation.plan_id;
+- reservation.capacity_group_id;
+- cycle.capacity_group_id;
+- subscription_plan_services;
+- subscription_cycle_services;
+- catálogo comercial multiplano;
+- snapshots de benefício;
+- novos serviços subscriber_service;
+- composição de benefícios;
+- cópia de barber_services;
+- helpers de ocupação;
+- reserva transacional por plano/grupo;
+- checkout multiplano;
+- confirmação financeira multiplano;
+- comissão administrativa preservada;
+- disponibilidade pública por p_plan_id.
+
+Preservado obrigatoriamente:
+
+SELECT ... FOR UPDATE.
+
+Hold PIX:
+
+30 minutos.
+
+Renovação:
+
+7 dias antes do fim do ciclo.
+
+Carência:
+
+2 dias.
+
+## CATÁLOGO COMERCIAL VALIDADO NO BANCO
+
+Consulta somente leitura após aplicação confirmou:
+
+Black Essencial:
+- R$ 85,00;
+- active = true;
+- BLACK_STANDARD;
+- capacidade do grupo = 25;
+- 4 benefícios.
+
+Black Navalha:
+- R$ 145,00;
+- active = true;
+- BLACK_STANDARD;
+- capacidade do grupo = 25;
+- 6 benefícios.
+
+Black Premium:
+- R$ 200,00;
+- active = true;
+- BLACK_PREMIUM;
+- capacidade do grupo = 5;
+- 10 benefícios.
+
+Plano Mensal legado:
+
+id:
+27fcd639-ddb5-43ab-8ddc-3fd141424fb5
+
+Estado após 033:
+
+- preservado;
+- active = false;
+- não apagado;
+- sem grupo;
+- histórico financeiro preservado.
+
+## CAPACIDADE
+
+Regra comercial atual:
+
+30 vagas totais por barbeiro.
+
+BLACK_STANDARD:
+
+25 vagas compartilhadas por Black Essencial + Black Navalha.
+
+BLACK_PREMIUM:
+
+5 vagas reservadas ao Black Premium.
+
+Premium não consome Standard.
+
+Standard não consome as 5 vagas Premium.
+
+A proteção transacional de checkout continua autoritativa no PostgreSQL.
+
+## MIGRATION 034 — BENEFÍCIO POR SNAPSHOT DO CICLO
+
+Arquivo:
+
+supabase/sql/034-appointment-cycle-benefits.sql
+
+Aplicada com sucesso após uma correção local de sintaxe no arquivo.
+
+IMPORTANTE:
+
+A primeira tentativa de aplicação da 034 falhou com:
+
+ERROR 42601
+syntax error at or near "commit"
+
+Causa comprovada:
+
+a definição obtida por pg_get_functiondef havia sido inserida na migration terminando em:
+
+$function$
+
+sem o ponto e vírgula necessário antes do commit.
+
+Nenhuma alteração da primeira tentativa foi aplicada.
+
+O arquivo local foi corrigido para:
+
+$function$;
+
+e a segunda execução concluiu com:
+
+Success. No rows returned
+
+Estado final correto:
+
+- helper get_subscription_for_appointment_service;
+- definição integral atual de create_public_multi_appointment versionada;
+- exatamente duas buscas de benefício alteradas;
+- zero joins antigos com subscription_services dentro da RPC;
+- duas chamadas SELECT ao helper;
+- restante da RPC preservado.
+
+O helper utiliza:
+
+subscriptions
+→ subscription_cycles
+→ subscription_cycle_services
+
+e restringe benefício ao período:
+
+period_start <= data do atendimento
+period_end >= data do atendimento.
+
+Carência preserva vaga, mas NÃO estende benefício.
+
+Preservado em create_public_multi_appointment:
+
+- múltiplos serviços;
+- serviços comuns;
+- preços;
+- duração;
+- barbeiro;
+- working_hours;
+- blocked_times;
+- timezone America/Sao_Paulo;
+- customer;
+- appointment;
+- appointment_services;
+- subscription_id histórico;
+- exclusion/conflicto.
+
+Não reconstruir /agendar.
+
+## MIGRATION 035 — ADMIN / VALIDAÇÃO DE CAPACIDADE
+
+Arquivo:
+
+supabase/sql/035-subscription-capacity-admin-validation.sql
+
+Criada e aplicada nesta continuidade.
+
+Implementa:
+
+- leitura administrativa de planos ativos e inativos;
+- preservação explícita de planos históricos;
+- nenhum DELETE de subscription_plans;
+- validação PostgreSQL das capacidades dos grupos;
+- validação da capacidade total dos barbeiros;
+- triggers autoritativos;
+- admin_create_subscription_plan;
+- admin_update_subscription_plan;
+- escrita atômica de plano + benefícios;
+- edição da capacidade do grupo;
+- proteção por auth.uid() + profiles.role = admin;
+- ciclos pagos/snapshots não são alterados pelas RPCs administrativas.
+
+Plano comercial NÃO deve ser apagado pelo Admin.
+
+Para encerrar novas vendas:
+
+active = false.
+
+Desativar plano não apaga histórico e não modifica retroativamente ciclos já pagos.
+
+## CONTRATO / SNAPSHOT
+
+Durante um ciclo pago permanecem congelados:
+
+- preço;
+- barbeiro;
+- benefícios;
+- grupo de capacidade.
+
+subscription_plan_services:
+
+catálogo atual editável.
+
+subscription_cycle_services:
+
+snapshot exato do benefício daquele ciclo.
+
+Alterações administrativas só afetam nova contratação/novo ciclo após novo pagamento confirmado.
+
+Upgrade/downgrade no meio do ciclo continua fora do escopo.
+
+Renovação atual continua no mesmo plano.
+
+## ADMIN DE PLANOS — IMPLEMENTAÇÃO LOCAL
+
+Nova rota preparada:
+
+/admin/planos
+
+Subrotas:
+
+/admin/planos/novo
+/admin/planos/[id]
+
+Arquivos locais criados:
+
+- app/admin/planos/page.tsx;
+- app/admin/planos/actions.ts;
+- app/admin/planos/plan-form.tsx;
+- app/admin/planos/novo/page.tsx;
+- app/admin/planos/[id]/page.tsx.
+
+Alterado:
+
+- app/admin/layout.tsx
+
+Foi adicionado item:
+
+Planos
+
+ao menu administrativo.
+
+Funcionalidades preparadas:
+
+- listagem;
+- planos ativos/inativos;
+- preço;
+- grupo;
+- capacidade;
+- benefícios;
+- criação;
+- edição;
+- ativação/desativação;
+- troca de grupo;
+- edição de benefícios;
+- edição da capacidade compartilhada do grupo;
+- nenhum botão/operação de exclusão de plano.
+
+As mutações utilizam Server Actions e RPCs administrativas.
+
+Admin não deve apagar plano.
+
+## NEXT.JS 16
+
+AGENTS.md foi respeitado.
+
+Documentação local relevante foi consultada antes da criação das novas rotas e Server Actions, incluindo guias de:
+
+- layouts/pages;
+- mutating data;
+- data security.
+
+Rotas reconhecidas pelo build:
+
+- /admin/planos;
+- /admin/planos/[id];
+- /admin/planos/novo.
+
+## BUILD
+
+Após criação do Admin de Planos:
+
+npm.cmd run build
+
+APROVADO.
+
+Next.js:
+
+16.3.4
+
+TypeScript:
+
+sem erros.
+
+## DIFF CHECK
+
+Executado:
+
+git diff --check
+
+Resultado funcional:
+
+APROVADO.
+
+Somente avisos conhecidos de futura conversão LF/CRLF.
+
+## /ADMIN/PLANOS — VALIDAÇÃO VISUAL INICIAL
+
+A rota foi aberta após aplicação das migrations.
+
+Dados reais apareceram corretamente.
+
+Exemplos visualizados:
+
+Black Navalha:
+- R$ 145;
+- ciclo 1 mês;
+- carência 2 dias;
+- grupo Black Essencial + Black Navalha;
+- 25 vagas por barbeiro;
+- 6 benefícios.
+
+Black Premium:
+- R$ 200;
+- grupo Black Premium;
+- 5 vagas por barbeiro;
+- benefícios exibidos.
+
+Menu Planos também foi exibido corretamente no Admin.
+
+Ainda falta validação funcional consciente de criação/edição/desativação administrativa, sem apagar planos reais.
+
+## /ASSINATURAS — ESTADO APÓS APLICAÇÃO
+
+A rota pública foi aberta após a aplicação da 033–035.
+
+Os três planos reais aparecem com os preços corretos:
+
+- Black Essencial — R$ 85;
+- Black Navalha — R$ 145;
+- Black Premium — R$ 200.
+
+Foi confirmado problema atual:
+
+os serviços/benefícios NÃO estão aparecendo na página pública.
+
+A interface mostra:
+
+"Não foi possível carregar os serviços incluídos no momento."
+
+IMPORTANTE:
+
+o Admin e a auditoria SQL confirmam que a composição dos planos existe no banco:
+
+- Essencial = 4;
+- Navalha = 6;
+- Premium = 10.
+
+Portanto NÃO recriar os vínculos no banco.
+
+O próximo diagnóstico deve se concentrar na leitura/consulta/renderização pública de:
+
+subscription_plan_services
+
+e serviços relacionados.
+
+Não alterar dados sem evidência.
+
+## /ASSINATURAS — REFINAMENTO VISUAL SOLICITADO
+
+Esta é a PRIORIDADE FUNCIONAL do próximo chat.
+
+O responsável quer reformular a vitrine dos planos.
+
+### Desktop
+
+Os três planos devem aparecer:
+
+LADO A LADO.
+
+Não como lista vertical.
+
+Objetivo:
+
+comparação clara entre Essencial, Navalha e Premium.
+
+### Hierarquia visual
+
+Os cards devem comunicar progressão:
+
+Essencial
+→ Navalha
+→ Premium.
+
+Sem fugir da identidade Black Navalha:
+
+- preto;
+- branco;
+- dourado/bronze;
+- visual premium;
+- tipografia forte;
+- bordas e fundos coerentes.
+
+Cada card deve ter personalidade própria:
+
+- Essencial mais sóbrio;
+- Navalha com destaque intermediário;
+- Premium com presença/acabamento superior.
+
+Não transformar em três identidades desconectadas.
+
+### Descrições
+
+Remover como descrição principal repetida:
+
+"Um ciclo mensal pago por vez. Sem renovação automática."
+
+Essa informação continua verdadeira, mas deve virar informação secundária.
+
+Criar descrição curta, comercial e diferente para cada plano.
+
+Direção desejada:
+
+Black Essencial:
+entrada prática para os cuidados essenciais.
+
+Black Navalha:
+experiência mais completa com cabelo e barba.
+
+Black Premium:
+experiência máxima com serviços premium e tratamentos.
+
+O texto final pode ser refinado, mas deve permanecer curto e atrativo.
+
+### Seleção do plano
+
+O CARD INTEIRO deve ser clicável.
+
+Ao clicar:
+
+- selecionar o plano;
+- deixar visualmente inequívoco qual plano foi selecionado;
+- borda/fundo/destaque/selo devem reagir;
+- cliente deve ter certeza da escolha.
+
+Não depender apenas de pequeno botão "ESCOLHER ESTE PLANO".
+
+A URL ?plano= continua podendo representar a seleção.
+
+### Benefícios
+
+Primeiro corrigir a leitura pública.
+
+Depois exibir claramente os serviços específicos de cada plano:
+
+Essencial:
+4.
+
+Navalha:
+6.
+
+Premium:
+10.
+
+## MOTOR PIX — NÃO ALTERAR
+
+Preservar integralmente:
+
+Orders API.
+
+PIX mensal avulso.
+
+external_reference = subscription_charge.id.
+
+Webhook HMAC.
+
+data.id ORIGINAL, inclusive maiúsculas.
+
+GET Order server-side.
+
+confirm_mercado_pago_subscription_payment.
+
+Polling observacional.
+
+Browser NÃO confirma pagamento.
+
+Não criar PIX para validar layout/catálogo.
+
+Não repetir E2E financeiro já aprovado.
+
+MERCADO_PAGO_TEST_MODE=true continua no ambiente de demonstração/teste.
+
+## COMISSÃO
+
+Migration 032 continua sendo a base da comissão.
+
+033 preservou:
+
+- subscription_commission_rate;
+- cálculo;
+- ledger;
+- idempotência;
+- barbeiro histórico do ciclo.
+
+Não reconstruir comissão.
+
+## CENTRAL DO CLIENTE
+
+Preservar alterações locais já existentes em:
+
+- app/minha-assinatura/actions.ts;
+- app/minha-assinatura/link-customer-button.tsx;
+- app/minha-assinatura/page.tsx;
+- app/minha-assinatura/page.module.css.
+
+Não desfazer UX de cliente vinculado sem assinatura.
+
+## WORKING TREE ESPERADO
+
+Arquivos modificados:
+
+- CONTEXTO-PROJETO.md;
+- app/admin/layout.tsx;
+- app/assinaturas/page.tsx;
+- app/assinaturas/subscription-checkout-form.tsx;
+- app/minha-assinatura/actions.ts;
+- app/minha-assinatura/link-customer-button.tsx;
+- app/minha-assinatura/page.module.css;
+- app/minha-assinatura/page.tsx.
+
+Novos:
+
+- app/admin/planos/;
+- supabase/sql/033-multi-subscription-plans.sql;
+- supabase/sql/034-appointment-cycle-benefits.sql;
+- supabase/sql/035-subscription-capacity-admin-validation.sql.
+
+Continuam fora do Git:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt.
+
+.env.local:
+
+nunca versionar/exibir.
+
+## PRÓXIMO PASSO EXATO — NOVO CHAT
+
+1. Ler integralmente CONTEXTO-PROJETO.md.
+2. Respeitar AGENTS.md.
+3. Confirmar Git real.
+4. Confirmar que 007–035 já estão aplicadas.
+5. NÃO reaplicar migration.
+6. NÃO criar PIX.
+7. NÃO repetir E2E Mercado Pago.
+8. Começar diretamente por /assinaturas.
+9. Inspecionar somente:
+   - app/assinaturas/page.tsx;
+   - app/assinaturas/page.module.css;
+   - subscription-checkout-form.tsx somente se necessário.
+10. Diagnosticar por que subscription_plan_services não aparece publicamente.
+11. Corrigir a leitura sem recriar dados.
+12. Reformular os cards:
+    - 3 lado a lado no desktop;
+    - responsivos no mobile;
+    - progressão visual Essencial/Navalha/Premium;
+    - descrições comerciais curtas e diferentes;
+    - informação de PIX mensal avulso em nível secundário;
+    - card inteiro selecionável;
+    - estado selecionado inequívoco.
+13. Validar desktop no Chrome.
+14. Validar mobile.
+15. Não gerar PIX.
+16. Depois retomar validação funcional do Admin de Planos.
+17. npm.cmd run build.
+18. git diff --check.
+19. Commit/push somente com autorização explícita.
+
+# FIM DO CHECKPOINT — 2026-09-21
+---
+
+# CHECKPOINT FINAL — CATÁLOGO MULTIPLANO / ASSINATURAS PÚBLICAS / ADMIN DE PLANOS — 2026-09-21
+
+## PRIORIDADE
+
+Este é o checkpoint mais recente e deve prevalecer sobre checkpoints anteriores quando houver divergência.
+
+## GIT DE REFERÊNCIA NO INÍCIO DESTA ETAPA
+
+Branch:
+
+main
+
+HEAD/origin confirmado:
+
+dc325ce Registra limpeza QA e refinamentos finais
+
+O working tree já possuía alterações locais da evolução multiplano, Admin de Planos e Central do Cliente. Essas alterações foram preservadas.
+
+Nunca versionar:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt;
+- .env.local.
+
+Nunca usar:
+
+git add .
+
+## MIGRATIONS
+
+Migrations 007–036 estão APLICADAS.
+
+NÃO reaplicar nenhuma.
+
+Já estavam aplicadas no início desta etapa:
+
+033 — catálogo multiplano;
+034 — benefício de agendamento pelo snapshot do ciclo;
+035 — validação administrativa de capacidade + RPCs do Admin de Planos.
+
+Nova migration aplicada nesta etapa:
+
+036 — leitura server-side do catálogo de benefícios para service_role.
+
+Arquivo:
+
+supabase/sql/036-service-role-subscription-catalog-read.sql
+
+A migration 036 concede somente SELECT para service_role em:
+
+- public.subscription_plan_services;
+- public.services.
+
+Não foi concedido novo acesso para anon/authenticated.
+
+Motivo comprovado antes da alteração:
+
+leituras server-side retornavam PostgreSQL 42501 permission denied para ambas as tabelas.
+
+Resultado da aplicação:
+
+Success. No rows returned
+
+NÃO reaplicar migration 036.
+
+## CATÁLOGO REAL VALIDADO
+
+Black Essencial:
+
+- R$ 85;
+- BLACK_STANDARD;
+- 25 vagas compartilhadas com Black Navalha;
+- 4 benefícios.
+
+Black Navalha:
+
+- R$ 145;
+- BLACK_STANDARD;
+- 25 vagas compartilhadas com Black Essencial;
+- 6 benefícios.
+
+Black Premium:
+
+- R$ 200;
+- BLACK_PREMIUM;
+- 5 vagas reservadas;
+- 10 benefícios.
+
+Plano Mensal legado:
+
+id:
+27fcd639-ddb5-43ab-8ddc-3fd141424fb5
+
+active=false.
+
+Preservado.
+
+NÃO apagar.
+
+## CAPACIDADE
+
+Total conceitual por barbeiro:
+
+30 vagas.
+
+BLACK_STANDARD:
+
+25 vagas compartilhadas por Essencial + Navalha.
+
+BLACK_PREMIUM:
+
+5 vagas reservadas ao Premium.
+
+Premium não consome Standard.
+
+Standard não consome Premium.
+
+A proteção transacional com:
+
+SELECT ... FOR UPDATE
+
+permanece obrigatória e não foi alterada nesta etapa.
+
+## /ASSINATURAS — BENEFÍCIOS CORRIGIDOS
+
+Problema inicial:
+
+os três planos e preços apareciam corretamente, mas a página apresentava:
+
+"Não foi possível carregar os serviços incluídos no momento."
+
+O banco já havia sido auditado e os vínculos estavam corretos.
+
+Não foram recriados vínculos.
+
+Não foi alterada a composição dos planos.
+
+A falha foi comprovada como leitura/permissão server-side, com erro:
+
+42501
+permission denied
+
+em:
+
+subscription_plan_services
+services.
+
+Após a migration 036, a página passou a montar os benefícios reais a partir do catálogo do banco.
+
+Resultado validado:
+
+- Black Essencial: 4 benefícios;
+- Black Navalha: 6 benefícios;
+- Black Premium: 10 benefícios.
+
+A composição NÃO está hardcoded no frontend.
+
+## /ASSINATURAS — SELEÇÃO
+
+A página agora abre sem plano previamente selecionado quando não existe:
+
+?plano=
+
+Nenhuma contratação é aberta automaticamente.
+
+O card inteiro é clicável.
+
+Ao selecionar um plano:
+
+- ?plano= representa a seleção;
+- o card recebe destaque inequívoco;
+- a faixa inferior muda de "ESCOLHER ESTE PLANO" para "ESCOLHIDO";
+- borda/fundo/acabamento indicam visualmente a escolha.
+
+Não existe mais texto redundante "Plano selecionado" no topo do card.
+
+## TROCA DE PLANO DURANTE A CONTRATAÇÃO
+
+Foi identificado visualmente um problema real:
+
+uma tentativa preparada para Premium podia continuar mantendo amount = R$ 200 no estado client-side depois de o usuário trocar visualmente para outro plano.
+
+Isso foi corrigido.
+
+SubscriptionCheckoutForm agora é remontado quando selectedPlan.id muda.
+
+Consequência correta:
+
+- estado local da tentativa anterior é descartado;
+- prepared/Pix/cronômetro/token local não são reaproveitados para outro plano;
+- o novo plano volta ao formulário de preparação;
+- uma charge/hold anterior NÃO é adulterada ou apagada pelo navegador;
+- a nova contratação precisa passar pelo pré-checkout correto do novo plano.
+
+Foi validado visualmente que a troca de plano durante a jornada retorna corretamente ao formulário.
+
+Não foi necessário criar novo PIX para validar essa correção.
+
+## /ASSINATURAS — REFINAMENTO VISUAL
+
+Desktop validado com:
+
+3 cards lado a lado.
+
+Progressão visual:
+
+Black Essencial
+→ Black Navalha
+→ Black Premium.
+
+Black Essencial:
+
+- apresentação mais sóbria;
+- porta de entrada.
+
+Black Navalha:
+
+- presença intermediária;
+- experiência mais completa.
+
+Black Premium:
+
+- acabamento visual superior;
+- bronze/dourado mais rico;
+- iluminação controlada;
+- borda e detalhe superior premium;
+- maior diferenciação sem abandonar a identidade Black Navalha.
+
+Identidade geral preservada:
+
+- preto;
+- branco;
+- dourado/bronze;
+- tipografia forte;
+- visual premium.
+
+Descrições comerciais diferentes foram adicionadas.
+
+A regra:
+
+"Um ciclo mensal pago por vez. Sem renovação automática."
+
+permanece visível apenas como informação secundária.
+
+## ESTADO DE SELEÇÃO VISUAL
+
+Foi decidido manter a faixa inferior nos três planos.
+
+Não selecionado:
+
+ESCOLHER ESTE PLANO
+
+Selecionado:
+
+ESCOLHIDO
+
+O amarelo/dourado fechado do estado selecionado foi padronizado entre Essencial, Navalha e Premium.
+
+O Premium mantém sua personalidade própria no restante do card.
+
+## RESPONSIVIDADE
+
+Desktop:
+
+APROVADO.
+
+Mobile:
+
+APROVADO pelo responsável em Chrome.
+
+Os cards empilham sem overflow observado.
+
+A navegação/seleção continua funcional no mobile.
+
+## PAGAMENTO
+
+Nenhuma alteração de arquitetura financeira nesta etapa.
+
+Plano continua sendo mensal AVULSO via PIX.
+
+SEM recorrência automática Mercado Pago.
+
+Preservado integralmente:
+
+- Orders API;
+- external_reference = subscription_charge.id;
+- Webhook HMAC;
+- data.id ORIGINAL;
+- GET Order server-side;
+- confirm_mercado_pago_subscription_payment;
+- polling observacional;
+- idempotência.
+
+Browser NÃO confirma pagamento.
+
+Nenhum novo E2E financeiro foi executado nesta etapa.
+
+Não foi necessário gerar novo PIX para concluir o refinamento público.
+
+## ADMIN DE PLANOS
+
+Rotas existentes localmente:
+
+- /admin/planos;
+- /admin/planos/novo;
+- /admin/planos/[id].
+
+A listagem /admin/planos foi validada visualmente após a conclusão de /assinaturas.
+
+Confirmado:
+
+- planos reais apresentados;
+- preços corretos;
+- status;
+- ciclo;
+- carência;
+- grupo;
+- capacidade;
+- benefícios;
+- ação EDITAR PLANO;
+- comunicação de histórico protegido.
+
+Black Navalha foi validado com:
+
+- R$ 145;
+- grupo Black Essencial + Black Navalha;
+- 25 vagas por barbeiro;
+- 6 benefícios.
+
+Black Premium foi validado com:
+
+- R$ 200;
+- grupo Black Premium;
+- 5 vagas por barbeiro;
+- 10 benefícios.
+
+Admin de Planos permite a evolução já registrada de:
+
+- criar;
+- editar;
+- ativar/desativar;
+- nome;
+- preço;
+- benefícios;
+- grupo;
+- capacidade compartilhada.
+
+NÃO existe exclusão física de plano.
+
+Planos devem ser desativados, nunca apagados.
+
+Nenhum plano real foi criado/editado apenas para repetir testes nesta etapa.
+
+## CENTRAL DO CLIENTE
+
+Todas as alterações locais existentes da Central do Cliente foram preservadas.
+
+Não foi desfeita a UX do cliente vinculado sem assinatura.
+
+## BUILD FINAL
+
+Executado após os refinamentos:
+
+npm.cmd run build
+
+Resultado:
+
+APROVADO.
+
+- Next.js 16.3.4;
+- compilação concluída;
+- TypeScript sem erros;
+- rotas geradas normalmente;
+- /assinaturas reconhecida;
+- /admin/planos reconhecida;
+- /admin/planos/novo reconhecida;
+- /admin/planos/[id] reconhecida.
+
+## DIFF CHECK
+
+Executado:
+
+git diff --check
+
+Resultado:
+
+APROVADO.
+
+Somente avisos conhecidos de futura conversão LF/CRLF.
+
+Nenhum erro de whitespace.
+
+## ESTADO FUNCIONAL
+
+Catálogo multiplano:
+
+APLICADO E VALIDADO.
+
+Benefícios públicos:
+
+CORRIGIDOS E VALIDADOS.
+
+Essencial 4 / Navalha 6 / Premium 10:
+
+VALIDADO.
+
+Seleção inicial vazia:
+
+VALIDADA.
+
+Card inteiro selecionável:
+
+VALIDADO.
+
+Troca segura de plano durante a jornada:
+
+VALIDADA.
+
+Refinamento visual desktop:
+
+APROVADO.
+
+Responsividade mobile:
+
+APROVADA.
+
+Premium diferenciado:
+
+APROVADO.
+
+Admin de Planos:
+
+VALIDADO VISUALMENTE.
+
+Build:
+
+APROVADO.
+
+Banco:
+
+somente migration 036 nesta etapa, aplicada com autorização explícita.
+
+## PRÓXIMO PASSO
+
+Criar checkpoint Git das alterações autorizadas desta evolução com staging SOMENTE por caminhos explícitos.
+
+Não incluir:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt;
+- .env.local.
+
+Depois do commit/push, confirmar HEAD/origin e registrar o commit final neste contexto em checkpoint documental posterior, se necessário.
+
+# FIM DO CHECKPOINT — 2026-09-21

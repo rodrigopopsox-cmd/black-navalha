@@ -1,4 +1,4 @@
-﻿"use server";
+"use server";
 
 import { redirect } from "next/navigation";
 
@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export type LinkCustomerState = {
   error?: string;
+  unavailable?: boolean;
 };
 
 export async function linkCustomerAccount(): Promise<LinkCustomerState> {
@@ -30,11 +31,20 @@ export async function linkCustomerAccount(): Promise<LinkCustomerState> {
     return { error: "Não foi possível validar seu acesso agora." };
   }
 
+  if (data === "unavailable") {
+    return { unavailable: true };
+  }
+
+  if (data === "unauthenticated") {
+    return { error: "Sua sessão não é válida. Entre novamente." };
+  }
+
+  if (data === "unverified") {
+    return { error: "Confirme seu e-mail antes de acessar sua assinatura." };
+  }
+
   if (data !== "linked") {
-    return {
-      error:
-        "Não foi possível vincular seu acesso automaticamente. Entre em contato com a Black Navalha.",
-    };
+    return { error: "Não foi possível validar seu acesso agora." };
   }
 
   redirect("/minha-assinatura");

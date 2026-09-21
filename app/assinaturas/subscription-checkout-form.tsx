@@ -382,7 +382,7 @@ export default function SubscriptionCheckoutForm({
         <div className={`${styles.checkoutSuccess} ${styles.paymentConfirmed}`} role="status" aria-live="polite">
           <strong>Pagamento confirmado.</strong>
           <p>
-            Seu Plano Mensal está ativo. O pagamento foi confirmado com
+            Seu {plan.name} está ativo. O pagamento foi confirmado com
             segurança pelo servidor.
           </p>
           <p>

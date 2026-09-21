@@ -1838,3 +1838,342 @@
     animation: none;
   }
 }
+/* ASSINATURAS — MULTIPLANO / PROGRESSÃO VISUAL */
+.inner {
+  width: min(1320px, calc(100% - 40px));
+}
+
+.plansGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  align-items: stretch;
+}
+
+.planLink {
+  display: block;
+  min-width: 0;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 12px;
+}
+
+.planLink:focus-visible {
+  outline: 2px solid #d29d4f;
+  outline-offset: 4px;
+}
+
+.plan {
+  display: flex;
+  min-width: 0;
+  height: 100%;
+  flex-direction: column;
+  border-radius: 12px;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.planLink:hover .plan {
+  transform: translateY(-3px);
+}
+
+.planEssencial {
+  border-color: #292929;
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.025), transparent 38%),
+    #0c0c0c;
+}
+
+.planNavalha {
+  border-color: rgba(210, 157, 79, 0.3);
+  background:
+    radial-gradient(circle at 88% 4%, rgba(210, 157, 79, 0.11), transparent 31%),
+    #0e0d0c;
+}
+
+.planPremium {
+  border-color: rgba(230, 185, 109, 0.52);
+  background:
+    radial-gradient(circle at 84% 0%, rgba(230, 185, 109, 0.17), transparent 34%),
+    linear-gradient(160deg, #15120e 0%, #0c0b0a 54%, #090909 100%);
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.2);
+}
+
+.planSelected {
+  border-color: #d29d4f;
+  background:
+    radial-gradient(circle at 82% 0%, rgba(210, 157, 79, 0.2), transparent 35%),
+    linear-gradient(155deg, rgba(210, 157, 79, 0.075), transparent 55%),
+    #10100f;
+  box-shadow:
+    0 0 0 1px rgba(210, 157, 79, 0.22),
+    0 18px 48px rgba(0, 0, 0, 0.3);
+}
+
+.planSelected .planLabel {
+  color: #f0c57f;
+}
+
+.planTop {
+  display: block;
+  padding: 27px 24px 24px;
+}
+
+.planTop h2 {
+  min-height: 62px;
+  font-size: clamp(22px, 2vw, 29px);
+  line-height: 1.02;
+}
+
+.planIdentity > p {
+  min-height: 68px;
+}
+
+.price {
+  margin-top: 24px;
+  text-align: left;
+}
+
+.price strong {
+  font-size: 30px;
+}
+
+.planBody {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 0 24px;
+}
+
+.benefits {
+  flex: 1;
+  padding: 23px 0 18px;
+}
+
+.benefits ul {
+  grid-template-columns: 1fr;
+  margin-top: 14px;
+}
+
+.benefits li {
+  padding: 10px 0 10px 15px;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.benefits li::before {
+  top: 15px;
+  width: 4px;
+  height: 4px;
+}
+
+.planRule {
+  padding: 14px 0 18px;
+  border-top: 1px solid #232323;
+  color: #68625c;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.selectPlanLink {
+  margin-top: auto;
+  border-top: 1px solid #252525;
+  background: rgba(255, 255, 255, 0.012);
+  transition:
+    color 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease;
+}
+
+.planLink:hover .selectPlanLink {
+  background: rgba(210, 157, 79, 0.055);
+}
+
+.selectPlanLinkSelected {
+  border-top-color: rgba(210, 157, 79, 0.38);
+  background: #d29d4f;
+  color: #080808;
+}
+
+.planLink:hover .selectPlanLinkSelected {
+  background: #dfab5e;
+  color: #080808;
+}
+
+@media (max-width: 980px) {
+  .plansGrid {
+    grid-template-columns: 1fr;
+    max-width: 680px;
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .planTop h2,
+  .planIdentity > p {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 620px) {
+  .inner {
+    width: min(100% - 28px, 1320px);
+  }
+
+  .plansGrid {
+    gap: 15px;
+  }
+
+  .planTop {
+    padding: 24px 20px 21px;
+  }
+
+  .planBody {
+    padding: 0 20px;
+  }
+
+  .price {
+    margin-top: 20px;
+  }
+
+  .benefits {
+    padding-top: 20px;
+  }
+
+  .planLink:hover .plan {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plan {
+    transition: none;
+  }
+}
+/* ASSINATURAS — BLACK PREMIUM / ACABAMENTO SUPERIOR */
+.planPremium {
+  position: relative;
+  isolation: isolate;
+  border-color: rgba(224, 172, 91, 0.68);
+  background:
+    radial-gradient(circle at 82% 7%, rgba(238, 193, 119, 0.2), transparent 28%),
+    radial-gradient(circle at 12% 94%, rgba(164, 108, 42, 0.1), transparent 34%),
+    linear-gradient(145deg, #18140f 0%, #100e0b 46%, #090909 100%);
+  box-shadow:
+    0 20px 52px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 222, 166, 0.07);
+}
+
+.planPremium::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  right: 20px;
+  left: 20px;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #b97932 18%,
+    #efc477 50%,
+    #b97932 82%,
+    transparent
+  );
+  box-shadow: 0 0 18px rgba(224, 172, 91, 0.24);
+  pointer-events: none;
+}
+
+.planPremium::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -90px;
+  right: -80px;
+  width: 230px;
+  height: 230px;
+  border: 1px solid rgba(230, 185, 109, 0.07);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 30px rgba(230, 185, 109, 0.018),
+    0 0 0 65px rgba(230, 185, 109, 0.012);
+  pointer-events: none;
+}
+
+.planPremium .planLabel {
+  color: #efc477;
+}
+
+.planPremium .planTop h2 {
+  color: #fffaf2;
+  text-shadow: 0 0 24px rgba(230, 185, 109, 0.08);
+}
+
+.planPremium .price strong {
+  color: #efb95f;
+  text-shadow: 0 0 22px rgba(210, 157, 79, 0.12);
+}
+
+.planPremium .benefitsTitle {
+  color: #e8b35c;
+}
+
+.planPremium .benefits li::before {
+  background: #e8b35c;
+  box-shadow: 0 0 8px rgba(232, 179, 92, 0.28);
+}
+
+.planPremium .selectPlanLink {
+  border-top-color: rgba(224, 172, 91, 0.3);
+  background:
+    linear-gradient(90deg, rgba(210, 157, 79, 0.06), rgba(239, 196, 119, 0.11), rgba(210, 157, 79, 0.06));
+  color: #efc477;
+}
+
+.planLink:hover .planPremium {
+  border-color: rgba(239, 196, 119, 0.88);
+  box-shadow:
+    0 24px 62px rgba(0, 0, 0, 0.4),
+    0 0 30px rgba(210, 157, 79, 0.055),
+    inset 0 1px 0 rgba(255, 222, 166, 0.09);
+}
+
+.planPremium.planSelected {
+  border-color: #efb95f;
+  background:
+    radial-gradient(circle at 82% 5%, rgba(239, 196, 119, 0.27), transparent 29%),
+    radial-gradient(circle at 12% 94%, rgba(177, 116, 45, 0.13), transparent 35%),
+    linear-gradient(145deg, #1c1710 0%, #12100c 48%, #0a0908 100%);
+  box-shadow:
+    0 0 0 1px rgba(239, 185, 95, 0.25),
+    0 25px 65px rgba(0, 0, 0, 0.42),
+    0 0 36px rgba(210, 157, 79, 0.065);
+}
+
+@media (max-width: 620px) {
+  .planPremium::before {
+    right: 16px;
+    left: 16px;
+  }
+
+  .planPremium::after {
+    width: 180px;
+    height: 180px;
+  }
+}
+/* ASSINATURAS — SELEÇÃO CONSISTENTE ENTRE PLANOS */
+.plan .selectPlanLinkSelected,
+.planPremium .selectPlanLinkSelected {
+  border-top-color: rgba(210, 157, 79, 0.72);
+  background: #d9a34d;
+  color: #080808;
+}
+
+.planLink:hover .plan .selectPlanLinkSelected,
+.planLink:hover .planPremium .selectPlanLinkSelected {
+  background: #d9a34d;
+  color: #080808;
+}

@@ -4363,3 +4363,171 @@ span {
     animation: none;
   }
 }
+
+/* =========================================================
+   ADMIN - SIDEBAR INTERATIVA
+========================================================= */
+
+.admin-nav-label {
+  display: inline;
+}
+
+.admin-nav a.active {
+  color: #ffffff;
+  background: #171717;
+}
+
+.admin-nav a.active svg {
+  color: #d29d4f;
+}
+
+.admin-sidebar-toggle {
+  display: none;
+}
+
+.admin-sidebar-backdrop {
+  display: none;
+}
+
+@media (max-width: 850px) {
+  .sidebar {
+    width: 72px;
+    transition: width 0.25s ease, box-shadow 0.25s ease;
+    overflow-x: hidden;
+    z-index: 60;
+  }
+
+  .sidebar.sidebar-open {
+    width: 230px;
+    box-shadow: 18px 0 45px rgba(0, 0, 0, 0.5);
+  }
+
+  .sidebar.sidebar-open .admin-logo {
+    padding: 0 13px 24px;
+    margin-bottom: 6px;
+    text-align: left;
+    font-size: 18px;
+  }
+
+  .sidebar.sidebar-open .admin-logo::before {
+    display: none;
+  }
+
+  .sidebar.sidebar-open .admin-logo span,
+  .sidebar.sidebar-open .admin-logo small {
+    display: block;
+  }
+
+  .admin-nav a .admin-nav-label {
+    display: none;
+    white-space: nowrap;
+    font-size: 14px;
+  }
+
+  .sidebar.sidebar-open .admin-nav a {
+    justify-content: flex-start;
+    gap: 13px;
+    padding: 12px 13px;
+    font-size: 14px;
+  }
+
+  .sidebar.sidebar-open .admin-nav a .admin-nav-label {
+    display: inline;
+  }
+
+  .sidebar.sidebar-open .sidebar-user {
+    display: flex;
+  }
+
+  .admin-sidebar-toggle {
+    margin-top: auto;
+    width: 100%;
+    min-height: 46px;
+    border: 0;
+    border-top: 1px solid #222222;
+    background: transparent;
+    color: #a0a0a0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 13px;
+    padding: 13px;
+    font: inherit;
+  }
+
+  .admin-sidebar-toggle:hover {
+    color: #ffffff;
+    background: #171717;
+  }
+
+  .admin-sidebar-toggle span {
+    display: none;
+    white-space: nowrap;
+    font-size: 14px;
+  }
+
+  .sidebar.sidebar-open .admin-sidebar-toggle {
+    justify-content: flex-start;
+  }
+
+  .sidebar.sidebar-open .admin-sidebar-toggle span {
+    display: inline;
+  }
+
+  .admin-sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    border: 0;
+    background: rgba(0, 0, 0, 0.52);
+    display: block;
+  }
+}
+
+/* ADMIN MOBILE - CONTROLE DE EXPANSAO */
+@media (max-width: 850px) {
+  .admin-sidebar-toggle {
+    order: -1;
+    flex: 0 0 auto !important;
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
+    margin: 0 auto 18px !important;
+    padding: 0 !important;
+    border: 1px solid #252525 !important;
+    border-radius: 10px !important;
+    background: #111111 !important;
+    color: #d29d4f !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
+    inset: auto !important;
+  }
+
+  .admin-sidebar-toggle svg {
+    display: block !important;
+    width: 22px !important;
+    height: 22px !important;
+    flex: 0 0 22px !important;
+  }
+
+  .admin-sidebar-toggle span {
+    display: none !important;
+  }
+
+  .sidebar.sidebar-open .admin-sidebar-toggle {
+    width: 100% !important;
+    margin: 0 0 18px !important;
+    padding: 0 13px !important;
+    justify-content: flex-start !important;
+    gap: 13px !important;
+  }
+
+  .sidebar.sidebar-open .admin-sidebar-toggle span {
+    display: inline !important;
+    font-size: 14px !important;
+  }
+}

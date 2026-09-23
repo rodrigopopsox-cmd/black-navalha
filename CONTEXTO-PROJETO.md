@@ -26166,3 +26166,617 @@ git add .
 Commit/push somente com caminhos explícitos.
 
 # FIM DO CHECKPOINT — 2026-09-22
+---
+
+# CHECKPOINT FINAL — ÁREA DO BARBEIRO / PAINEL OPERACIONAL COMPLETO — 2026-09-23
+
+## PRIORIDADE
+
+Este é o checkpoint funcional mais recente e deve prevalecer sobre checkpoints anteriores quando houver divergência.
+
+A frente:
+
+ÁREA DO BARBEIRO
+
+avançou da fundação segura de autenticação para a primeira versão operacional completa.
+
+## IDENTIDADE E SEGURANÇA
+
+As três áreas continuam independentes:
+
+- Cliente: /minha-assinatura
+- Barbeiro: /barbeiro
+- Administrador: /admin
+
+O barbeiro NÃO possui profiles.role = admin.
+
+Identidade profissional preservada:
+
+auth.uid()
+→ barbers.auth_user_id
+→ barbers.id
+
+O navegador NÃO fornece barber_id como autoridade nas funcionalidades privadas implementadas.
+
+Rodrigo Alves Correa permanece como profissional real vinculado.
+
+Validação já existente permanece:
+
+- active = true;
+- possui acesso profissional;
+- possui_role_admin = false.
+
+A área /admin continua exclusiva do administrador.
+
+## ROTAS DA ÁREA DO BARBEIRO
+
+Rotas operacionais implementadas:
+
+- /barbeiro
+- /barbeiro/agenda
+- /barbeiro/assinantes
+- /barbeiro/clientes
+- /barbeiro/comissoes
+- /barbeiro/horarios
+- /barbeiro/bloqueios
+
+Login profissional preservado:
+
+- /barbeiro/entrar
+
+Route Group preservado:
+
+app/barbeiro/(painel)/
+
+Portanto:
+
+/barbeiro/entrar
+= público.
+
+/barbeiro e subrotas operacionais
+= protegidas.
+
+## DASHBOARD
+
+/barbeiro agora apresenta dados reais do próprio profissional:
+
+- agendamentos de hoje;
+- concluídos hoje;
+- meus assinantes;
+- comissão do mês;
+- Agenda de hoje.
+
+Agendamentos considerados no indicador operacional do dia:
+
+- scheduled;
+- confirmed;
+- completed.
+
+Cancelados não entram no indicador do dia.
+
+A Agenda completa por data pode continuar exibindo registros cancelados para contexto operacional.
+
+## MINHA AGENDA
+
+Rota:
+
+/barbeiro/agenda
+
+Implementado:
+
+- somente appointments do próprio barbeiro;
+- navegação por data;
+- dia anterior;
+- Hoje;
+- próximo dia;
+- horário;
+- cliente;
+- telefone;
+- serviços;
+- status.
+
+Validação real:
+
+22/09/2026 possuía 1 appointment de Rodrigo.
+
+A página apresentou exatamente 1 registro real, incluindo:
+
+- 09:00–09:45;
+- cliente;
+- telefone;
+- serviço Cabelo + Barba;
+- status Cancelado.
+
+Nenhum SELECT geral em appointments foi concedido ao barbeiro.
+
+## MEUS ASSINANTES
+
+Rota:
+
+/barbeiro/assinantes
+
+Mostra somente assinaturas atualmente vinculadas ao próprio profissional por ciclos:
+
+- paid;
+- grace;
+- grace_until ainda vigente.
+
+Cada assinatura aparece no máximo uma vez, usando o ciclo mais recente do próprio barbeiro.
+
+Dados operacionais expostos:
+
+- cliente;
+- telefone;
+- plano;
+- status;
+- período;
+- carência.
+
+Não expõe:
+
+- Order ID;
+- Charge ID;
+- dados Mercado Pago;
+- notas;
+- assinaturas de outros profissionais.
+
+Estado real validado durante esta frente:
+
+0 assinantes vinculados.
+
+Nenhum dado artificial foi criado para preencher a tela.
+
+## MEUS CLIENTES
+
+Rota:
+
+/barbeiro/clientes
+
+Definição operacional:
+
+cliente do profissional = customer que possui pelo menos um appointment historicamente vinculado ao próprio barbeiro.
+
+Exibe:
+
+- nome;
+- telefone;
+- quantidade de agendamentos;
+- último registro;
+- próximo horário efetivo, quando houver.
+
+Próximo horário considera somente:
+
+- scheduled;
+- confirmed.
+
+Validação real:
+
+Rodrigo possuía 1 cliente relacionado por appointment.
+
+Tela validada com:
+
+1 cliente;
+1 agendamento;
+nenhum próximo horário.
+
+## COMISSÕES
+
+Rota:
+
+/barbeiro/comissoes
+
+Fonte autoritativa:
+
+subscription_commission_entries.
+
+A interface NÃO recalcula comissão usando a taxa atual do barbeiro.
+
+Utiliza os valores históricos congelados no ledger.
+
+Implementado:
+
+- navegação mensal;
+- comissões do período;
+- reversões;
+- saldo líquido;
+- lançamentos;
+- taxa histórica;
+- data/hora.
+
+Reversal é subtraída do total líquido.
+
+Nenhum Charge ID ou Order Mercado Pago é exposto.
+
+Estado real validado:
+
+R$ 0,00 no período atual.
+
+Nenhuma comissão artificial foi criada.
+
+## HORÁRIOS
+
+Rota:
+
+/barbeiro/horarios
+
+Primeira versão é SOMENTE LEITURA.
+
+O profissional consulta a própria jornada semanal.
+
+A administração continua responsável pela edição da jornada nesta etapa.
+
+Não foi concedido UPDATE geral em working_hours ao barbeiro.
+
+## BLOQUEIOS
+
+Rota:
+
+/barbeiro/bloqueios
+
+Implementado:
+
+- leitura somente dos próprios bloqueios;
+- criação de bloqueio;
+- início;
+- fim;
+- motivo opcional;
+- exclusão do próprio bloqueio;
+- confirmação antes da exclusão.
+
+A criação NÃO recebe barber_id.
+
+A exclusão recebe somente block_id e a RPC confirma no banco que o bloqueio pertence ao barbeiro derivado da sessão.
+
+Server Actions revalidam a sessão com auth.getUser().
+
+As RPCs revalidam novamente identidade/barbeiro.
+
+Teste funcional real realizado:
+
+- bloqueio futuro criado pela interface;
+- bloqueio apareceu na própria listagem;
+- fluxo de exclusão exercitado pela interface.
+
+O dado temporário de teste deve permanecer removido após a validação final.
+
+## MIGRATION 038
+
+Arquivo:
+
+supabase/sql/038-barber-dashboard-agenda-read.sql
+
+APLICADA.
+
+Cria:
+
+- get_my_barber_dashboard(date);
+- get_my_barber_appointments(date).
+
+Nenhuma RPC recebe barber_id.
+
+Nenhum SELECT geral foi concedido.
+
+## MIGRATION 039
+
+Arquivo:
+
+supabase/sql/039-barber-subscribers-read.sql
+
+APLICADA.
+
+Cria:
+
+get_my_barber_subscribers()
+
+Somente leitura dos assinantes operacionais do próprio barbeiro.
+
+## MIGRATION 040
+
+Arquivo:
+
+supabase/sql/040-barber-customers-read.sql
+
+APLICADA.
+
+Cria:
+
+get_my_barber_customers()
+
+Somente clientes relacionados a appointments do próprio profissional.
+
+## MIGRATION 041
+
+Arquivo:
+
+supabase/sql/041-barber-commissions-read.sql
+
+APLICADA.
+
+Cria:
+
+get_my_barber_commissions(year, month)
+
+Ano/mês são somente filtros.
+
+barber_id continua derivado exclusivamente da sessão.
+
+O ledger histórico permanece autoridade.
+
+## MIGRATION 042
+
+Arquivo:
+
+supabase/sql/042-barber-working-hours-blocks.sql
+
+APLICADA.
+
+Cria:
+
+- get_my_barber_working_hours();
+- get_my_barber_blocks();
+- create_my_barber_block(...);
+- delete_my_barber_block(...).
+
+Nenhuma delas recebe barber_id.
+
+Não foi concedido acesso geral às tabelas.
+
+## MIGRATIONS
+
+Migrations aplicadas agora:
+
+007–042.
+
+NÃO reaplicar nenhuma.
+
+Próximo número disponível:
+
+043.
+
+Qualquer nova alteração real de banco deve ser versionada nesse número ou posterior e aplicada somente com necessidade concreta/autorização.
+
+## VISUAL
+
+A primeira versão visual criada durante a implementação foi posteriormente alinhada ao padrão já aprovado do Admin.
+
+Foi reutilizada conceitualmente a mesma experiência:
+
+- sidebar desktop;
+- item ativo;
+- ícones;
+- menu mobile compacto;
+- expansão do menu;
+- nomes das opções quando expandido;
+- fechamento ao selecionar rota;
+- fechamento por backdrop;
+- botão Menu/Fechar;
+- identificação do profissional.
+
+Criado componente independente:
+
+app/barbeiro/(painel)/barber-sidebar.tsx
+
+IMPORTANTE:
+
+A Área do Barbeiro reutiliza somente direção visual/mecânica de navegação.
+
+As permissões NÃO são compartilhadas com Admin.
+
+Desktop:
+
+APROVADO visualmente.
+
+Mobile:
+
+APROVADO visualmente após alinhamento ao padrão do Admin.
+
+## ARQUIVOS PRINCIPAIS DESTA FRENTE
+
+Alterados:
+
+- app/barbeiro/(painel)/layout.tsx
+- app/barbeiro/(painel)/page.tsx
+- app/globals.css
+
+Criados:
+
+- app/barbeiro/(painel)/barber-sidebar.tsx
+- app/barbeiro/(painel)/agenda/page.tsx
+- app/barbeiro/(painel)/assinantes/page.tsx
+- app/barbeiro/(painel)/clientes/page.tsx
+- app/barbeiro/(painel)/comissoes/page.tsx
+- app/barbeiro/(painel)/horarios/page.tsx
+- app/barbeiro/(painel)/bloqueios/page.tsx
+- app/barbeiro/(painel)/bloqueios/actions.ts
+- app/barbeiro/(painel)/bloqueios/block-form.tsx
+- app/barbeiro/(painel)/bloqueios/delete-block-button.tsx
+- supabase/sql/038-barber-dashboard-agenda-read.sql
+- supabase/sql/039-barber-subscribers-read.sql
+- supabase/sql/040-barber-customers-read.sql
+- supabase/sql/041-barber-commissions-read.sql
+- supabase/sql/042-barber-working-hours-blocks.sql
+
+## NEXT.JS 16
+
+AGENTS.md foi respeitado.
+
+Documentação local consultada durante a frente:
+
+- fetching data;
+- linking and navigating;
+- mutating data.
+
+Server Actions de Bloqueios revalidam autenticação/autorização e não confiam no layout isoladamente.
+
+## TESTES
+
+Build final:
+
+npm.cmd run build
+
+APROVADO.
+
+Next.js:
+
+16.3.4
+
+TypeScript:
+
+APROVADO.
+
+Rotas profissionais reconhecidas pelo build:
+
+- /barbeiro
+- /barbeiro/agenda
+- /barbeiro/assinantes
+- /barbeiro/clientes
+- /barbeiro/comissoes
+- /barbeiro/horarios
+- /barbeiro/bloqueios
+- /barbeiro/entrar
+
+git diff --check:
+
+APROVADO.
+
+Somente avisos conhecidos LF/CRLF.
+
+## REGRAS CRÍTICAS PRESERVADAS
+
+Catálogo:
+
+- Black Essencial: R$ 85, BLACK_STANDARD, 25 compartilhadas, 4 benefícios;
+- Black Navalha: R$ 145, BLACK_STANDARD, 25 compartilhadas, 6 benefícios;
+- Black Premium: R$ 200, BLACK_PREMIUM, 5 reservadas, 10 benefícios;
+- Plano Mensal legado preservado e active=false.
+
+Capacidade:
+
+- 30 totais por barbeiro;
+- BLACK_STANDARD: 25;
+- BLACK_PREMIUM: 5;
+- preservar obrigatoriamente SELECT ... FOR UPDATE.
+
+Pagamento:
+
+- mensal avulso via PIX;
+- sem recorrência automática Mercado Pago;
+- Orders API;
+- external_reference = subscription_charge.id;
+- Webhook HMAC;
+- data.id ORIGINAL;
+- GET Order server-side;
+- confirm_mercado_pago_subscription_payment;
+- polling observacional;
+- browser NÃO confirma pagamento.
+
+Central do Cliente:
+
+PRESERVADA.
+
+Não reconstruir:
+
+- /minha-assinatura;
+- identidade;
+- renovação;
+- cancelamento;
+- remarcação;
+- recuperação de senha;
+- histórico;
+- próximos agendamentos.
+
+Agendamento:
+
+PRESERVADO.
+
+Não reconstruir:
+
+- /agendar;
+- create_public_multi_appointment;
+- regra de benefício/preço.
+
+## GIT / SEGURANÇA
+
+Nunca versionar:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt;
+- .env.local.
+
+Nunca usar:
+
+git add .
+
+Staging somente com caminhos explícitos.
+
+## ESTADO FINAL
+
+Área do Barbeiro — autenticação:
+
+APROVADA.
+
+Dashboard:
+
+IMPLEMENTADO.
+
+Minha Agenda:
+
+IMPLEMENTADA E VALIDADA COM DADO REAL.
+
+Meus Assinantes:
+
+IMPLEMENTADO.
+
+Meus Clientes:
+
+IMPLEMENTADO E VALIDADO COM DADO REAL.
+
+Comissões:
+
+IMPLEMENTADA.
+
+Horários:
+
+IMPLEMENTADO SOMENTE LEITURA.
+
+Bloqueios:
+
+IMPLEMENTADO COM LEITURA/CRIAÇÃO/EXCLUSÃO SEGURAS.
+
+Desktop:
+
+APROVADO.
+
+Mobile:
+
+APROVADO.
+
+Build:
+
+APROVADO.
+
+Banco:
+
+migrations 007–042 aplicadas.
+
+## PRÓXIMO PASSO
+
+Depois deste checkpoint Git, não refazer a Área do Barbeiro.
+
+Próximas evoluções devem partir de necessidade concreta.
+
+Possibilidades futuras:
+
+- edição controlada da própria jornada, se desejado;
+- gestão de status de atendimento pelo profissional, com regra própria;
+- refinamentos operacionais adicionais;
+- logout/recuperação de acesso profissional;
+- testes com múltiplos barbeiros quando existirem dados adequados.
+
+Qualquer nova leitura/escrita privada do profissional deve continuar derivando:
+
+auth.uid()
+→ barbers.auth_user_id
+→ barber_id.
+
+# FIM DO CHECKPOINT — 2026-09-23

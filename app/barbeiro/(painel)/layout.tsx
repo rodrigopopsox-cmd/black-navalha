@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import BarberSidebar from "./barber-sidebar";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function BarberPrivateLayout({
@@ -29,19 +30,12 @@ export default async function BarberPrivateLayout({
   }
 
   return (
-    <div className="barber-area-shell">
-      <header className="barber-area-header">
-        <div>
-          <strong>
-            BLACK <span>NAVALHA</span>
-          </strong>
-          <small>ÁREA DO PROFISSIONAL</small>
-        </div>
+    <div className="admin-shell barber-admin-shell">
+      <BarberSidebar barberName={barber.barber_name} />
 
-        <p>{barber.barber_name}</p>
-      </header>
-
-      {children}
+      <div className="admin-content barber-admin-content">
+        {children}
+      </div>
     </div>
   );
 }

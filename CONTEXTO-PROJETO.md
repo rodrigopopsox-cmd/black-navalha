@@ -25839,3 +25839,330 @@ Não incluir:
 Depois do commit/push, confirmar HEAD/origin e registrar o commit final neste contexto em checkpoint documental posterior, se necessário.
 
 # FIM DO CHECKPOINT — 2026-09-21
+
+---
+
+# CHECKPOINT — FUNDAÇÃO SEGURA DA ÁREA DO BARBEIRO — 2026-09-22
+
+## PRIORIDADE
+
+Este é o checkpoint funcional mais recente.
+
+A nova frente escolhida é:
+
+ÁREA DO BARBEIRO.
+
+Objetivo:
+
+criar uma área operacional própria para barbeiros contratados, separada do Admin.
+
+O barbeiro NÃO deve receber acesso administrativo global.
+
+## GIT / PRODUÇÃO ANTES DESTA FRENTE
+
+A melhoria da navegação mobile do Admin foi concluída, validada localmente e publicada no Vercel.
+
+Commit:
+
+83196e2 Melhora navegacao mobile do Admin
+
+Produção:
+
+https://black-navalha.vercel.app
+
+Deploy Vercel:
+
+Ready.
+
+Admin mobile publicado foi validado no Chrome.
+
+O menu administrativo agora:
+
+- permanece compacto com ícones no mobile;
+- pode ser expandido;
+- apresenta nomes das opções;
+- destaca a rota ativa;
+- fecha ao selecionar uma opção;
+- fecha pelo backdrop;
+- preserva desktop.
+
+## DECISÃO DE ARQUITETURA
+
+Foram consolidadas três áreas distintas:
+
+- Cliente: /minha-assinatura
+- Barbeiro: /barbeiro
+- Administrador: /admin
+
+O barbeiro não recebe profiles.role = admin.
+
+A nova área profissional deve utilizar identidade própria e derivar o barbeiro exclusivamente da sessão autenticada.
+
+Não confiar em barber_id fornecido pelo browser como autoridade.
+
+## MIGRATION 037
+
+Criada:
+
+supabase/sql/037-barber-auth-identity.sql
+
+APLICADA no Supabase em 2026-09-22.
+
+Resultado:
+
+Success. No rows returned
+
+NÃO reaplicar.
+
+A migration adiciona:
+
+barbers.auth_user_id uuid NULL
+
+com FK:
+
+auth.users(id)
+
+ON DELETE SET NULL.
+
+Também cria índice UNIQUE parcial para auth_user_id preenchido.
+
+Cria a RPC:
+
+public.get_my_barber_profile()
+
+A função:
+
+- deriva usuário por auth.uid();
+- exige autenticação;
+- exige e-mail confirmado;
+- localiza exclusivamente barbers.auth_user_id = auth.uid();
+- retorna DTO mínimo do próprio profissional;
+- EXECUTE somente para authenticated;
+- anon/public sem execução.
+
+## IDENTIDADE DO BARBEIRO
+
+Foi criada uma conta Auth separada para o barbeiro.
+
+Ela foi vinculada ao registro real:
+
+Rodrigo Alves Correa
+
+Validação após o vínculo:
+
+active = true
+possui_acesso = true
+possui_role_admin = false
+
+Portanto a identidade profissional está separada da identidade administrativa.
+
+Nenhuma role admin foi concedida ao barbeiro.
+
+## ROTAS CRIADAS
+
+Criadas localmente:
+
+/barbeiro
+/barbeiro/entrar
+
+Arquivos principais:
+
+- app/barbeiro/entrar/page.tsx
+- app/barbeiro/(painel)/layout.tsx
+- app/barbeiro/(painel)/page.tsx
+
+A página de login utiliza Supabase Auth por e-mail + senha.
+
+A área privada utiliza Server Component e revalida:
+
+supabase.auth.getUser()
+→ get_my_barber_profile()
+→ barbeiro ativo.
+
+## CORREÇÃO DE LOOP DE REDIRECT
+
+A primeira estrutura colocava:
+
+/barbeiro/entrar
+
+sob o mesmo layout protegido de /barbeiro.
+
+Isso causou:
+
+ERR_TOO_MANY_REDIRECTS
+
+porque o layout sem sessão redirecionava /barbeiro/entrar para ela mesma.
+
+Foi corrigido usando Route Group:
+
+app/barbeiro/(painel)/
+
+O Route Group não altera a URL pública.
+
+Estado final:
+
+/barbeiro/entrar
+→ rota pública de login profissional.
+
+/barbeiro
+→ rota privada protegida.
+
+Build após a correção:
+
+APROVADO.
+
+## TESTE REAL
+
+Teste realizado em janela anônima do Chrome.
+
+Login profissional:
+
+APROVADO.
+
+Após autenticação, /barbeiro abriu corretamente.
+
+Foi apresentado:
+
+Rodrigo Alves Correa
+
+no cabeçalho da área profissional.
+
+A tela atual possui propositalmente somente a fundação/placeholder:
+
+Visão Geral
+Área profissional protegida
+
+Nenhuma leitura operacional ampla foi concedida ainda.
+
+## SEGURANÇA
+
+A fundação foi validada antes de liberar agenda/clientes/assinantes.
+
+Preservado:
+
+- barbeiro não é admin;
+- /admin continua separado;
+- nenhuma permissão global de UPDATE foi concedida;
+- nenhum SELECT geral de appointments foi concedido ao barbeiro;
+- nenhuma informação de outro barbeiro foi exposta;
+- nenhuma regra financeira foi alterada;
+- nenhuma regra de capacidade foi alterada.
+
+## PRÓXIMA FRENTE EXATA
+
+Transformar /barbeiro em painel operacional real.
+
+Direção aprovada:
+
+Sidebar semelhante ao Admin, com opções adequadas ao profissional:
+
+- Visão Geral;
+- Minha Agenda;
+- Meus Assinantes;
+- Meus Clientes;
+- Comissões;
+- Horários;
+- Bloqueios.
+
+Primeira evolução recomendada:
+
+DASHBOARD + MINHA AGENDA.
+
+O dashboard deverá apresentar somente dados do profissional autenticado, por exemplo:
+
+- agendamentos de hoje;
+- atendimentos concluídos;
+- assinantes vinculados;
+- comissão do período;
+- agenda de hoje.
+
+Segurança obrigatória:
+
+auth.uid()
+→ barbers.auth_user_id
+→ barber_id server-side.
+
+Nunca confiar em barber_id enviado pelo navegador.
+
+Preferir RPCs específicas para o próprio barbeiro em vez de conceder SELECT geral nas estruturas administrativas.
+
+## MIGRATION SEGUINTE
+
+Próximo número disponível:
+
+038.
+
+Antes de criar/aplicar 038:
+
+- inspecionar somente os contratos necessários;
+- especialmente appointments, ciclos e comissão atuais;
+- definir RPCs mínimas de leitura;
+- obter autorização explícita para alteração de banco.
+
+Não conceder acesso global por conveniência.
+
+## MIGRATIONS
+
+Migrations aplicadas:
+
+007–037.
+
+NÃO reaplicar nenhuma.
+
+## REGRAS CRÍTICAS PRESERVADAS
+
+Catálogo:
+
+- Black Essencial: R$ 85, BLACK_STANDARD, 25 compartilhadas, 4 benefícios;
+- Black Navalha: R$ 145, BLACK_STANDARD, 25 compartilhadas, 6 benefícios;
+- Black Premium: R$ 200, BLACK_PREMIUM, 5 reservadas, 10 benefícios;
+- Plano Mensal legado preservado e inativo.
+
+Capacidade:
+
+- 30 totais por barbeiro;
+- Standard: 25;
+- Premium: 5;
+- preservar SELECT ... FOR UPDATE.
+
+Pagamento:
+
+- mensal avulso via PIX;
+- sem recorrência automática Mercado Pago;
+- Orders API;
+- external_reference = subscription_charge.id;
+- webhook HMAC;
+- data.id ORIGINAL;
+- GET Order server-side;
+- confirmação transacional/idempotente;
+- browser não confirma pagamento.
+
+Não repetir E2E financeiro sem necessidade concreta.
+
+## NÃO ALTERAR
+
+Não reconstruir:
+
+- /agendar;
+- create_public_multi_appointment;
+- benefícios de assinatura;
+- PIX;
+- webhook;
+- Central do Cliente;
+- Admin de Planos.
+
+## GIT / SEGURANÇA
+
+Nunca versionar:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt;
+- .env.local.
+
+Nunca usar:
+
+git add .
+
+Commit/push somente com caminhos explícitos.
+
+# FIM DO CHECKPOINT — 2026-09-22

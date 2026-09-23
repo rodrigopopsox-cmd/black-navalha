@@ -4531,3 +4531,184 @@ span {
     font-size: 14px !important;
   }
 }
+
+/* =========================================================
+   AREA DO BARBEIRO
+========================================================= */
+
+.barber-login-page,
+.barber-area-shell {
+  min-height: 100vh;
+  background: #080808;
+  color: #f5f2eb;
+}
+
+.barber-login-page {
+  display: grid;
+  place-items: center;
+  padding: 28px 18px;
+}
+
+.barber-login-card {
+  width: min(100%, 430px);
+}
+
+.barber-login-brand {
+  margin-bottom: 46px;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 4px;
+}
+
+.barber-login-brand span,
+.barber-area-header strong span {
+  color: #d29d4f;
+}
+
+.barber-login-eyebrow,
+.barber-area-eyebrow {
+  color: #d29d4f;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 3px;
+}
+
+.barber-login-card h1,
+.barber-area-page h1 {
+  margin: 12px 0;
+  color: #fff;
+  font-size: clamp(34px, 7vw, 52px);
+  line-height: 1;
+}
+
+.barber-login-copy,
+.barber-area-page > p {
+  color: #888;
+  line-height: 1.7;
+}
+
+.barber-login-card form {
+  display: grid;
+  margin-top: 30px;
+}
+
+.barber-login-card label {
+  margin-bottom: 8px;
+  color: #bbb;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.barber-login-card input {
+  min-height: 50px;
+  margin-bottom: 20px;
+  border: 1px solid #292929;
+  border-radius: 5px;
+  outline: none;
+  background: #111;
+  color: #fff;
+  padding: 0 15px;
+}
+
+.barber-login-card input:focus {
+  border-color: #d29d4f;
+}
+
+.barber-login-card button {
+  min-height: 52px;
+  border: 0;
+  border-radius: 5px;
+  background: #d29d4f;
+  color: #080808;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.barber-login-error {
+  margin-bottom: 18px;
+  border: 1px solid #702929;
+  background: rgba(180, 40, 40, 0.1);
+  color: #ff8d8d;
+  padding: 12px;
+  font-size: 13px;
+}
+
+.barber-login-card > a {
+  display: block;
+  margin-top: 28px;
+  color: #777;
+  text-align: center;
+  text-decoration: none;
+  font-size: 11px;
+}
+
+.barber-area-header {
+  min-height: 82px;
+  border-bottom: 1px solid #202020;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 18px clamp(20px, 5vw, 60px);
+}
+
+.barber-area-header strong {
+  display: block;
+  color: #fff;
+  letter-spacing: 3px;
+}
+
+.barber-area-header small {
+  display: block;
+  margin-top: 5px;
+  color: #666;
+  font-size: 8px;
+  letter-spacing: 2px;
+}
+
+.barber-area-header p {
+  margin: 0;
+  color: #aaa;
+  font-size: 13px;
+}
+
+.barber-area-page {
+  width: min(1100px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 64px 0;
+}
+
+.barber-area-page > p {
+  max-width: 620px;
+}
+
+.barber-area-placeholder {
+  margin-top: 38px;
+  border: 1px solid #252525;
+  background: #0e0e0e;
+  padding: 28px;
+  display: grid;
+  gap: 8px;
+}
+
+.barber-area-placeholder strong {
+  color: #fff;
+}
+
+.barber-area-placeholder span {
+  color: #777;
+  font-size: 13px;
+}
+
+@media (max-width: 600px) {
+  .barber-area-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .barber-area-page {
+    width: min(100% - 28px, 1100px);
+    padding: 42px 0;
+  }
+}

@@ -27237,3 +27237,493 @@ Antes de nova evolução:
 Nenhuma nova migration é necessária para o refinamento concluído.
 
 # FIM DO CHECKPOINT — 2026-09-25
+---
+
+# CHECKPOINT DE DIREÇÃO — MODERNIZAÇÃO DO ADMIN E AUTOMAÇÕES / WHATSAPP — 2026-09-25
+
+## PRIORIDADE
+
+Este checkpoint registra a próxima direção de produto.
+
+O checkpoint funcional imediatamente anterior permanece válido:
+
+STATUS, REMARCAÇÃO, COMISSÃO DE SERVIÇOS E REFINAMENTO VISUAL — 2026-09-25.
+
+Não reconstruir as funcionalidades já concluídas.
+
+## GIT DE REFERÊNCIA
+
+Branch:
+
+main
+
+HEAD/origin confirmado antes deste checkpoint:
+
+0c2deae596891dd4c7faaf250df8fb3181741c78
+
+Commit:
+
+0c2deae Registra conclusao das operacoes de atendimentos
+
+Working tree esperado antes desta atualização documental:
+
+?? ASSINATURAS-LOTE.txt
+?? CODIGO-COMPLETO.txt
+
+Continuam obrigatoriamente fora do Git:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt;
+- .env.local.
+
+Nunca usar:
+
+git add .
+
+## MIGRATIONS
+
+Migrations 007–046 estão APLICADAS.
+
+NÃO reaplicar nenhuma.
+
+Próximo número disponível:
+
+047.
+
+Nenhuma migration 047 foi criada neste planejamento.
+
+## PRÓXIMA FRENTE IMEDIATA
+
+MODERNIZAÇÃO DOS CADASTROS ADMINISTRATIVOS.
+
+Motivo:
+
+A Área do Admin foi construída antes de várias evoluções posteriores do produto.
+
+Hoje já existem:
+
+- Central do Cliente;
+- identidade segura do cliente;
+- Área do Barbeiro;
+- identidade profissional;
+- catálogo multiplano;
+- capacidade por grupo;
+- ciclos/snapshots;
+- PIX mensal avulso;
+- comissão de assinatura;
+- comissão de serviço;
+- operações de atendimento.
+
+Alguns formulários administrativos antigos ainda refletem modelos anteriores.
+
+A próxima frente deve alinhar o Admin ao produto atual.
+
+## PRIORIDADE 1 — CADASTRO DE BARBEIRO
+
+Começar por:
+
+/admin/barbeiros/novo
+
+O cadastro administrativo do profissional deverá ser revisado para contemplar o modelo atual.
+
+Direção desejada:
+
+- nome;
+- WhatsApp profissional;
+- comissão de assinatura;
+- comissão de serviços;
+- status ativo/inativo;
+- acesso profissional;
+- e-mail de acesso profissional.
+
+O Admin deve conseguir provisionar corretamente o acesso à:
+
+/barbeiro
+
+sem conceder:
+
+profiles.role = admin.
+
+Identidade profissional obrigatória permanece:
+
+auth.uid()
+→ barbers.auth_user_id
+→ barber_id.
+
+Nunca utilizar barber_id vindo do browser como autoridade nas operações privadas.
+
+## SENHA DO BARBEIRO
+
+Direção preferida:
+
+o Admin NÃO deve conhecer/manter a senha permanente do profissional.
+
+Preferir fluxo em que:
+
+- Admin cadastra/provisiona o profissional e o e-mail;
+- a identidade Auth é criada/vinculada de forma segura;
+- o profissional define a própria senha por mecanismo de convite/definição segura;
+- senha nunca é exibida no Admin;
+- senha nunca é registrada no banco de aplicação;
+- nenhuma role administrativa é concedida.
+
+Antes da implementação, inspecionar somente o fluxo atual necessário de:
+
+- /admin/barbeiros/novo;
+- identidade profissional existente;
+- migration 037 e contratos relacionados.
+
+Não criar migration 047 antes de definir o fluxo exato e comprovar a necessidade.
+
+## PRIORIDADE 2 — EDIÇÃO DO BARBEIRO
+
+Depois do cadastro novo estar correto, revisar:
+
+/admin/barbeiros/[id]
+
+Objetivo:
+
+apresentar claramente o estado do acesso profissional, por exemplo:
+
+- acesso configurado;
+- acesso ainda não configurado.
+
+Permitir provisionamento seguro para barbeiros legados quando necessário.
+
+Não exibir senha.
+
+Preservar as duas comissões independentes:
+
+- subscription_commission_rate;
+- service_commission_rate.
+
+## PRIORIDADE 3 — NOVA ASSINATURA ADMIN
+
+A tela:
+
+/admin/assinantes/novo
+
+ainda apresenta elementos do modelo legado.
+
+Ela deve ser posteriormente alinhada ao modelo comercial atual.
+
+Catálogo vigente:
+
+Black Essencial:
+R$ 85
+BLACK_STANDARD
+25 vagas compartilhadas
+4 benefícios.
+
+Black Navalha:
+R$ 145
+BLACK_STANDARD
+25 vagas compartilhadas
+6 benefícios.
+
+Black Premium:
+R$ 200
+BLACK_PREMIUM
+5 vagas reservadas
+10 benefícios.
+
+Plano Mensal legado:
+
+id:
+27fcd639-ddb5-43ab-8ddc-3fd141424fb5
+
+active=false.
+
+NÃO apagar.
+
+A nova assinatura administrativa moderna deverá considerar conscientemente:
+
+- cliente;
+- plano real do catálogo;
+- barbeiro;
+- capacidade;
+- grupo de capacidade;
+- snapshot do ciclo;
+- benefícios do plano;
+- histórico.
+
+Não permitir que um formulário administrativo antigo contorne:
+
+- capacidade;
+- snapshots;
+- ciclos;
+- regras financeiras.
+
+## DECISÃO PENDENTE — ASSINATURA CRIADA PELO ADMIN
+
+Antes de modernizar o cadastro de assinatura, definir explicitamente:
+
+uma assinatura criada manualmente pelo Admin representa:
+
+- cortesia;
+- ajuste operacional;
+- venda/pagamento fora do gateway;
+- ou somente preparação para cobrança?
+
+Não fabricar:
+
+- charge paid;
+- ciclo paid;
+- receita;
+- comissão;
+
+sem regra de negócio explícita.
+
+Não tomar essa decisão automaticamente.
+
+## PRIORIDADE 4 — CLIENTES / CENTRAL DO CLIENTE
+
+Posteriormente revisar o Admin de Clientes para refletir a identidade moderna da Central.
+
+Objetivos futuros:
+
+- informar se o cliente possui acesso configurado;
+- permitir iniciar/provisionar acesso de forma segura quando apropriado;
+- nunca permitir que o Admin visualize senha;
+- preservar customers.auth_user_id;
+- preservar isolamento da Central do Cliente.
+
+## DIREÇÃO FUTURA — NOTIFICAÇÕES
+
+Após o alinhamento dos cadastros administrativos, criar uma fundação própria de notificações.
+
+Essa fundação NÃO deve depender obrigatoriamente de:
+
+- n8n;
+- IA;
+- um fornecedor específico de WhatsApp.
+
+O Black Navalha deve continuar sendo autoridade das regras.
+
+Arquitetura conceitual:
+
+evento do Black Navalha
+→ registro interno idempotente
+→ agendamento/fila
+→ canal de envio
+→ registro de entrega/erro.
+
+## NOTIFICAÇÕES PRIORITÁRIAS — CLIENTE
+
+Primeira direção desejada:
+
+Lembrete de atendimento aproximadamente 24 horas antes.
+
+Exemplo conceitual:
+
+"Olá, Rodrigo. Seu horário na Black Navalha é amanhã às 10:00 com Rodrigo."
+
+A evolução futura pode possuir ações:
+
+[CONFIRMAR]
+[REMARCAR]
+[CANCELAR]
+
+Também é desejável avaliar posteriormente lembrete curto próximo do atendimento, por exemplo aproximadamente 2 horas antes.
+
+Regras reais de status/remarcação/cancelamento devem continuar no backend.
+
+WhatsApp não será autoridade da agenda.
+
+## NOTIFICAÇÕES PRIORITÁRIAS — BARBEIRO
+
+Resumo automático da agenda do dia.
+
+Exemplo conceitual:
+
+"Bom dia, Rodrigo. Sua agenda de hoje:
+
+09:00 — João — Cabelo
+10:00 — Carlos — Barba
+11:15 — Paulo — Cabelo + Barba"
+
+Também poderão existir futuramente eventos como:
+
+- novo agendamento;
+- cancelamento;
+- remarcação;
+- nova assinatura vinculada.
+
+Os dados devem vir das mesmas regras/estruturas autoritativas da Área do Barbeiro.
+
+Não manter agenda paralela no sistema de automação.
+
+## N8N
+
+n8n é considerado uma opção válida de orquestração futura.
+
+Pode ser estudado em modo self-hosted para reduzir custo operacional.
+
+Entretanto:
+
+n8n NÃO deve ser autoridade sobre:
+
+- disponibilidade;
+- agendamentos;
+- capacidade;
+- benefícios;
+- status financeiros;
+- confirmação PIX;
+- comissões.
+
+Ele poderá orquestrar chamadas para ferramentas/APIs seguras do Black Navalha.
+
+A automação deve continuar funcionalmente desacoplada de n8n sempre que possível.
+
+## WHATSAPP
+
+Ainda NÃO foi escolhido provedor definitivo.
+
+Opções futuras a comparar conscientemente:
+
+- Meta WhatsApp Business Platform / Cloud API oficial;
+- BSP/provedor oficial;
+- solução de prototipagem de baixo custo quando apropriada.
+
+Para produção real, considerar:
+
+- estabilidade;
+- regras atuais da Meta;
+- custos atuais;
+- templates;
+- consentimento;
+- LGPD;
+- opt-out;
+- entrega;
+- risco de bloqueio.
+
+Não assumir preços/regras do WhatsApp sem consultar a documentação vigente no momento da implementação.
+
+## PRIMEIRO DEGRAU SEM AUTOMAÇÃO COMPLETA
+
+Uma versão intermediária poderá utilizar:
+
+wa.me
+
+com mensagem pré-preenchida.
+
+Exemplo:
+
+Barbeiro/Admin toca em "Lembrar cliente"
+→ WhatsApp abre com mensagem pronta
+→ humano confirma o envio.
+
+Essa opção pode fornecer valor antes da automação completa e sem tornar n8n obrigatório.
+
+## SECRETÁRIA VIRTUAL FUTURA
+
+Direção desejada posteriormente:
+
+WhatsApp
+→ interpretação de intenção
+→ ferramentas seguras do Black Navalha
+→ resposta.
+
+Exemplos:
+
+- consultar serviços;
+- consultar planos;
+- consultar profissionais;
+- consultar horários;
+- criar agendamento;
+- cancelar;
+- remarcar;
+- transferir para atendimento humano.
+
+A IA, caso utilizada, poderá interpretar linguagem natural, mas NÃO deverá:
+
+- executar SQL livre;
+- decidir que pagamento ocorreu;
+- inventar disponibilidade;
+- contornar autenticação;
+- conceder benefício;
+- modificar capacidade diretamente.
+
+Exemplo:
+
+cliente diz:
+"Quero cabelo e barba sexta à tarde com Rodrigo."
+
+A automação pode interpretar intenção/data/profissional.
+
+O backend Black Navalha continua responsável por determinar os horários realmente disponíveis.
+
+## IDEMPOTÊNCIA DE NOTIFICAÇÕES
+
+A futura fundação deve impedir mensagens duplicadas.
+
+Eventos conceituais poderão incluir:
+
+- appointment.created;
+- appointment.reminder_24h;
+- appointment.reminder_2h;
+- appointment.confirmed;
+- appointment.cancelled;
+- appointment.rescheduled;
+- barber.daily_agenda;
+- subscription.payment_confirmed;
+- subscription.renewal_available.
+
+Cada entrega deve possuir identificação/idempotência própria.
+
+Retries não podem enviar a mesma notificação indefinidamente.
+
+## DADOS / WHATSAPP
+
+Ao modernizar cadastros, preparar conscientemente os dados para automação futura.
+
+Distinguir:
+
+- WhatsApp do cliente;
+- WhatsApp do profissional;
+- WhatsApp comercial da Black Navalha;
+- futuro número remetente oficial.
+
+Manter normalização e validação de telefone.
+
+Não misturar identidade Auth com simples posse/conhecimento de número de WhatsApp.
+
+Não expor dados privados apenas porque alguém informou um telefone.
+
+## ORDEM RECOMENDADA DE EVOLUÇÃO
+
+1. Modernizar cadastro do barbeiro e provisionamento do acesso profissional.
+2. Modernizar edição/estado de acesso do barbeiro.
+3. Modernizar Nova Assinatura Admin.
+4. Revisar Cliente/Admin e acesso à Central.
+5. Criar fundação interna de notificações.
+6. Implementar lembrete de atendimento do cliente.
+7. Implementar resumo diário da agenda do barbeiro.
+8. Escolher/conectar canal WhatsApp.
+9. Evoluir para ações Confirmar/Remarcar/Cancelar.
+10. Somente posteriormente avaliar secretária conversacional completa.
+
+## PRÓXIMO PASSO EXATO — NOVO CHAT
+
+1. Ler integralmente CONTEXTO-PROJETO.md.
+2. Ler AGENTS.md.
+3. Confirmar Git real.
+4. Considerar migrations 007–046 aplicadas.
+5. NÃO reaplicar migrations.
+6. NÃO reconstruir Agenda, status, remarcação, comissão, PIX ou Central do Cliente.
+7. Começar por /admin/barbeiros/novo.
+8. Inspecionar somente os arquivos atuais necessários do cadastro de barbeiro.
+9. Inspecionar somente os contratos necessários da identidade profissional já criada na migration 037.
+10. Definir o fluxo seguro Admin → provisionamento do acesso profissional.
+11. Preservar:
+    auth.uid()
+    → barbers.auth_user_id
+    → barber_id.
+12. Não conceder profiles.role = admin ao barbeiro.
+13. Não criar migration 047 antes de comprovar necessidade.
+14. Trabalhar uma etapa por vez.
+15. npm.cmd run build após implementação.
+16. git diff --check.
+17. Commit/push somente com autorização explícita.
+
+# FIM DO CHECKPOINT DE DIREÇÃO — 2026-09-25

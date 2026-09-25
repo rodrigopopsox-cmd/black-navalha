@@ -211,7 +211,7 @@ export default function AppointmentOperations({
               className="is-neutral"
               onClick={() => {
                 setShowReschedule((value) => !value);
-        
+
                 clearFeedback();
               }}
             >

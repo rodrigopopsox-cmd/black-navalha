@@ -26780,3 +26780,460 @@ auth.uid()
 → barber_id.
 
 # FIM DO CHECKPOINT — 2026-09-23
+---
+
+# CHECKPOINT FINAL — STATUS, REMARCAÇÃO, COMISSÃO DE SERVIÇOS E REFINAMENTO VISUAL — 2026-09-25
+
+## PRIORIDADE
+
+Este é o checkpoint funcional mais recente.
+
+A frente de operações de atendimento, comissão de serviços e refinamento visual foi:
+
+CONCLUÍDA, TESTADA E VERSIONADA.
+
+Não reconstruir essas funcionalidades no próximo chat.
+
+## GIT
+
+Branch:
+
+main
+
+Commit funcional:
+
+6e9f4f4 Implementa operacoes e comissoes de atendimentos
+
+Push realizado com sucesso para:
+
+origin/main
+
+Após esse commit:
+
+HEAD/origin:
+6e9f4f49f281b441a9d28d410481c66123d0e507
+
+Foi identificada posteriormente uma única ocorrência cosmética de trailing whitespace em:
+
+app/admin/agenda/appointment-operations.tsx
+
+Ela foi removida antes do checkpoint documental final.
+
+Continuam obrigatoriamente fora do Git:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt;
+- .env.local.
+
+Nunca usar:
+
+git add .
+
+## MIGRATIONS
+
+Migrations 007–046 estão APLICADAS.
+
+NÃO reaplicar nenhuma.
+
+Novas desta frente:
+
+043:
+supabase/sql/043-barber-appointment-operations.sql
+
+Operações seguras do próprio atendimento pelo barbeiro.
+
+RPCs:
+
+- update_my_barber_appointment_status(uuid, text);
+- reschedule_my_barber_appointment(uuid, timestamptz).
+
+044:
+supabase/sql/044-service-commission.sql
+
+Comissão de serviços e ledger histórico.
+
+045:
+supabase/sql/045-barber-service-commissions-read.sql
+
+Leitura profissional unificada de comissão de assinatura, serviço e reversões.
+
+046:
+supabase/sql/046-admin-appointment-rescheduling.sql
+
+Remarcação administrativa atômica.
+
+RPC:
+
+reschedule_admin_appointment(uuid, timestamptz).
+
+Próximo número disponível:
+
+047.
+
+## STATUS DO BARBEIRO
+
+Fluxos profissionais preservados:
+
+scheduled
+→ confirmed
+→ completed/cancelled/no_show
+
+Também:
+
+scheduled
+→ completed/cancelled/no_show.
+
+Estados terminais para o barbeiro:
+
+- completed;
+- cancelled;
+- no_show.
+
+O barbeiro não pode reabrir estado terminal.
+
+Identidade obrigatória:
+
+auth.uid()
+→ barbers.auth_user_id
+→ barber_id.
+
+Nenhum UPDATE geral em appointments foi concedido.
+
+## REMARCAÇÃO
+
+Remarcação do barbeiro:
+
+ATÔMICA E VALIDADA.
+
+Remarcação Admin:
+
+ATÔMICA E IMPLEMENTADA pela RPC 046.
+
+Preservado:
+
+- mesmo appointment.id;
+- cliente;
+- barbeiro;
+- serviços;
+- preço histórico;
+- benefícios históricos.
+
+Duração continua derivada de appointment_services.duration_minutes.
+
+Jornada, bloqueios e conflitos continuam validados server-side.
+
+## COMISSÃO DE SERVIÇOS
+
+Admin controla independentemente:
+
+- subscription_commission_rate;
+- service_commission_rate.
+
+Comissão de serviço:
+
+- nasce ao entrar em completed;
+- utiliza appointments.price como base histórica;
+- congela percentual e valor;
+- base R$ 0,00 ou taxa 0 não gera lançamento;
+- saída de completed gera reversal;
+- histórico não é apagado.
+
+Teste real já validado:
+
+R$ 70,00
+x 50%
+=
+R$ 35,00.
+
+Ao restaurar completed → scheduled:
+
+- lançamento original preservado;
+- reversal preservado;
+- saldo líquido retornou a R$ 0,00.
+
+Não fabricar comissão retroativa.
+
+## FATURAMENTO ADMIN
+
+Regra preservada:
+
+Agendamentos hoje considera:
+
+- scheduled;
+- confirmed;
+- completed.
+
+Faturamento hoje soma SOMENTE:
+
+- completed.
+
+scheduled/confirmed/cancelled/no_show não representam faturamento realizado.
+
+## AGENDA ADMIN
+
+Rota:
+
+/admin/agenda
+
+Status:
+
+FUNCIONAL E VISUALMENTE APROVADA.
+
+Refinamento final:
+
+- dados do atendimento separados das operações;
+- desktop com leitura horizontal clara;
+- ações em faixa operacional própria;
+- mobile aproximadamente 385 px sem overflow;
+- informações organizadas verticalmente no mobile;
+- ações rápidas em grade adequada;
+- remarcação preservada.
+
+A ação visual genérica:
+
+Corrigir status
+
+foi removida da interface operacional para reduzir ruído.
+
+As Server Actions/RPCs administrativas existentes não foram removidas por causa desse refinamento.
+
+O componente antigo:
+
+app/admin/agenda/appointment-status-form.tsx
+
+foi verificado.
+
+Não existem referências externas atuais a AppointmentStatusForm.
+
+O arquivo permanece no projeto e NÃO foi apagado automaticamente.
+
+## AGENDA DO BARBEIRO
+
+Rota:
+
+/barbeiro/agenda
+
+Desktop:
+
+APROVADO.
+
+Mobile aproximadamente 385 px:
+
+APROVADO.
+
+Refinamento mobile final:
+
+- horário em bloco próprio;
+- nome do cliente sem truncamento;
+- telefone e serviços legíveis;
+- status separado;
+- ações em duas colunas;
+- textos das ações sem corte;
+- Remarcar preservado;
+- formulário de remarcação preparado em coluna única no mobile.
+
+Nenhuma regra operacional foi alterada pelo CSS.
+
+## COMISSÕES — REVISÃO VISUAL
+
+/barbeiro/comissoes:
+
+APROVADO.
+
+Validado visualmente:
+
+- Assinaturas: R$ 0,00;
+- Serviços: R$ 35,00;
+- Reversões: R$ 35,00;
+- Saldo líquido: R$ 0,00;
+- Comissão · Serviço;
+- Reversão · Serviço;
+- taxa histórica 50%.
+
+Edição administrativa do barbeiro:
+
+APROVADA.
+
+Campos apresentados claramente:
+
+- Comissão de assinatura (%);
+- Comissão de serviços (%).
+
+No estado validado:
+
+50% / 50%.
+
+As explicações de incidência e histórico estão preservadas.
+
+## TESTES FINAIS
+
+npm.cmd run build:
+
+APROVADO.
+
+Next.js:
+
+16.3.4.
+
+TypeScript:
+
+APROVADO.
+
+Rotas relevantes reconhecidas:
+
+- /admin/agenda;
+- /barbeiro/agenda;
+- /barbeiro/comissoes.
+
+git diff --check:
+
+APROVADO após limpeza final do trailing whitespace.
+
+Avisos LF/CRLF conhecidos não representam erro funcional.
+
+## REGRAS CRÍTICAS PRESERVADAS
+
+Catálogo:
+
+Black Essencial:
+R$ 85
+BLACK_STANDARD
+25 compartilhadas
+4 benefícios.
+
+Black Navalha:
+R$ 145
+BLACK_STANDARD
+25 compartilhadas
+6 benefícios.
+
+Black Premium:
+R$ 200
+BLACK_PREMIUM
+5 reservadas
+10 benefícios.
+
+Plano Mensal legado:
+
+id 27fcd639-ddb5-43ab-8ddc-3fd141424fb5
+active=false.
+
+Não apagar.
+
+Capacidade:
+
+30 totais por barbeiro.
+
+Preservar SELECT ... FOR UPDATE.
+
+Pagamento:
+
+PIX mensal avulso.
+
+SEM recorrência automática Mercado Pago.
+
+Preservar:
+
+- Orders API;
+- external_reference = subscription_charge.id;
+- Webhook HMAC;
+- data.id ORIGINAL;
+- GET Order server-side;
+- confirm_mercado_pago_subscription_payment;
+- polling observacional;
+- idempotência.
+
+Browser NÃO confirma pagamento.
+
+Não repetir E2E financeiro sem necessidade.
+
+Central do Cliente:
+
+PRESERVADA.
+
+Agendamento público:
+
+PRESERVADO.
+
+Não reconstruir /agendar nem create_public_multi_appointment.
+
+Área do Barbeiro:
+
+auth.uid()
+→ barbers.auth_user_id
+→ barber_id.
+
+Admin:
+
+profiles.role = admin.
+
+Não conceder role admin ao barbeiro.
+
+## ESTADO FINAL
+
+Status operacional do barbeiro:
+
+APROVADO.
+
+Remarcação do barbeiro:
+
+APROVADA.
+
+Remarcação Admin:
+
+IMPLEMENTADA.
+
+Comissão de serviços:
+
+APROVADA.
+
+Reversões:
+
+APROVADAS.
+
+Leitura unificada de comissões:
+
+APROVADA.
+
+Agenda Admin desktop:
+
+APROVADA.
+
+Agenda Admin mobile:
+
+APROVADA.
+
+Agenda Barbeiro desktop:
+
+APROVADA.
+
+Agenda Barbeiro mobile:
+
+APROVADA.
+
+Comissões Barbeiro:
+
+APROVADA VISUALMENTE.
+
+Edição das taxas no Admin:
+
+APROVADA VISUALMENTE.
+
+Build:
+
+APROVADO.
+
+## PRÓXIMO PASSO
+
+Antes de nova evolução:
+
+1. ler integralmente CONTEXTO-PROJETO.md;
+2. respeitar AGENTS.md;
+3. confirmar Git;
+4. considerar migrations 007–046 aplicadas;
+5. não reconstruir funcionalidades deste checkpoint;
+6. escolher a próxima evolução somente a partir de necessidade concreta.
+
+Nenhuma nova migration é necessária para o refinamento concluído.
+
+# FIM DO CHECKPOINT — 2026-09-25

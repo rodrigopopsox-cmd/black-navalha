@@ -23,7 +23,8 @@ export default async function EditarBarbeiroPage({
       name,
       phone,
       active,
-      subscription_commission_rate
+      subscription_commission_rate,
+      service_commission_rate
     `)
     .eq("id", id)
     .single();
@@ -41,6 +42,8 @@ export default async function EditarBarbeiroPage({
         active: barber.active,
         subscriptionCommissionRate:
           Number(barber.subscription_commission_rate),
+        serviceCommissionRate:
+          Number(barber.service_commission_rate),
       }}
     />
   );

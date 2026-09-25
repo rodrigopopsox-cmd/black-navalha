@@ -9,6 +9,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 
 type CommissionRow = {
+  source: "subscription" | "service";
   entry_type: "commission" | "reversal";
   amount: number | string;
   rate: number | string | null;
@@ -119,14 +120,27 @@ export default async function BarberCommissionsPage({
 
   const entries = (data ?? []) as CommissionRow[];
 
-  const commissions = entries
-    .filter((entry) => entry.entry_type === "commission")
+  const subscriptionCommissions = entries
+    .filter(
+      (entry) =>
+        entry.source === "subscription" &&
+        entry.entry_type === "commission"
+    )
+    .reduce((total, entry) => total + Number(entry.amount), 0);
+
+  const serviceCommissions = entries
+    .filter(
+      (entry) =>
+        entry.source === "service" &&
+        entry.entry_type === "commission"
+    )
     .reduce((total, entry) => total + Number(entry.amount), 0);
 
   const reversals = entries
     .filter((entry) => entry.entry_type === "reversal")
     .reduce((total, entry) => total + Number(entry.amount), 0);
 
+  const commissions = subscriptionCommissions + serviceCommissions;
   const net = commissions - reversals;
 
   return (
@@ -136,7 +150,7 @@ export default async function BarberCommissionsPage({
           <div className="barber-area-eyebrow">ÁREA DO PROFISSIONAL</div>
           <h1>Comissões</h1>
           <p>
-            Seus lançamentos históricos de comissão por mensalidades pagas.
+            Comissões históricas de assinaturas e atendimentos concluídos.
           </p>
         </div>
       </div>
@@ -173,8 +187,13 @@ export default async function BarberCommissionsPage({
 
       <section className="barber-commission-summary">
         <article>
-          <span>COMISSÕES</span>
-          <strong>{moneyFormatter.format(commissions)}</strong>
+          <span>ASSINATURAS</span>
+          <strong>{moneyFormatter.format(subscriptionCommissions)}</strong>
+        </article>
+
+        <article>
+          <span>SERVIÇOS</span>
+          <strong>{moneyFormatter.format(serviceCommissions)}</strong>
         </article>
 
         <article>
@@ -210,7 +229,7 @@ export default async function BarberCommissionsPage({
             <WalletCards size={26} />
             <strong>Nenhum lançamento neste período.</strong>
             <span>
-              Comissões de mensalidades confirmadas aparecerão aqui.
+              Comissões de assinaturas e serviços concluídos aparecerão aqui.
             </span>
           </div>
         ) : (
@@ -235,8 +254,16 @@ export default async function BarberCommissionsPage({
                 <div>
                   <strong>
                     {entry.entry_type === "reversal"
-                      ? "Reversão"
-                      : "Comissão"}
+                      ? `Reversão · ${
+                          entry.source === "service"
+                            ? "Serviço"
+                            : "Assinatura"
+                        }`
+                      : `Comissão · ${
+                          entry.source === "service"
+                            ? "Serviço"
+                            : "Assinatura"
+                        }`}
                   </strong>
                   <span>{formatDateTime(entry.created_at)}</span>
                 </div>

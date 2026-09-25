@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import {
   CalendarDays,
   ChevronLeft,
@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
-import AppointmentStatusForm from "./appointment-status-form";
+import AppointmentOperations from "./appointment-operations";
 
 type Appointment = {
   id: string;
@@ -280,20 +280,11 @@ export default async function AgendaPage({
             );
 
             return (
-              <div
+              <article
                 key={appointment.id}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns:
-                    "repeat(auto-fit, minmax(150px, 1fr))",
-                  alignItems: "center",
-                  gap: "20px",
-                  padding: "20px",
-                  background: "#0e0e0e",
-                  border: "1px solid #222",
-                  borderRadius: "8px",
-                }}
+                className="admin-agenda-card"
               >
+                <div className="admin-agenda-card-details">
                 <div>
                   <small style={labelStyle}>HORÁRIO</small>
 
@@ -379,29 +370,33 @@ export default async function AgendaPage({
                   </strong>
                 </div>
 
-                <div>
-                  <small style={labelStyle}>VALOR</small>
+                  <div className="admin-agenda-value">
+                    <small style={labelStyle}>VALOR</small>
 
-                  <strong
-                    style={{
-                      display: "flex",
-                      justifyContent: "flex-start",
-                      alignItems: "center",
-                      gap: "5px",
-                      color: "#d29d4f",
-                    }}
-                  >
-                    <DollarSign size={14} />
+                    <strong
+                      style={{
+                        display: "flex",
+                        justifyContent: "flex-start",
+                        alignItems: "center",
+                        gap: "5px",
+                        color: "#d29d4f",
+                      }}
+                    >
+                      <DollarSign size={14} />
 
-                    {formatPrice(appointment.price)}
-                  </strong>
+                      {formatPrice(appointment.price)}
+                    </strong>
+                  </div>
+                </div>
 
-                  <AppointmentStatusForm
+                <div className="admin-agenda-card-operations">
+                  <AppointmentOperations
                     appointmentId={appointment.id}
                     currentStatus={appointment.status}
+                    startAt={appointment.start_at}
                   />
                 </div>
-              </div>
+              </article>
             );
           })}
         </div>

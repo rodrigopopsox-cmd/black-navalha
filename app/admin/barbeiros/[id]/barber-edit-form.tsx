@@ -17,6 +17,7 @@ type Barber = {
   phone: string | null;
   active: boolean;
   subscriptionCommissionRate: number;
+  serviceCommissionRate: number;
 };
 
 export default function BarberEditForm({
@@ -31,6 +32,9 @@ export default function BarberEditForm({
     subscriptionCommissionRate,
     setSubscriptionCommissionRate,
   ] = useState(String(barber.subscriptionCommissionRate));
+
+  const [serviceCommissionRate, setServiceCommissionRate] =
+    useState(String(barber.serviceCommissionRate));
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -122,6 +126,21 @@ export default function BarberEditForm({
       return;
     }
 
+    const serviceRate = Number(
+      serviceCommissionRate.replace(",", ".")
+    );
+
+    if (
+      !Number.isFinite(serviceRate) ||
+      serviceRate < 0 ||
+      serviceRate > 100
+    ) {
+      setError(
+        "Informe uma comissão de serviços entre 0% e 100%."
+      );
+      return;
+    }
+
     startTransition(async () => {
       const result = await updateBarber({
         id: barber.id,
@@ -129,6 +148,7 @@ export default function BarberEditForm({
         phone: trimmedPhone,
         active,
         subscriptionCommissionRate: commissionRate,
+        serviceCommissionRate: serviceRate,
       });
 
       if (!result.success) {
@@ -284,6 +304,35 @@ export default function BarberEditForm({
                 Incide somente sobre mensalidades de assinatura
                 efetivamente pagas. Alterações afetam apenas
                 pagamentos futuros.
+              </span>
+            </div>
+
+            <div>
+              <label
+                htmlFor="barber-service-commission-rate"
+                style={fieldLabelStyle}
+              >
+                COMISSÃO DE SERVIÇOS (%) *
+              </label>
+
+              <input
+                id="barber-service-commission-rate"
+                type="number"
+                min="0"
+                max="100"
+                step="0.01"
+                inputMode="decimal"
+                required
+                value={serviceCommissionRate}
+                onChange={(event) => {
+                  setServiceCommissionRate(event.target.value);
+                  clearFeedback();
+                }}
+                style={inputStyle}
+              />
+
+              <span style={helpStyle}>
+                Incide sobre o valor histórico cobrado nos atendimentos concluídos. Benefícios de assinatura com valor R$ 0,00 não geram comissão de serviço. Alterações afetam apenas lançamentos futuros.
               </span>
             </div>
 

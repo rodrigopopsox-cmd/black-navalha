@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
+import BarberAppointmentActions from "./appointment-actions";
 
 type AppointmentRow = {
   appointment_id: string;
@@ -182,11 +183,19 @@ export default async function BarberAgendaPage({
                   </p>
                 </div>
 
-                <span
-                  className={`barber-status barber-status-${appointment.status}`}
-                >
-                  {STATUS_LABELS[appointment.status] ?? appointment.status}
-                </span>
+                <div className="barber-appointment-operation">
+                  <span
+                    className={`barber-status barber-status-${appointment.status}`}
+                  >
+                    {STATUS_LABELS[appointment.status] ?? appointment.status}
+                  </span>
+
+                  <BarberAppointmentActions
+                    appointmentId={appointment.appointment_id}
+                    currentStatus={appointment.status}
+                    startAt={appointment.start_at}
+                  />
+                </div>
               </article>
             ))}
           </div>

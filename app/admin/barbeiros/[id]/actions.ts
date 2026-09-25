@@ -10,6 +10,7 @@ export type UpdateBarberInput = {
   phone: string;
   active: boolean;
   subscriptionCommissionRate: number;
+  serviceCommissionRate: number;
 };
 
 export type UpdateBarberResult = {
@@ -26,6 +27,8 @@ export async function updateBarber(
   const phoneDigits = phone.replace(/\D/g, "");
   const subscriptionCommissionRate =
     input.subscriptionCommissionRate;
+  const serviceCommissionRate =
+    input.serviceCommissionRate;
 
   if (!id) {
     return {
@@ -60,6 +63,18 @@ export async function updateBarber(
       success: false,
       message:
         "Informe uma comissão de assinatura entre 0% e 100%.",
+    };
+  }
+
+  if (
+    !Number.isFinite(serviceCommissionRate) ||
+    serviceCommissionRate < 0 ||
+    serviceCommissionRate > 100
+  ) {
+    return {
+      success: false,
+      message:
+        "Informe uma comissão de serviços entre 0% e 100%.",
     };
   }
 
@@ -129,6 +144,8 @@ export async function updateBarber(
       active: input.active,
       subscription_commission_rate:
         subscriptionCommissionRate,
+      service_commission_rate:
+        serviceCommissionRate,
     })
     .eq("id", id);
 

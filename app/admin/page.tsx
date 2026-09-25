@@ -1,4 +1,4 @@
-﻿import {
+import {
   CalendarDays,
   Clock3,
   DollarSign,
@@ -181,12 +181,13 @@ export default async function AdminPage() {
   );
 
   const todayRevenue =
-    validTodayAppointments.reduce(
-      (total, appointment) =>
-        total +
-        Number(appointment.price),
-      0
-    );
+    validTodayAppointments
+      .filter((appointment) => appointment.status === "completed")
+      .reduce(
+        (total, appointment) =>
+          total + Number(appointment.price),
+        0
+      );
 
   return (
     <main className="admin-page">

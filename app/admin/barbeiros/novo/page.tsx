@@ -3,75 +3,130 @@
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, UserRound } from "lucide-react";
+import {
+  ArrowLeft,
+  KeyRound,
+  Mail,
+  Save,
+  UserRound,
+} from "lucide-react";
 
-import { createClient } from "@/lib/supabase/client";
+import { createBarber } from "./actions";
 
 export default function NovoBarbeiroPage() {
   const router = useRouter();
-  const supabase = createClient();
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [accessEmail, setAccessEmail] = useState("");
   const [active, setActive] = useState(true);
   const [subscriptionCommissionRate, setSubscriptionCommissionRate] =
     useState("0");
+  const [serviceCommissionRate, setServiceCommissionRate] =
+    useState("0");
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState<
+    "success" | "error" | ""
+  >("");
 
-  async function handleSubmit(
-    event: FormEvent<HTMLFormElement>
-  ) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    setError("");
+    setMessage("");
+    setMessageType("");
 
-    if (!name.trim()) {
-      setError("Informe o nome do barbeiro.");
+    if (name.trim().length < 2) {
+      setMessage("Informe o nome do barbeiro.");
+      setMessageType("error");
       return;
     }
 
-    const commissionRate = Number(
+    const phoneDigits = phone.replace(/\D/g, "");
+
+    if (
+      phoneDigits &&
+      (phoneDigits.length < 10 || phoneDigits.length > 11)
+    ) {
+      setMessage("Informe um WhatsApp profissional válido.");
+      setMessageType("error");
+      return;
+    }
+
+    const subscriptionRate = Number(
       subscriptionCommissionRate.replace(",", ".")
     );
 
+    const serviceRate = Number(
+      serviceCommissionRate.replace(",", ".")
+    );
+
     if (
-      !Number.isFinite(commissionRate) ||
-      commissionRate < 0 ||
-      commissionRate > 100
+      !Number.isFinite(subscriptionRate) ||
+      subscriptionRate < 0 ||
+      subscriptionRate > 100
     ) {
-      setError(
+      setMessage(
         "Informe uma comissão de assinatura entre 0% e 100%."
       );
+      setMessageType("error");
+      return;
+    }
+
+    if (
+      !Number.isFinite(serviceRate) ||
+      serviceRate < 0 ||
+      serviceRate > 100
+    ) {
+      setMessage(
+        "Informe uma comissão de serviços entre 0% e 100%."
+      );
+      setMessageType("error");
+      return;
+    }
+
+    if (!accessEmail.trim()) {
+      setMessage("Informe o e-mail de acesso profissional.");
+      setMessageType("error");
       return;
     }
 
     setLoading(true);
 
-    const { error } = await supabase
-      .from("barbers")
-      .insert({
-        name: name.trim(),
-        phone: phone.trim() || null,
-        active,
-        subscription_commission_rate: commissionRate,
-      });
+    const result = await createBarber({
+      name,
+      phone,
+      active,
+      subscriptionCommissionRate: subscriptionRate,
+      serviceCommissionRate: serviceRate,
+      accessEmail,
+    });
 
-    if (error) {
-      console.error(error);
+    setLoading(false);
+    setMessage(result.message);
 
-      setError(
-        "Não foi possível cadastrar o barbeiro: " +
-          error.message
-      );
+    if (result.success) {
+      setMessageType("success");
 
-      setLoading(false);
+      setTimeout(() => {
+        router.push("/admin/barbeiros");
+        router.refresh();
+      }, 900);
+
       return;
     }
 
-    router.push("/admin/barbeiros");
-    router.refresh();
+    setMessageType("error");
+
+    if (result.barberCreated) {
+      setName("");
+      setPhone("");
+      setAccessEmail("");
+      setActive(true);
+      setSubscriptionCommissionRate("0");
+      setServiceCommissionRate("0");
+    }
   }
 
   return (
@@ -96,19 +151,15 @@ export default function NovoBarbeiroPage() {
       <div className="admin-header">
         <div>
           <div className="admin-eyebrow">EQUIPE</div>
-
           <h1 className="admin-title">Novo barbeiro</h1>
-
           <p className="admin-subtitle">
-            Cadastre um novo profissional da Black Navalha.
+            Cadastre o profissional e provisione o acesso seguro à
+            Área do Barbeiro.
           </p>
         </div>
       </div>
 
-      <form
-        className="admin-form"
-        onSubmit={handleSubmit}
-      >
+      <form className="admin-form" onSubmit={handleSubmit}>
         <div
           style={{
             display: "flex",
@@ -140,54 +191,53 @@ export default function NovoBarbeiroPage() {
                 fontSize: "11px",
               }}
             >
-              Você poderá configurar horários e serviços depois.
+              Horários e serviços poderão ser configurados depois.
             </span>
           </div>
         </div>
 
-        {error && (
-          <div className="admin-error">
-            {error}
+        {message ? (
+          <div
+            className={
+              messageType === "success"
+                ? "admin-success"
+                : "admin-error"
+            }
+            style={{ marginBottom: "22px" }}
+          >
+            {message}
           </div>
-        )}
+        ) : null}
 
         <div className="form-grid">
           <div className="form-group full">
-            <label htmlFor="name">
-              NOME DO BARBEIRO *
-            </label>
-
+            <label htmlFor="name">NOME DO BARBEIRO *</label>
             <input
               id="name"
               type="text"
               placeholder="Ex: Rodrigo"
               value={name}
-              onChange={(event) =>
-                setName(event.target.value)
-              }
+              onChange={(event) => setName(event.target.value)}
+              autoComplete="name"
               required
               disabled={loading}
             />
           </div>
 
           <div className="form-group full">
-            <label htmlFor="phone">
-              WHATSAPP
-            </label>
-
+            <label htmlFor="phone">WHATSAPP PROFISSIONAL</label>
             <input
               id="phone"
               type="tel"
               placeholder="(41) 99999-9999"
               value={phone}
-              onChange={(event) =>
-                setPhone(event.target.value)
-              }
+              onChange={(event) => setPhone(event.target.value)}
+              autoComplete="tel"
               disabled={loading}
             />
-
             <span className="form-help">
-              Telefone profissional. Este campo é opcional.
+              Número profissional para contato e futuras notificações.
+              Não é utilizado como identidade de acesso.
             </span>
           </div>
 
@@ -195,7 +245,6 @@ export default function NovoBarbeiroPage() {
             <label htmlFor="subscription-commission-rate">
               COMISSÃO DE ASSINATURA (%) *
             </label>
-
             <input
               id="subscription-commission-rate"
               type="number"
@@ -210,16 +259,38 @@ export default function NovoBarbeiroPage() {
               required
               disabled={loading}
             />
-
             <span className="form-help">
-              Incide somente sobre mensalidades de assinatura
-              efetivamente pagas. Novos barbeiros começam em 0%.
+              Incide sobre mensalidades de assinatura conforme as
+              regras financeiras vigentes.
+            </span>
+          </div>
+
+          <div className="form-group full">
+            <label htmlFor="service-commission-rate">
+              COMISSÃO DE SERVIÇOS (%) *
+            </label>
+            <input
+              id="service-commission-rate"
+              type="number"
+              min="0"
+              max="100"
+              step="0.01"
+              inputMode="decimal"
+              value={serviceCommissionRate}
+              onChange={(event) =>
+                setServiceCommissionRate(event.target.value)
+              }
+              required
+              disabled={loading}
+            />
+            <span className="form-help">
+              Incide sobre serviços concluídos conforme as regras de
+              comissão já configuradas no sistema.
             </span>
           </div>
 
           <div className="form-group full">
             <label>STATUS</label>
-
             <label
               style={{
                 display: "flex",
@@ -243,16 +314,76 @@ export default function NovoBarbeiroPage() {
                   accentColor: "#d29d4f",
                 }}
               />
-
               <span style={{ color: "#bbb" }}>
                 Barbeiro ativo
               </span>
             </label>
-
             <span className="form-help">
-              Somente profissionais ativos poderão receber
-              novos agendamentos.
+              Somente profissionais ativos podem operar normalmente
+              na Área do Barbeiro e receber novos agendamentos.
             </span>
+          </div>
+
+          <div className="form-group full">
+            <div
+              style={{
+                marginTop: "10px",
+                paddingTop: "26px",
+                borderTop: "1px solid #222",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  marginBottom: "17px",
+                }}
+              >
+                <KeyRound size={18} color="#d29d4f" />
+                <strong style={{ fontSize: "13px" }}>
+                  Acesso profissional
+                </strong>
+              </div>
+
+              <label htmlFor="access-email">
+                E-MAIL DE ACESSO PROFISSIONAL *
+              </label>
+
+              <div style={{ position: "relative" }}>
+                <Mail
+                  size={16}
+                  aria-hidden="true"
+                  style={{
+                    position: "absolute",
+                    left: "14px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    color: "#666",
+                    pointerEvents: "none",
+                  }}
+                />
+                <input
+                  id="access-email"
+                  type="email"
+                  placeholder="profissional@exemplo.com"
+                  value={accessEmail}
+                  onChange={(event) =>
+                    setAccessEmail(event.target.value)
+                  }
+                  autoComplete="email"
+                  required
+                  disabled={loading}
+                  style={{ paddingLeft: "42px" }}
+                />
+              </div>
+
+              <span className="form-help">
+                O profissional receberá um convite para definir a
+                própria senha. O Admin não cria, visualiza ou armazena
+                a senha do barbeiro.
+              </span>
+            </div>
           </div>
         </div>
 
@@ -270,10 +401,7 @@ export default function NovoBarbeiroPage() {
             disabled={loading}
           >
             <Save size={16} />
-
-            {loading
-              ? "SALVANDO..."
-              : "SALVAR BARBEIRO"}
+            {loading ? "CADASTRANDO..." : "CADASTRAR BARBEIRO"}
           </button>
         </div>
       </form>

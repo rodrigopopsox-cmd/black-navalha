@@ -24,7 +24,8 @@ export default async function EditarBarbeiroPage({
       phone,
       active,
       subscription_commission_rate,
-      service_commission_rate
+      service_commission_rate,
+      auth_user_id
     `)
     .eq("id", id)
     .single();
@@ -44,6 +45,7 @@ export default async function EditarBarbeiroPage({
           Number(barber.subscription_commission_rate),
         serviceCommissionRate:
           Number(barber.service_commission_rate),
+        accessConfigured: Boolean(barber.auth_user_id),
       }}
     />
   );

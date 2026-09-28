@@ -5,11 +5,17 @@ import Link from "next/link";
 import {
   ArrowLeft,
   CheckCircle2,
+  KeyRound,
+  Mail,
   Save,
+  ShieldCheck,
   UserRound,
 } from "lucide-react";
 
-import { updateBarber } from "./actions";
+import {
+  provisionBarberAccess,
+  updateBarber,
+} from "./actions";
 
 type Barber = {
   id: string;
@@ -18,6 +24,7 @@ type Barber = {
   active: boolean;
   subscriptionCommissionRate: number;
   serviceCommissionRate: number;
+  accessConfigured: boolean;
 };
 
 export default function BarberEditForm({
@@ -32,13 +39,21 @@ export default function BarberEditForm({
     subscriptionCommissionRate,
     setSubscriptionCommissionRate,
   ] = useState(String(barber.subscriptionCommissionRate));
-
   const [serviceCommissionRate, setServiceCommissionRate] =
     useState(String(barber.serviceCommissionRate));
 
+  const [accessConfigured, setAccessConfigured] = useState(
+    barber.accessConfigured
+  );
+  const [accessEmail, setAccessEmail] = useState("");
+
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [accessError, setAccessError] = useState("");
+  const [accessSuccess, setAccessSuccess] = useState("");
+
   const [isPending, startTransition] = useTransition();
+  const [isProvisioning, startProvisioning] = useTransition();
 
   function clearFeedback() {
     setError("");
@@ -48,10 +63,7 @@ export default function BarberEditForm({
   function handlePhone(value: string) {
     let numbers = value.replace(/\D/g, "");
 
-    if (
-      numbers.length >= 12 &&
-      numbers.startsWith("55")
-    ) {
+    if (numbers.length >= 12 && numbers.startsWith("55")) {
       numbers = numbers.slice(2);
     }
 
@@ -63,33 +75,23 @@ export default function BarberEditForm({
     }
 
     if (numbers.length <= 6) {
-      setPhone(
-        `(${numbers.slice(0, 2)}) ${numbers.slice(2)}`
-      );
+      setPhone(`(${numbers.slice(0, 2)}) ${numbers.slice(2)}`);
       return;
     }
 
     if (numbers.length <= 10) {
       setPhone(
-        `(${numbers.slice(0, 2)}) ${numbers.slice(
-          2,
-          6
-        )}-${numbers.slice(6)}`
+        `(${numbers.slice(0, 2)}) ${numbers.slice(2, 6)}-${numbers.slice(6)}`
       );
       return;
     }
 
     setPhone(
-      `(${numbers.slice(0, 2)}) ${numbers.slice(
-        2,
-        7
-      )}-${numbers.slice(7)}`
+      `(${numbers.slice(0, 2)}) ${numbers.slice(2, 7)}-${numbers.slice(7)}`
     );
   }
 
-  function handleSubmit(
-    event: FormEvent<HTMLFormElement>
-  ) {
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     clearFeedback();
@@ -162,13 +164,39 @@ export default function BarberEditForm({
     });
   }
 
+  function handleProvisionAccess(
+    event: FormEvent<HTMLFormElement>
+  ) {
+    event.preventDefault();
+
+    setAccessError("");
+    setAccessSuccess("");
+
+    if (!accessEmail.trim()) {
+      setAccessError("Informe o e-mail de acesso profissional.");
+      return;
+    }
+
+    startProvisioning(async () => {
+      const result = await provisionBarberAccess({
+        barberId: barber.id,
+        email: accessEmail,
+      });
+
+      if (!result.success) {
+        setAccessError(result.message);
+        return;
+      }
+
+      setAccessConfigured(true);
+      setAccessEmail("");
+      setAccessSuccess(result.message);
+    });
+  }
+
   return (
     <main className="admin-page">
-      <div
-        style={{
-          marginBottom: "24px",
-        }}
-      >
+      <div style={{ marginBottom: "24px" }}>
         <Link
           href="/admin/barbeiros"
           style={{
@@ -187,16 +215,11 @@ export default function BarberEditForm({
 
       <div className="admin-header">
         <div>
-          <div className="admin-eyebrow">
-            EQUIPE
-          </div>
-
-          <h1 className="admin-title">
-            Editar barbeiro
-          </h1>
-
+          <div className="admin-eyebrow">EQUIPE</div>
+          <h1 className="admin-title">Editar barbeiro</h1>
           <p className="admin-subtitle">
-            Atualize os dados do profissional sem alterar seus horários ou serviços.
+            Gerencie os dados profissionais, comissões e o estado do
+            acesso à Área do Barbeiro.
           </p>
         </div>
       </div>
@@ -229,13 +252,9 @@ export default function BarberEditForm({
 
           <div style={formGridStyle}>
             <div>
-              <label
-                htmlFor="barber-name"
-                style={fieldLabelStyle}
-              >
+              <label htmlFor="barber-name" style={fieldLabelStyle}>
                 NOME *
               </label>
-
               <input
                 id="barber-name"
                 type="text"
@@ -250,13 +269,9 @@ export default function BarberEditForm({
             </div>
 
             <div>
-              <label
-                htmlFor="barber-phone"
-                style={fieldLabelStyle}
-              >
-                WHATSAPP
+              <label htmlFor="barber-phone" style={fieldLabelStyle}>
+                WHATSAPP PROFISSIONAL
               </label>
-
               <input
                 id="barber-phone"
                 type="tel"
@@ -268,9 +283,9 @@ export default function BarberEditForm({
                 placeholder="(41) 99999-9999"
                 style={inputStyle}
               />
-
               <span style={helpStyle}>
-                Telefone profissional. Este campo é opcional.
+                Contato profissional. Não é utilizado como identidade
+                de acesso.
               </span>
             </div>
 
@@ -281,7 +296,6 @@ export default function BarberEditForm({
               >
                 COMISSÃO DE ASSINATURA (%) *
               </label>
-
               <input
                 id="barber-subscription-commission-rate"
                 type="number"
@@ -292,18 +306,13 @@ export default function BarberEditForm({
                 required
                 value={subscriptionCommissionRate}
                 onChange={(event) => {
-                  setSubscriptionCommissionRate(
-                    event.target.value
-                  );
+                  setSubscriptionCommissionRate(event.target.value);
                   clearFeedback();
                 }}
                 style={inputStyle}
               />
-
               <span style={helpStyle}>
-                Incide somente sobre mensalidades de assinatura
-                efetivamente pagas. Alterações afetam apenas
-                pagamentos futuros.
+                Alterações afetam somente pagamentos futuros.
               </span>
             </div>
 
@@ -314,7 +323,6 @@ export default function BarberEditForm({
               >
                 COMISSÃO DE SERVIÇOS (%) *
               </label>
-
               <input
                 id="barber-service-commission-rate"
                 type="number"
@@ -330,21 +338,13 @@ export default function BarberEditForm({
                 }}
                 style={inputStyle}
               />
-
               <span style={helpStyle}>
-                Incide sobre o valor histórico cobrado nos atendimentos concluídos. Benefícios de assinatura com valor R$ 0,00 não geram comissão de serviço. Alterações afetam apenas lançamentos futuros.
+                Alterações afetam somente lançamentos futuros.
               </span>
             </div>
 
-            <div
-              style={{
-                gridColumn: "1 / -1",
-              }}
-            >
-              <span style={fieldLabelStyle}>
-                STATUS
-              </span>
-
+            <div style={{ gridColumn: "1 / -1" }}>
+              <span style={fieldLabelStyle}>STATUS</span>
               <label
                 style={{
                   display: "flex",
@@ -367,115 +367,187 @@ export default function BarberEditForm({
                     accentColor: "#d29d4f",
                   }}
                 />
-
                 <span style={{ color: "#bbb" }}>
                   Barbeiro ativo
                 </span>
               </label>
-
               <span style={helpStyle}>
-                Somente profissionais ativos poderão receber novos agendamentos.
+                Somente profissionais ativos podem operar normalmente
+                na Área do Barbeiro e receber novos agendamentos.
               </span>
             </div>
           </div>
 
-          {error && (
-            <div
-              role="alert"
-              style={{
-                marginTop: "18px",
-                padding: "12px",
-                border: "1px solid #8b3232",
-                borderRadius: "6px",
-                background: "#1a0e0e",
-                color: "#ff8c8c",
-                fontSize: "13px",
-              }}
-            >
-              {error}
-            </div>
-          )}
+          {error ? <div style={errorStyle}>{error}</div> : null}
 
-          {success && (
-            <div
-              role="status"
-              style={{
-                marginTop: "18px",
-                padding: "12px",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                border: "1px solid #355c3c",
-                borderRadius: "6px",
-                background: "#0e1a10",
-                color: "#8fd49a",
-                fontSize: "13px",
-              }}
-            >
+          {success ? (
+            <div role="status" style={successStyle}>
               <CheckCircle2 size={16} />
               {success}
             </div>
-          )}
+          ) : null}
 
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              flexWrap: "wrap",
-              gap: "10px",
-              marginTop: "20px",
-            }}
-          >
+          <div style={actionsStyle}>
             <button
               type="submit"
               disabled={isPending}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "7px",
-                minHeight: "42px",
-                padding: "0 18px",
-                border: "none",
-                borderRadius: "6px",
-                background: isPending
-                  ? "#554515"
-                  : "#c89b58",
-                color: "#0a0704",
-                fontSize: "12px",
-                fontWeight: 700,
-                cursor: isPending
-                  ? "not-allowed"
-                  : "pointer",
-              }}
+              style={primaryButtonStyle}
             >
               <Save size={16} />
-
-              {isPending
-                ? "SALVANDO..."
-                : "SALVAR ALTERAÇÕES"}
+              {isPending ? "SALVANDO..." : "SALVAR ALTERAÇÕES"}
             </button>
 
             <Link
               href="/admin/barbeiros"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                minHeight: "42px",
-                padding: "0 18px",
-                color: "#bbb",
-                background: "#141414",
-                border: "1px solid #333",
-                borderRadius: "6px",
-                textDecoration: "none",
-                fontSize: "12px",
-                fontWeight: 700,
-              }}
+              style={secondaryButtonStyle}
             >
               CANCELAR
             </Link>
           </div>
         </fieldset>
       </form>
+
+      <section
+        style={{
+          marginTop: "22px",
+          padding: "24px",
+          border: "1px solid #222",
+          borderRadius: "8px",
+          background: "#0e0e0e",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            marginBottom: "18px",
+            color: "#c89b58",
+            fontSize: "13px",
+            textTransform: "uppercase",
+            letterSpacing: "1px",
+          }}
+        >
+          <KeyRound size={18} />
+          Acesso profissional
+        </div>
+
+        {accessConfigured ? (
+          <div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                color: "#8fd49a",
+                fontWeight: 700,
+                marginBottom: "8px",
+              }}
+            >
+              <ShieldCheck size={18} />
+              ACESSO CONFIGURADO
+            </div>
+
+            <p style={accessCopyStyle}>
+              Este profissional possui uma identidade vinculada à Área
+              do Barbeiro. A senha é pessoal e não é exibida ou
+              armazenada pelo Admin.
+            </p>
+
+            {accessSuccess ? (
+              <div role="status" style={successStyle}>
+                <CheckCircle2 size={16} />
+                {accessSuccess}
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          <form onSubmit={handleProvisionAccess}>
+            <div
+              style={{
+                color: "#d9a65a",
+                fontWeight: 700,
+                marginBottom: "8px",
+              }}
+            >
+              ACESSO NÃO CONFIGURADO
+            </div>
+
+            <p style={accessCopyStyle}>
+              Informe o e-mail profissional para enviar um convite. O
+              barbeiro definirá a própria senha e não receberá acesso
+              administrativo.
+            </p>
+
+            <label htmlFor="barber-access-email" style={fieldLabelStyle}>
+              E-MAIL DE ACESSO PROFISSIONAL *
+            </label>
+
+            <div
+              style={{
+                position: "relative",
+                maxWidth: "520px",
+              }}
+            >
+              <Mail
+                size={16}
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  left: "14px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: "#666",
+                  pointerEvents: "none",
+                }}
+              />
+              <input
+                id="barber-access-email"
+                type="email"
+                value={accessEmail}
+                onChange={(event) => {
+                  setAccessEmail(event.target.value);
+                  setAccessError("");
+                  setAccessSuccess("");
+                }}
+                placeholder="profissional@exemplo.com"
+                autoComplete="email"
+                required
+                disabled={isProvisioning}
+                style={{
+                  ...inputStyle,
+                  paddingLeft: "42px",
+                }}
+              />
+            </div>
+
+            {accessError ? (
+              <div style={errorStyle}>{accessError}</div>
+            ) : null}
+
+            {accessSuccess ? (
+              <div role="status" style={successStyle}>
+                <CheckCircle2 size={16} />
+                {accessSuccess}
+              </div>
+            ) : null}
+
+            <button
+              type="submit"
+              disabled={isProvisioning}
+              style={{
+                ...primaryButtonStyle,
+                marginTop: "16px",
+              }}
+            >
+              <KeyRound size={16} />
+              {isProvisioning
+                ? "ENVIANDO..."
+                : "ENVIAR CONVITE DE ACESSO"}
+            </button>
+          </form>
+        )}
+      </section>
     </main>
   );
 }
@@ -514,4 +586,73 @@ const helpStyle = {
   color: "#666",
   fontSize: "11px",
   lineHeight: 1.4,
+} as const;
+
+const accessCopyStyle = {
+  margin: "0 0 18px",
+  color: "#777",
+  fontSize: "12px",
+  lineHeight: 1.6,
+  maxWidth: "680px",
+} as const;
+
+const errorStyle = {
+  marginTop: "18px",
+  padding: "12px",
+  border: "1px solid #8b3232",
+  borderRadius: "6px",
+  background: "#1a0e0e",
+  color: "#ff8c8c",
+  fontSize: "13px",
+} as const;
+
+const successStyle = {
+  marginTop: "18px",
+  padding: "12px",
+  display: "flex",
+  alignItems: "center",
+  gap: "8px",
+  border: "1px solid #355c3c",
+  borderRadius: "6px",
+  background: "#0e1a10",
+  color: "#8fd49a",
+  fontSize: "13px",
+} as const;
+
+const actionsStyle = {
+  display: "flex",
+  alignItems: "center",
+  flexWrap: "wrap",
+  gap: "10px",
+  marginTop: "20px",
+} as const;
+
+const primaryButtonStyle = {
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "7px",
+  minHeight: "42px",
+  padding: "0 18px",
+  border: "none",
+  borderRadius: "6px",
+  background: "#c89b58",
+  color: "#0a0704",
+  fontSize: "12px",
+  fontWeight: 700,
+  cursor: "pointer",
+} as const;
+
+const secondaryButtonStyle = {
+  display: "inline-flex",
+  alignItems: "center",
+  minHeight: "42px",
+  padding: "0 18px",
+  color: "#bbb",
+  background: "#141414",
+  border: "1px solid #333",
+  borderRadius: "6px",
+  textDecoration: "none",
+  fontSize: "12px",
+  fontWeight: 700,
 } as const;

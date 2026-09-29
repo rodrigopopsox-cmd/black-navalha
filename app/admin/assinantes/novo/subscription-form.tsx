@@ -1,444 +1,293 @@
 "use client";
 
-import { FormEvent, useState } from "react";
 import Link from "next/link";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-
 import {
   ArrowLeft,
   BadgeCheck,
+  Banknote,
   Check,
-  Save,
+  CreditCard,
+  UserRound,
 } from "lucide-react";
 
-import { createClient } from "@/lib/supabase/client";
+import {
+  createAdminSubscription,
+  type AdminSubscriptionMode,
+  type ExternalPaymentMethod,
+} from "./actions";
 
-type Service = {
+import AdminPixCheckout from "./admin-pix-checkout";
+
+type Customer = {
   id: string;
   name: string;
-  category: string;
-  duration_minutes: number;
+  phone: string;
+  email: string | null;
 };
 
+type Plan = {
+  id: string;
+  name: string;
+  price: number;
+  billingIntervalMonths: number;
+  graceDays: number;
+  benefits: string[];
+};
+
+type Barber = {
+  id: string;
+  name: string;
+  availableSlots: number;
+};
+
+type PreparedPix = {
+  chargeId: string;
+  checkoutToken: string;
+  amount: number;
+  currency: string;
+  reservationExpiresAt: string;
+};
+
+function money(value: number) {
+  return value.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+}
+
+function formatPhone(phone: string) {
+  const digits = phone.replace(/\D/g, "");
+
+  if (digits.length === 11) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(
+      2,
+      7
+    )}-${digits.slice(7)}`;
+  }
+
+  if (digits.length === 10) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(
+      2,
+      6
+    )}-${digits.slice(6)}`;
+  }
+
+  return phone;
+}
+
 export default function SubscriptionForm({
-  services,
+  customers,
+  plans,
 }: {
-  services: Service[];
+  customers: Customer[];
+  plans: Plan[];
 }) {
   const router = useRouter();
 
-  const [customerName, setCustomerName] =
-    useState("");
+  const [customerId, setCustomerId] = useState("");
+  const [planId, setPlanId] = useState("");
+  const [barberId, setBarberId] = useState("");
+  const [mode, setMode] =
+    useState<AdminSubscriptionMode>("external_payment");
+  const [paymentMethod, setPaymentMethod] =
+    useState<ExternalPaymentMethod>("pix_in_person");
+  const [note, setNote] = useState("");
 
-  const [phone, setPhone] =
-    useState("");
-
-  const [planName, setPlanName] =
-    useState("Plano Mensal");
-
-  const [startsAt, setStartsAt] =
-    useState(todayString());
-
-  const [expiresAt, setExpiresAt] =
-    useState(nextMonthString());
-
-  const [selectedServices, setSelectedServices] =
-    useState<string[]>([]);
-
-  const [saving, setSaving] =
+  const [barbers, setBarbers] = useState<Barber[]>([]);
+  const [loadingBarbers, setLoadingBarbers] =
     useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [preparedPix, setPreparedPix] =
+    useState<PreparedPix | null>(null);
 
-  const [error, setError] =
-    useState("");
+  const selectedCustomer = useMemo(
+    () =>
+      customers.find(
+        (customer) => customer.id === customerId
+      ),
+    [customers, customerId]
+  );
 
+  const selectedPlan = useMemo(
+    () => plans.find((plan) => plan.id === planId),
+    [plans, planId]
+  );
 
-  function toggleService(
-    serviceId: string
-  ) {
-    setSelectedServices(
-      (current) => {
-        if (
-          current.includes(
-            serviceId
-          )
-        ) {
-          return current.filter(
-            (id) =>
-              id !== serviceId
-          );
-        }
+  const selectedBarber = useMemo(
+    () =>
+      barbers.find((barber) => barber.id === barberId),
+    [barbers, barberId]
+  );
 
-        return [
-          ...current,
-          serviceId,
-        ];
-      }
-    );
-  }
-
-
-  function handlePhone(
-    value: string
-  ) {
-    let numbers =
-      value.replace(
-        /\D/g,
-        ""
-      );
-
-    numbers =
-      numbers.slice(
-        0,
-        11
-      );
-
-    if (
-      numbers.length <= 2
-    ) {
-      setPhone(
-        numbers
-          ? `(${numbers}`
-          : ""
-      );
-      return;
-    }
-
-    if (
-      numbers.length <= 6
-    ) {
-      setPhone(
-        `(${numbers.slice(
-          0,
-          2
-        )}) ${numbers.slice(2)}`
-      );
-      return;
-    }
-
-    if (
-      numbers.length <= 10
-    ) {
-      setPhone(
-        `(${numbers.slice(
-          0,
-          2
-        )}) ${numbers.slice(
-          2,
-          6
-        )}-${numbers.slice(6)}`
-      );
-      return;
-    }
-
-    setPhone(
-      `(${numbers.slice(
-        0,
-        2
-      )}) ${numbers.slice(
-        2,
-        7
-      )}-${numbers.slice(7)}`
-    );
-  }
-
-
-  async function handleSubmit(
-    event: FormEvent<HTMLFormElement>
-  ) {
-    event.preventDefault();
-
+  async function selectPlan(nextPlanId: string) {
+    setPlanId(nextPlanId);
+    setBarberId("");
+    setBarbers([]);
+    setPreparedPix(null);
+    setSuccess("");
     setError("");
 
-    if (
-      customerName.trim().length < 2
-    ) {
-      setError(
-        "Informe o nome do cliente."
-      );
+    if (!nextPlanId) {
       return;
     }
 
-    const phoneDigits =
-      phone.replace(
-        /\D/g,
-        ""
+    setLoadingBarbers(true);
+
+    try {
+      const supabaseModule = await import(
+        "@/lib/supabase/client"
+      );
+      const supabase = supabaseModule.createClient();
+
+      const { data, error: barberError } =
+        await supabase.rpc(
+          "get_public_subscription_barbers",
+          {
+            p_plan_id: nextPlanId,
+          }
+        );
+
+      if (barberError) {
+        throw barberError;
+      }
+
+      setBarbers(
+        (data ?? []).map(
+          (barber: {
+            id: string;
+            name: string;
+            available_slots: number;
+          }) => ({
+            id: barber.id,
+            name: barber.name,
+            availableSlots: Number(
+              barber.available_slots
+            ),
+          })
+        )
+      );
+    } catch (loadError) {
+      console.error(
+        "Erro ao carregar barbeiros da assinatura:",
+        loadError
       );
 
-    if (
-      phoneDigits.length < 10
-    ) {
       setError(
-        "Informe um WhatsApp válido."
+        "NÃ£o foi possÃ­vel carregar a disponibilidade dos barbeiros."
       );
+    } finally {
+      setLoadingBarbers(false);
+    }
+  }
+
+  async function submit() {
+    if (preparedPix) {
+      return;
+    }
+    setError("");
+    setSuccess("");
+
+    if (!customerId) {
+      setError("Selecione o cliente.");
+      return;
+    }
+
+    if (!planId) {
+      setError("Selecione o plano.");
+      return;
+    }
+
+    if (!barberId) {
+      setError("Selecione o barbeiro.");
       return;
     }
 
     if (
-      !planName.trim()
+      mode === "external_payment" &&
+      paymentMethod === "other" &&
+      note.trim().length < 2
     ) {
       setError(
-        "Informe o nome do plano."
-      );
-      return;
-    }
-
-    if (
-      selectedServices.length === 0
-    ) {
-      setError(
-        "Selecione pelo menos um serviço para a assinatura."
-      );
-      return;
-    }
-
-    if (
-      expiresAt &&
-      expiresAt < startsAt
-    ) {
-      setError(
-        "A validade não pode ser anterior à data de início."
+        "Descreva o meio de pagamento recebido."
       );
       return;
     }
 
     setSaving(true);
 
-    const supabase =
-      createClient();
+    try {
+      const result = await createAdminSubscription({
+        customerId,
+        planId,
+        barberId,
+        mode,
+        paymentMethod:
+          mode === "external_payment"
+            ? paymentMethod
+            : undefined,
+        administrativeNote: note,
+      });
 
-
-    // Procura cliente pelo telefone.
-    // A busca abaixo pega os clientes disponíveis
-    // ao administrador e compara o número normalizado.
-
-    const {
-      data: customers,
-      error: customerSearchError,
-    } = await supabase
-      .from("customers")
-      .select(
-        "id, name, phone"
-      );
-
-
-    if (
-      customerSearchError
-    ) {
-      setError(
-        "Não foi possível consultar os clientes."
-      );
-
-      setSaving(false);
-      return;
-    }
-
-
-    const existing =
-      customers?.find(
-        (customer) =>
-          normalizePhone(
-            customer.phone
-          ) ===
-          phoneDigits
-      );
-
-
-    let customerId =
-      existing?.id;
-
-
-    // Se não existe, cria
-
-    if (!customerId) {
-      const {
-        data: createdCustomer,
-        error: createCustomerError,
-      } = await supabase
-        .from("customers")
-        .insert({
-          name:
-            customerName.trim(),
-
-          phone,
-        })
-        .select("id")
-        .single();
-
-
-      if (
-        createCustomerError ||
-        !createdCustomer
-      ) {
-        setError(
-          "Não foi possível cadastrar o cliente."
-        );
-
-        setSaving(false);
+      if (!result.success) {
+        setError(result.message);
         return;
       }
 
+      setSuccess(result.message);
 
-      customerId =
-        createdCustomer.id;
-    } else {
-      // Atualiza o nome/telefone
-      await supabase
-        .from("customers")
-        .update({
-          name:
-            customerName.trim(),
+      if (
+        mode === "prepare_pix" &&
+        result.chargeId &&
+        result.checkoutToken &&
+        result.amount !== undefined &&
+        result.currency &&
+        result.reservationExpiresAt
+      ) {
+        setPreparedPix({
+          chargeId: result.chargeId,
+          checkoutToken: result.checkoutToken,
+          amount: result.amount,
+          currency: result.currency,
+          reservationExpiresAt:
+            result.reservationExpiresAt,
+        });
+        return;
+      }
 
-          phone,
-        })
-        .eq(
-          "id",
-          customerId
-        );
-    }
-
-
-    // Cria assinatura
-
-    const {
-      data: subscription,
-      error: subscriptionError,
-    } = await supabase
-      .from("subscriptions")
-      .insert({
-        customer_id:
-          customerId,
-
-        name:
-          planName.trim(),
-
-        status:
-          "active",
-
-        starts_at:
-          startsAt,
-
-        expires_at:
-          expiresAt || null,
-      })
-      .select("id")
-      .single();
-
-
-    if (
-      subscriptionError ||
-      !subscription
-    ) {
-      setError(
-        "Não foi possível criar a assinatura."
-      );
-
+      router.push("/admin/assinantes");
+      router.refresh();
+    } finally {
       setSaving(false);
-      return;
     }
-
-
-    // Relaciona serviços
-
-    const rows =
-      selectedServices.map(
-        (serviceId) => ({
-          subscription_id:
-            subscription.id,
-
-          service_id:
-            serviceId,
-        })
-      );
-
-
-    const {
-      error:
-        serviceLinkError,
-    } = await supabase
-      .from(
-        "subscription_services"
-      )
-      .insert(rows);
-
-
-    if (
-      serviceLinkError
-    ) {
-      /*
-       * Se o vínculo falhar,
-       * removemos a assinatura
-       * para não deixar cadastro
-       * incompleto.
-       */
-      await supabase
-        .from("subscriptions")
-        .delete()
-        .eq(
-          "id",
-          subscription.id
-        );
-
-      setError(
-        "Não foi possível vincular os serviços ao plano."
-      );
-
-      setSaving(false);
-      return;
-    }
-
-
-    router.push(
-      "/admin/assinantes"
-    );
-
-    router.refresh();
   }
-
 
   return (
     <main className="admin-page">
-
-      <div
-        style={{
-          marginBottom: 25,
-        }}
-      >
+      <div style={{ marginBottom: 25 }}>
         <Link
           href="/admin/assinantes"
           style={{
-            display:
-              "inline-flex",
-
-            alignItems:
-              "center",
-
+            display: "inline-flex",
+            alignItems: "center",
             gap: 7,
-
-            color:
-              "#777",
-
-            textDecoration:
-              "none",
-
-            fontSize:
-              11,
+            color: "#777",
+            textDecoration: "none",
+            fontSize: 11,
           }}
         >
-          <ArrowLeft
-            size={14}
-          />
-
+          <ArrowLeft size={14} />
           VOLTAR PARA ASSINANTES
         </Link>
       </div>
 
-
       <div className="admin-header">
-
         <div>
-
           <div className="admin-eyebrow">
-            PLANOS
+            ASSINATURAS
           </div>
 
           <h1 className="admin-title">
@@ -446,304 +295,387 @@ export default function SubscriptionForm({
           </h1>
 
           <p className="admin-subtitle">
-            Cadastre um assinante e defina os serviços incluídos.
+            Use o catÃ¡logo comercial, a capacidade real e o
+            histÃ³rico financeiro correto.
           </p>
-
         </div>
-
       </div>
 
-
-      <form
-        className="subscription-form"
-        onSubmit={
-          handleSubmit
-        }
-      >
-
+      <div className="subscription-form">
         {error && (
-          <div className="admin-error">
-            {error}
-          </div>
+          <div className="admin-error">{error}</div>
         )}
 
+        {success && (
+          <div className="admin-success">{success}</div>
+        )}
 
-        <div className="subscription-form-section">
-
+        <section className="subscription-form-section">
           <div className="subscription-form-heading">
-
-            <BadgeCheck
-              size={18}
-            />
-
+            <UserRound size={18} />
             <div>
-              <strong>
-                Dados do cliente
-              </strong>
-
+              <strong>Cliente</strong>
               <span>
-                Identificação do assinante.
+                Selecione um cliente jÃ¡ cadastrado.
               </span>
             </div>
-
           </div>
-
 
           <div className="form-grid">
-
-            <div className="form-group">
-
-              <label>
-                NOME *
-              </label>
-
-              <input
-                type="text"
-                value={
-                  customerName
-                }
-                placeholder="Nome do cliente"
-                disabled={
-                  saving
-                }
-                onChange={
-                  (event) =>
-                    setCustomerName(
-                      event.target.value
-                    )
-                }
-              />
-
-            </div>
-
-
-            <div className="form-group">
-
-              <label>
-                WHATSAPP *
-              </label>
-
-              <input
-                type="tel"
-                value={
-                  phone
-                }
-                placeholder="(41) 99999-9999"
-                disabled={
-                  saving
-                }
-                onChange={
-                  (event) =>
-                    handlePhone(
-                      event.target.value
-                    )
-                }
-              />
-
-            </div>
-
-          </div>
-
-        </div>
-
-
-        <div className="subscription-form-section">
-
-          <div className="subscription-form-heading">
-
-            <BadgeCheck
-              size={18}
-            />
-
-            <div>
-
-              <strong>
-                Dados do plano
-              </strong>
-
-              <span>
-                Nome e período da assinatura.
-              </span>
-
-            </div>
-
-          </div>
-
-
-          <div className="form-grid">
-
             <div className="form-group full">
+              <label>CLIENTE *</label>
 
-              <label>
-                NOME DO PLANO *
-              </label>
+              <select
+                value={customerId}
+                disabled={saving || Boolean(preparedPix)}
+                onChange={(event) => {
+                  setCustomerId(event.target.value);
+                  setPreparedPix(null);
+                  setSuccess("");
+                }}
+              >
+                <option value="">
+                  Selecione o cliente
+                </option>
 
-              <input
-                type="text"
-                value={
-                  planName
-                }
-                disabled={
-                  saving
-                }
-                onChange={
-                  (event) =>
-                    setPlanName(
-                      event.target.value
-                    )
-                }
-              />
-
+                {customers.map((customer) => (
+                  <option
+                    key={customer.id}
+                    value={customer.id}
+                  >
+                    {customer.name} Â·{" "}
+                    {formatPhone(customer.phone)}
+                  </option>
+                ))}
+              </select>
             </div>
-
-
-            <div className="form-group">
-
-              <label>
-                INÍCIO *
-              </label>
-
-              <input
-                type="date"
-                value={
-                  startsAt
-                }
-                disabled={
-                  saving
-                }
-                onChange={
-                  (event) =>
-                    setStartsAt(
-                      event.target.value
-                    )
-                }
-              />
-
-            </div>
-
-
-            <div className="form-group">
-
-              <label>
-                VALIDADE
-              </label>
-
-              <input
-                type="date"
-                value={
-                  expiresAt
-                }
-                disabled={
-                  saving
-                }
-                onChange={
-                  (event) =>
-                    setExpiresAt(
-                      event.target.value
-                    )
-                }
-              />
-
-            </div>
-
           </div>
 
-        </div>
+          <div style={{ marginTop: 12 }}>
+            <Link
+              href="/admin/clientes/novo"
+              className="admin-button-secondary"
+            >
+              CADASTRAR NOVO CLIENTE
+            </Link>
+          </div>
 
+          {selectedCustomer && (
+            <div style={infoBoxStyle}>
+              <strong>{selectedCustomer.name}</strong>
+              <span>
+                {formatPhone(selectedCustomer.phone)}
+              </span>
+              <span>
+                {selectedCustomer.email ||
+                  "E-mail nÃ£o cadastrado"}
+              </span>
+            </div>
+          )}
+        </section>
 
-        <div className="subscription-form-section">
-
+        <section className="subscription-form-section">
           <div className="subscription-form-heading">
-
-            <BadgeCheck
-              size={18}
-            />
-
+            <BadgeCheck size={18} />
             <div>
+              <strong>Plano comercial</strong>
+              <span>
+                PreÃ§o, ciclo e benefÃ­cios vÃªm do catÃ¡logo.
+              </span>
+            </div>
+          </div>
 
+          <div style={planGridStyle}>
+            {plans.map((plan) => {
+              const selected = plan.id === planId;
+
+              return (
+                <button
+                  key={plan.id}
+                  type="button"
+                  disabled={saving || Boolean(preparedPix)}
+                  onClick={() => selectPlan(plan.id)}
+                  style={{
+                    ...planCardStyle,
+                    ...(selected
+                      ? selectedPlanCardStyle
+                      : {}),
+                  }}
+                >
+                  <span style={planNameStyle}>
+                    {plan.name}
+                  </span>
+
+                  <strong style={planPriceStyle}>
+                    {money(plan.price)}
+                  </strong>
+
+                  <span style={planMetaStyle}>
+                    {plan.billingIntervalMonths} mÃªs Â·{" "}
+                    {plan.graceDays} dias de carÃªncia
+                  </span>
+
+                  <span style={benefitCountStyle}>
+                    {plan.benefits.length} benefÃ­cios
+                  </span>
+
+                  {selected && (
+                    <span style={selectedLabelStyle}>
+                      <Check size={13} />
+                      SELECIONADO
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {selectedPlan && (
+            <div style={benefitsBoxStyle}>
               <strong>
-                Serviços incluídos
+                BenefÃ­cios deste plano
               </strong>
 
-              <span>
-                Marque o que este plano permite agendar.
-              </span>
+              <ul style={benefitsListStyle}>
+                {selectedPlan.benefits.map((benefit) => (
+                  <li key={benefit}>{benefit}</li>
+                ))}
+              </ul>
 
+              <small style={mutedTextStyle}>
+                Estes benefÃ­cios serÃ£o congelados no novo ciclo apÃ³s a confirmaÃ§Ã£o da operaÃ§Ã£o.
+              </small>
             </div>
+          )}
+        </section>
 
+        <section className="subscription-form-section">
+          <div className="subscription-form-heading">
+            <UserRound size={18} />
+            <div>
+              <strong>Barbeiro</strong>
+              <span>
+                A capacidade final Ã© revalidada no banco.
+              </span>
+            </div>
           </div>
 
+          {!planId ? (
+            <p style={mutedTextStyle}>
+              Selecione primeiro o plano.
+            </p>
+          ) : loadingBarbers ? (
+            <p style={mutedTextStyle}>
+              Carregando disponibilidade...
+            </p>
+          ) : barbers.length === 0 ? (
+            <div className="admin-error">
+              Nenhum barbeiro disponÃ­vel para este plano.
+            </div>
+          ) : (
+            <div className="form-grid">
+              <div className="form-group full">
+                <label>PROFISSIONAL *</label>
 
-          <div className="subscription-service-options">
+                <select
+                  value={barberId}
+                  disabled={saving || Boolean(preparedPix)}
+                  onChange={(event) => {
+                    setBarberId(event.target.value);
+                    setPreparedPix(null);
+                    setSuccess("");
+                  }}
+                >
+                  <option value="">
+                    Selecione o barbeiro
+                  </option>
 
-            {services.map(
-              (service) => {
+                  {barbers.map((barber) => (
+                    <option
+                      key={barber.id}
+                      value={barber.id}
+                      disabled={barber.availableSlots <= 0}
+                    >
+                      {barber.name} Â·{" "}
+                      {barber.availableSlots > 0
+                        ? "Vagas disponÃ­veis"
+                        : "IndisponÃ­vel"}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+        </section>
 
-                const selected =
-                  selectedServices.includes(
-                    service.id
-                  );
+        <section className="subscription-form-section">
+          <div className="subscription-form-heading">
+            <Banknote size={18} />
+            <div>
+              <strong>Forma de contrataÃ§Ã£o</strong>
+              <span>
+                Escolha conscientemente a origem financeira.
+              </span>
+            </div>
+          </div>
 
+          <div style={modeGridStyle}>
+            <button
+              type="button"
+              disabled={saving || Boolean(preparedPix)}
+              onClick={() => {
+                setMode("external_payment");
+                setPreparedPix(null);
+                setSuccess("");
+              }}
+              style={{
+                ...modeCardStyle,
+                ...(mode === "external_payment"
+                  ? selectedModeCardStyle
+                  : {}),
+              }}
+            >
+              <Banknote size={20} />
+              <strong>
+                PAGAMENTO RECEBIDO FORA DO MERCADO PAGO
+              </strong>
+              <span>
+                Registra receita real, ciclo pago e comissÃ£o
+                histÃ³rica.
+              </span>
+            </button>
 
-                return (
-                  <button
-                    type="button"
-                    key={
-                      service.id
-                    }
-                    className={
-                      selected
-                        ? "subscription-service selected"
-                        : "subscription-service"
-                    }
-                    onClick={() =>
-                      toggleService(
-                        service.id
+            <button
+              type="button"
+              disabled={saving || Boolean(preparedPix)}
+              onClick={() => {
+                setMode("prepare_pix");
+                setPreparedPix(null);
+                setSuccess("");
+              }}
+              style={{
+                ...modeCardStyle,
+                ...(mode === "prepare_pix"
+                  ? selectedModeCardStyle
+                  : {}),
+              }}
+            >
+              <CreditCard size={20} />
+              <strong>PREPARAR CONTRATAÃ‡ÃƒO PIX</strong>
+              <span>
+                Reserva a vaga temporariamente e cria cobranÃ§a
+                pendente. NÃ£o ativa a assinatura.
+              </span>
+            </button>
+          </div>
+
+          {mode === "external_payment" && (
+            <div style={{ marginTop: 18 }}>
+              <div className="form-grid">
+                <div className="form-group">
+                  <label>MEIO RECEBIDO *</label>
+
+                  <select
+                    value={paymentMethod}
+                    disabled={saving || Boolean(preparedPix)}
+                    onChange={(event) =>
+                      setPaymentMethod(
+                        event.target
+                          .value as ExternalPaymentMethod
                       )
                     }
                   >
+                    <option value="pix_in_person">
+                      PIX presencial
+                    </option>
+                    <option value="cash">
+                      Dinheiro
+                    </option>
+                    <option value="other">
+                      Outro
+                    </option>
+                  </select>
+                </div>
 
-                    <span className="subscription-checkbox">
+                <div className="form-group">
+                  <label>
+                    OBSERVAÃ‡ÃƒO{" "}
+                    {paymentMethod === "other" ? "*" : ""}
+                  </label>
 
-                      {selected && (
-                        <Check
-                          size={13}
-                        />
-                      )}
+                  <input
+                    type="text"
+                    value={note}
+                    disabled={saving || Boolean(preparedPix)}
+                    maxLength={240}
+                    placeholder="ReferÃªncia administrativa opcional"
+                    onChange={(event) =>
+                      setNote(event.target.value)
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </section>
 
-                    </span>
+        {selectedCustomer &&
+          selectedPlan &&
+          selectedBarber && (
+            <section className="subscription-form-section">
+              <div className="subscription-form-heading">
+                <BadgeCheck size={18} />
+                <div>
+                  <strong>Resumo</strong>
+                  <span>
+                    Confira antes de registrar.
+                  </span>
+                </div>
+              </div>
 
+              <div style={summaryGridStyle}>
+                <Summary
+                  label="Cliente"
+                  value={selectedCustomer.name}
+                />
+                <Summary
+                  label="Plano"
+                  value={`${selectedPlan.name} Â· ${money(
+                    selectedPlan.price
+                  )}`}
+                />
+                <Summary
+                  label="Barbeiro"
+                  value={selectedBarber.name}
+                />
+                <Summary
+                  label="OperaÃ§Ã£o"
+                  value={
+                    mode === "external_payment"
+                      ? "Pagamento externo confirmado"
+                      : preparedPix
+                        ? "ContrataÃ§Ã£o preparada"
+                        : "Preparar contrataÃ§Ã£o PIX"
+                  }
+                />
+              </div>
+            </section>
+          )}
 
-                    <span>
+        {preparedPix && (
+          <AdminPixCheckout prepared={preparedPix} />
+        )}
 
-                      <strong>
-                        {
-                          service.name
-                        }
-                      </strong>
-
-                      <small>
-                        {
-                          service.duration_minutes
-                        }{" "}
-                        min
-                      </small>
-
-                    </span>
-
-                  </button>
-                );
-
-              }
-            )}
-
+        {(error || (success && !preparedPix)) && (
+          <div
+            className={error ? "admin-error" : "admin-success"}
+            style={{ marginTop: 18 }}
+          >
+            {error || success}
           </div>
-
-        </div>
-
+        )}
 
         <div className="form-actions">
-
           <Link
             href="/admin/assinantes"
             className="admin-button-secondary"
@@ -751,89 +683,196 @@ export default function SubscriptionForm({
             CANCELAR
           </Link>
 
-
           <button
-            type="submit"
+            type="button"
             className="admin-button"
             disabled={
-              saving
+              saving ||
+              !customerId ||
+              !planId ||
+              !barberId ||
+              (mode === "prepare_pix" && Boolean(preparedPix))
             }
+            onClick={submit}
           >
-
-            <Save
-              size={16}
-            />
-
             {saving
-              ? "SALVANDO..."
-              : "CRIAR ASSINATURA"}
-
+              ? "PROCESSANDO..."
+              : mode === "external_payment"
+                ? "REGISTRAR PAGAMENTO E ATIVAR"
+                : preparedPix
+                  ? "CONTRATAÃ‡ÃƒO PREPARADA"
+                  : "PREPARAR CONTRATAÃ‡ÃƒO"}
           </button>
-
         </div>
-
-      </form>
-
+      </div>
     </main>
   );
 }
 
-
-function normalizePhone(
-  phone: string
-) {
-  return phone.replace(
-    /\D/g,
-    ""
+function Summary({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div>
+      <span style={summaryLabelStyle}>{label}</span>
+      <strong style={summaryValueStyle}>{value}</strong>
+    </div>
   );
 }
 
+const infoBoxStyle = {
+  display: "grid",
+  gap: 5,
+  marginTop: 14,
+  padding: 14,
+  border: "1px solid #242424",
+  borderRadius: 7,
+  background: "#0e0e0e",
+  color: "#ddd",
+  fontSize: 12,
+} as const;
 
-function todayString() {
-  const today =
-    new Date();
+const planGridStyle = {
+  display: "grid",
+  gridTemplateColumns:
+    "repeat(auto-fit, minmax(210px, 1fr))",
+  gap: 12,
+} as const;
 
-  return formatDateInput(
-    today
-  );
-}
+const planCardStyle = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "flex-start",
+  gap: 7,
+  padding: 16,
+  color: "#ccc",
+  background: "#0d0d0d",
+  border: "1px solid #292929",
+  borderRadius: 8,
+  textAlign: "left",
+  cursor: "pointer",
+} as const;
 
+const selectedPlanCardStyle = {
+  border: "1px solid #c89b58",
+  background: "#171107",
+  boxShadow: "inset 0 0 0 1px #6d512a",
+} as const;
 
-function nextMonthString() {
-  const date =
-    new Date();
+const planNameStyle = {
+  color: "#f3efe8",
+  fontSize: 15,
+  fontWeight: 800,
+} as const;
 
-  date.setMonth(
-    date.getMonth() + 1
-  );
+const planPriceStyle = {
+  color: "#e6b96d",
+  fontSize: 20,
+} as const;
 
-  return formatDateInput(
-    date
-  );
-}
+const planMetaStyle = {
+  color: "#777",
+  fontSize: 11,
+} as const;
 
+const benefitCountStyle = {
+  color: "#aaa",
+  fontSize: 11,
+} as const;
 
-function formatDateInput(
-  date: Date
-) {
-  const year =
-    date.getFullYear();
+const selectedLabelStyle = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 5,
+  marginTop: 5,
+  color: "#d2a35d",
+  fontSize: 10,
+  fontWeight: 800,
+} as const;
 
-  const month =
-    String(
-      date.getMonth() + 1
-    ).padStart(
-      2,
-      "0"
-    );
+const benefitsBoxStyle = {
+  marginTop: 15,
+  padding: 16,
+  border: "1px solid #242424",
+  borderRadius: 8,
+  background: "#0d0d0d",
+  color: "#ddd",
+} as const;
 
-  const day =
-    String(
-      date.getDate()
-    ).padStart(
-      2,
-      "0"
-    );
+const benefitsListStyle = {
+  margin: "10px 0",
+  paddingLeft: 18,
+  color: "#aaa",
+  fontSize: 12,
+  lineHeight: 1.7,
+} as const;
 
-  return `${year}-${month}-${day}`;
-}
+const mutedTextStyle = {
+  color: "#777",
+  fontSize: 11,
+  lineHeight: 1.6,
+} as const;
+
+const modeGridStyle = {
+  display: "grid",
+  gridTemplateColumns:
+    "repeat(auto-fit, minmax(240px, 1fr))",
+  gap: 12,
+} as const;
+
+const modeCardStyle = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "flex-start",
+  gap: 8,
+  padding: 16,
+  color: "#aaa",
+  background: "#0d0d0d",
+  border: "1px solid #292929",
+  borderRadius: 8,
+  textAlign: "left",
+  cursor: "pointer",
+} as const;
+
+const selectedModeCardStyle = {
+  color: "#ddd",
+  border: "1px solid #c89b58",
+  background: "#171107",
+} as const;
+
+const summaryGridStyle = {
+  display: "grid",
+  gridTemplateColumns:
+    "repeat(auto-fit, minmax(160px, 1fr))",
+  gap: 15,
+} as const;
+
+const summaryLabelStyle = {
+  display: "block",
+  marginBottom: 5,
+  color: "#777",
+  fontSize: 10,
+  textTransform: "uppercase",
+  letterSpacing: "0.8px",
+} as const;
+
+const summaryValueStyle = {
+  color: "#eee",
+  fontSize: 13,
+} as const;
+
+const preparedBoxStyle = {
+  borderColor: "#4e412b",
+  background: "#141108",
+} as const;
+
+const preparedTextStyle = {
+  margin: "8px 0 15px",
+  color: "#aaa",
+  fontSize: 12,
+  lineHeight: 1.6,
+} as const;

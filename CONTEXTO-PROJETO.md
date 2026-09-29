@@ -27727,3 +27727,1471 @@ Não expor dados privados apenas porque alguém informou um telefone.
 17. Commit/push somente com autorização explícita.
 
 # FIM DO CHECKPOINT DE DIREÇÃO — 2026-09-25
+---
+
+# CHECKPOINT FINAL — MODERNIZAÇÃO DA NOVA ASSINATURA ADMIN — 2026-09-28
+
+## PRIORIDADE
+
+Este checkpoint registra a conclusão do PASSO 3 da modernização administrativa:
+
+/admin/assinantes/novo
+
+Passos anteriores preservados:
+
+1. Cadastro do barbeiro + acesso profissional — CONCLUÍDO.
+2. Edição/estado do acesso profissional — CONCLUÍDO.
+3. Nova Assinatura Admin — CONCLUÍDO nesta frente.
+
+## GIT DE REFERÊNCIA NO INÍCIO
+
+Branch:
+
+main
+
+HEAD/origin no início desta frente:
+
+fa1d1390e1b7301fc4e55ff81aae8489bc020692
+
+Commit:
+
+fa1d139 Moderniza estado do acesso profissional de barbeiros
+
+Não houve commit/push desta frente até este checkpoint documental.
+
+## MODELO LEGADO REMOVIDO DE /admin/assinantes/novo
+
+O cadastro anterior permitia:
+
+- nome livre do plano;
+- Plano Mensal legado como default visual;
+- início manual;
+- validade manual;
+- seleção manual de serviços;
+- INSERT direto no browser em subscriptions;
+- INSERT direto em subscription_services;
+- ativação imediata sem ciclo comercial;
+- ausência de plano real;
+- ausência de barbeiro;
+- ausência de grupo/capacidade;
+- ausência de snapshot.
+
+Esse fluxo foi substituído.
+
+## NOVA EXPERIÊNCIA ADMINISTRATIVA
+
+A nova tela utiliza:
+
+- cliente existente;
+- link para cadastro de novo cliente;
+- subscription_plans ativos;
+- preço real do catálogo;
+- benefícios reais de subscription_plan_services;
+- barbeiro;
+- disponibilidade por plano/grupo;
+- resumo da operação;
+- origem financeira explícita.
+
+Planos validados visualmente:
+
+Black Essencial:
+R$ 85
+4 benefícios.
+
+Black Navalha:
+R$ 145
+6 benefícios.
+
+Black Premium:
+R$ 200
+10 benefícios.
+
+Plano Mensal legado:
+
+active=false
+
+não aparece para nova contratação e permanece preservado no banco.
+
+## BENEFÍCIOS
+
+O Admin não escolhe benefícios manualmente.
+
+A tela apresenta somente os benefícios atuais do plano.
+
+Ao concluir um ciclo, a composição é congelada em:
+
+subscription_cycle_services
+
+Alterações futuras em subscription_plan_services não modificam snapshots históricos.
+
+subscription_services permanece somente para compatibilidade legada.
+
+## MODALIDADES DA NOVA ASSINATURA ADMIN
+
+Cortesia foi conscientemente retirada do escopo.
+
+Existem somente:
+
+1. Pagamento recebido fora do Mercado Pago.
+2. Preparar pagamento PIX.
+
+## PAGAMENTO EXTERNO
+
+Representa receita REAL recebida fora do Mercado Pago.
+
+Meios suportados:
+
+- cash — Dinheiro;
+- pix_in_person — PIX presencial;
+- other — Outro.
+
+Para other, observação administrativa é obrigatória.
+
+Pagamento externo:
+
+- usa preço autoritativo de subscription_plans;
+- exige cliente existente;
+- exige plano ativo;
+- exige barbeiro ativo;
+- valida capacidade total;
+- valida capacidade do grupo;
+- bloqueia barbeiro com SELECT ... FOR UPDATE;
+- cria/reutiliza assinatura comercial;
+- não converte assinatura legada plan_id NULL;
+- cria subscription_cycle paid;
+- congela benefícios em subscription_cycle_services;
+- atualiza compatibilidade em subscription_services;
+- cria subscription_charge paid;
+- usa provider = admin_external;
+- NÃO fabrica Mercado Pago Order;
+- registra paid_at server-side;
+- registra meio de pagamento;
+- registra Admin responsável;
+- permite observação auditável;
+- gera comissão histórica somente quando subscription_commission_rate > 0;
+- congela rate + amount no ledger;
+- não recalcula comissão histórica antiga.
+
+Não permite usar Nova Assinatura para sobrepor silenciosamente ciclo paid/grace ainda vigente.
+
+Renovação continua com fluxo próprio.
+
+## MIGRATION 047
+
+Criada:
+
+supabase/sql/047-admin-subscription-creation.sql
+
+Aplicada no Supabase em 2026-09-28.
+
+Resultado:
+
+Success. No rows returned
+
+NÃO reaplicar.
+
+A migration adiciona em subscription_charges:
+
+- external_payment_method;
+- recorded_by_admin_user_id;
+- administrative_note.
+
+Adiciona constraint para:
+
+- cash;
+- pix_in_person;
+- other.
+
+Cria RPC:
+
+public.admin_confirm_external_subscription_payment(...)
+
+EXECUTE:
+
+authenticated
+
+A própria RPC exige:
+
+auth.uid()
+→ profiles.role = admin.
+
+Nenhuma permissão pública ampla foi criada.
+
+## PREPARAR PAGAMENTO PIX
+
+Não foi criado segundo motor PIX.
+
+A funcionalidade reutiliza:
+
+create_subscription_checkout
+
+Ela produz:
+
+- subscription_charge pending;
+- hold de capacidade de 30 minutos;
+- nenhum ciclo paid;
+- nenhuma assinatura ativada;
+- nenhuma comissão.
+
+A Server Action administrativa:
+
+- revalida auth.getUser();
+- exige profiles.role = admin;
+- recebe IDs da UI;
+- recarrega nome/telefone/e-mail do customer no servidor;
+- não confia nesses dados enviados pelo browser;
+- utiliza createAdminClient somente para chamar a RPC privilegiada create_subscription_checkout.
+
+A primeira tentativa revelou corretamente que create_subscription_checkout não possui EXECUTE para authenticated e é reservada ao service_role.
+
+A fronteira foi corrigida sem conceder permissão adicional no banco.
+
+## TESTE DE PREPARAÇÃO PIX
+
+Foi executada UMA preparação controlada.
+
+Plano:
+
+Black Navalha
+
+Valor:
+
+R$ 145,00
+
+Resultado visual:
+
+Pagamento PIX preparado.
+
+Confirmado:
+
+- cobrança somente pending;
+- reserva temporária de capacidade;
+- aproximadamente 30 minutos;
+- nenhum pagamento confirmado;
+- nenhum ciclo ativado pela preparação;
+- nenhuma mensagem de assinatura ativa;
+- nenhum E2E Mercado Pago repetido.
+
+Depois do sucesso, o botão passa para:
+
+PIX JÁ PREPARADO
+
+e fica desabilitado para evitar nova tentativa acidental no mesmo estado local.
+
+## PAGAMENTO EXTERNO — TESTE
+
+A RPC foi:
+
+- criada;
+- aplicada;
+- revisada estaticamente;
+- integrada à Server Action;
+- compilada com sucesso.
+
+Não foi criado pagamento externo fictício somente para teste.
+
+Motivo:
+
+a operação representa receita real e pode gerar comissão histórica.
+
+O primeiro teste de lançamento deve ocorrer quando houver pagamento externo legítimo ou fixture financeira conscientemente autorizada.
+
+Não fabricar receita/comissão apenas para validação visual.
+
+## FEEDBACK DA INTERFACE
+
+Erros e sucessos permanecem visíveis no topo e também são apresentados próximos às ações no fim do formulário.
+
+Isso evita que o Admin precise retornar ao topo de um formulário longo para entender o resultado.
+
+Foi corrigido também warning React causado por mistura de:
+
+border
+
+e:
+
+borderColor
+
+nos estilos inline.
+
+## ARQUIVOS FUNCIONAIS
+
+Alterados:
+
+- app/admin/assinantes/novo/page.tsx;
+- app/admin/assinantes/novo/subscription-form.tsx.
+
+Criado:
+
+- app/admin/assinantes/novo/actions.ts.
+
+Banco:
+
+- supabase/sql/047-admin-subscription-creation.sql.
+
+## NEXT.JS 16 / SEGURANÇA
+
+AGENTS.md foi respeitado.
+
+Documentação local de segurança/mutação foi consultada.
+
+A Server Action revalida autenticação/autorização.
+
+O Client Component recebe somente DTOs necessários.
+
+Regras críticas permanecem no PostgreSQL.
+
+## BUILD FINAL
+
+Executado:
+
+npm.cmd run build
+
+Resultado:
+
+APROVADO.
+
+Next.js:
+
+16.3.4.
+
+TypeScript:
+
+APROVADO.
+
+Rota:
+
+/admin/assinantes/novo
+
+reconhecida como dinâmica.
+
+## DIFF CHECK
+
+Executado para os arquivos do Passo 3.
+
+Resultado:
+
+APROVADO.
+
+Somente avisos conhecidos LF → CRLF no Windows.
+
+Nenhum erro de whitespace.
+
+## MIGRATIONS
+
+Migrations aplicadas agora:
+
+007–047.
+
+NÃO reaplicar nenhuma.
+
+Próximo número disponível:
+
+048.
+
+## REGRAS PRESERVADAS
+
+Catálogo:
+
+Black Essencial:
+R$ 85
+BLACK_STANDARD
+25 compartilhadas
+4 benefícios.
+
+Black Navalha:
+R$ 145
+BLACK_STANDARD
+25 compartilhadas
+6 benefícios.
+
+Black Premium:
+R$ 200
+BLACK_PREMIUM
+5 reservadas
+10 benefícios.
+
+Plano Mensal legado:
+27fcd639-ddb5-43ab-8ddc-3fd141424fb5
+active=false.
+
+Capacidade:
+
+30 totais por barbeiro.
+
+Preservar obrigatoriamente SELECT ... FOR UPDATE.
+
+Pagamento Mercado Pago:
+
+- mensal avulso;
+- sem recorrência automática;
+- Orders API;
+- external_reference = subscription_charge.id;
+- webhook HMAC;
+- data.id ORIGINAL;
+- GET Order server-side;
+- confirm_mercado_pago_subscription_payment;
+- polling observacional;
+- idempotência.
+
+Browser NÃO confirma pagamento.
+
+Nenhuma alteração em:
+
+- /agendar;
+- create_public_multi_appointment;
+- Central do Cliente;
+- Área do Barbeiro;
+- Admin de Planos;
+- motor Mercado Pago;
+- snapshots históricos existentes.
+
+## WORKING TREE ESPERADO
+
+Arquivos desta frente:
+
+M app/admin/assinantes/novo/page.tsx
+M app/admin/assinantes/novo/subscription-form.tsx
+?? app/admin/assinantes/novo/actions.ts
+?? supabase/sql/047-admin-subscription-creation.sql
+
+Após este checkpoint:
+
+M CONTEXTO-PROJETO.md
+
+Devem continuar fora do Git:
+
+?? ASSINATURAS-LOTE.txt
+?? CODIGO-COMPLETO.txt
+
+.env.local nunca deve ser versionado/exibido.
+
+Nunca usar:
+
+git add .
+
+## ESTADO
+
+Passo 3 — Nova Assinatura Admin:
+
+CONCLUÍDO.
+
+Modelo legado de criação:
+
+REMOVIDO DA NOVA EXPERIÊNCIA.
+
+Pagamento externo:
+
+IMPLEMENTADO COM TRILHA FINANCEIRA AUDITÁVEL.
+
+Preparação PIX:
+
+IMPLEMENTADA E VALIDADA.
+
+Cortesia:
+
+FORA DO ESCOPO.
+
+Build:
+
+APROVADO.
+
+Banco:
+
+migration 047 aplicada.
+
+## PRÓXIMO PASSO
+
+Não iniciar automaticamente outra frente antes do checkpoint Git.
+
+Ordem planejada permanece:
+
+4. Cliente/Admin e acesso à Central.
+5. Fundação interna de notificações.
+6. Lembrete de atendimento do cliente.
+7. Resumo diário do barbeiro.
+8. Escolher/conectar WhatsApp.
+9. Confirmar/Remarcar/Cancelar via canal.
+10. Secretária conversacional posteriormente.
+
+Commit/push somente com autorização explícita.
+
+# FIM DO CHECKPOINT — 2026-09-28
+
+---
+
+# CHECKPOINT DE CONTINUIDADE — PASSO 3 / NOVA ASSINATURA ADMIN / PIX AINDA PENDENTE — 2026-09-28
+
+## PRIORIDADE ABSOLUTA
+
+Este é o checkpoint MAIS RECENTE e deve prevalecer sobre o checkpoint imediatamente anterior que registrou prematuramente o Passo 3 como CONCLUÍDO.
+
+Correção de estado:
+
+PASSO 3 — MODERNIZAR NOVA ASSINATURA ADMIN:
+
+EM FINALIZAÇÃO.
+
+NÃO considerar concluído ainda.
+
+Motivo:
+
+a modalidade administrativa denominada "Preparar pagamento PIX" atualmente cria somente o pré-checkout interno:
+
+subscription_charge pending
++
+hold de capacidade de 30 minutos.
+
+Ela ainda NÃO cria a Order PIX do Mercado Pago e, portanto, ainda NÃO apresenta:
+
+- QR Code;
+- Pix Copia e Cola.
+
+A próxima continuidade deve finalizar conscientemente esse fluxo antes do checkpoint funcional final.
+
+## GIT REAL CONFIRMADO NO INÍCIO DESTA FRENTE
+
+Branch:
+
+main
+
+HEAD:
+
+fa1d1390e1b7301fc4e55ff81aae8489bc020692
+
+origin/main:
+
+fa1d1390e1b7301fc4e55ff81aae8489bc020692
+
+Commit:
+
+fa1d139 Moderniza estado do acesso profissional de barbeiros
+
+Passo 1 anterior:
+
+8dbe63f Moderniza cadastro e acesso profissional de barbeiros
+
+Passo 2 anterior:
+
+fa1d139 Moderniza estado do acesso profissional de barbeiros
+
+Passos 1 e 2 NÃO devem ser refeitos.
+
+Nenhum commit/push do Passo 3 foi realizado até este checkpoint.
+
+## WORKING TREE ATUAL
+
+Arquivos funcionais alterados/criados do Passo 3:
+
+M app/admin/assinantes/novo/page.tsx
+M app/admin/assinantes/novo/subscription-form.tsx
+?? app/admin/assinantes/novo/actions.ts
+?? supabase/sql/047-admin-subscription-creation.sql
+
+CONTEXTO-PROJETO.md também está modificado.
+
+Devem continuar obrigatoriamente fora do Git:
+
+?? ASSINATURAS-LOTE.txt
+?? CODIGO-COMPLETO.txt
+
+.env.local nunca deve ser exibido/versionado.
+
+Nunca usar:
+
+git add .
+
+Commit/push somente com autorização explícita.
+
+## MIGRATIONS
+
+Migrations 007–046 já estavam aplicadas.
+
+Nesta frente foi criada e APLICADA com autorização explícita:
+
+supabase/sql/047-admin-subscription-creation.sql
+
+Resultado no Supabase:
+
+Success. No rows returned
+
+NÃO reaplicar migration 047.
+
+Migrations aplicadas agora:
+
+007–047.
+
+Próximo número disponível:
+
+048.
+
+Não existe necessidade conhecida de migration 048 para finalizar o PIX administrativo.
+
+## DECISÃO DE NEGÓCIO — CORTESIA
+
+Cortesia foi REMOVIDA do escopo.
+
+Não implementar cortesia nesta frente.
+
+A Nova Assinatura Admin trabalha somente com:
+
+1. pagamento recebido fora do Mercado Pago;
+2. preparação/geração de PIX pelo fluxo Mercado Pago existente.
+
+## PAGAMENTO EXTERNO — REGRA DEFINIDA
+
+Pagamento externo representa receita REAL recebida fora do Mercado Pago.
+
+Meios definidos:
+
+- cash — Dinheiro;
+- pix_in_person — PIX presencial;
+- other — Outro.
+
+Para other, observação administrativa é obrigatória.
+
+Migration 047 adicionou em subscription_charges:
+
+- external_payment_method;
+- recorded_by_admin_user_id;
+- administrative_note.
+
+Também criou:
+
+public.admin_confirm_external_subscription_payment(...)
+
+A RPC:
+
+- exige auth.uid();
+- exige profiles.role = admin;
+- utiliza customer existente;
+- exige plano ativo;
+- exige barbeiro ativo;
+- preço vem exclusivamente de subscription_plans;
+- bloqueia o barbeiro com SELECT ... FOR UPDATE;
+- valida capacidade total;
+- valida capacidade do grupo;
+- preserva BLACK_STANDARD/BLACK_PREMIUM;
+- cria/reutiliza assinatura comercial;
+- não converte assinatura legada plan_id NULL;
+- rejeita sobreposição silenciosa de ciclo paid/grace vigente;
+- cria subscription_cycle paid;
+- cria snapshot em subscription_cycle_services;
+- mantém subscription_services apenas por compatibilidade;
+- cria subscription_charge paid;
+- provider = admin_external;
+- NÃO fabrica Order Mercado Pago;
+- registra paid_at server-side;
+- registra Admin responsável;
+- gera comissão histórica somente se subscription_commission_rate > 0;
+- congela rate e amount no ledger.
+
+Pagamento externo NÃO foi executado artificialmente nesta frente.
+
+Motivo:
+
+isso fabricaria receita e potencial comissão.
+
+A primeira validação financeira dessa modalidade deve utilizar um pagamento externo legítimo ou fixture financeira conscientemente autorizada.
+
+## NOVA UI /admin/assinantes/novo
+
+O modelo legado foi removido da nova experiência.
+
+Não existem mais:
+
+- nome arbitrário de plano;
+- Plano Mensal legado como default comercial;
+- início manual;
+- validade manual;
+- seleção arbitrária de benefícios;
+- criação direta de subscriptions pelo Client Component;
+- criação manual de subscription_services pelo browser.
+
+A nova tela apresenta:
+
+- cliente existente;
+- link CADASTRAR NOVO CLIENTE;
+- planos ativos reais;
+- preços reais;
+- benefícios por subscription_plan_services;
+- barbeiro;
+- disponibilidade por plano;
+- modalidade financeira explícita;
+- resumo da operação.
+
+Catálogo visualmente validado:
+
+Black Essencial:
+R$ 85
+4 benefícios.
+
+Black Navalha:
+R$ 145
+6 benefícios.
+
+Black Premium:
+R$ 200
+10 benefícios.
+
+Plano Mensal legado:
+active=false
+não aparece na nova contratação.
+
+## BENEFÍCIOS / SNAPSHOT
+
+Benefícios são somente leitura na Nova Assinatura.
+
+O Admin não escolhe serviços manualmente.
+
+A UI foi refinada para apresentar:
+
+"Benefícios deste plano"
+
+A intenção correta é:
+
+esses benefícios serão congelados em subscription_cycle_services quando o ciclo for efetivamente criado.
+
+subscription_plan_services continua sendo catálogo atual editável.
+
+subscription_cycle_services continua sendo snapshot histórico autoritativo.
+
+Não alterar snapshots históricos.
+
+## BARBEIRO / CAPACIDADE
+
+Disponibilidade visual usa o motor existente por plano.
+
+Cliente/Admin vê:
+
+Vagas disponíveis
+
+ou:
+
+Indisponível.
+
+Quantidade numérica não precisa ser exibida.
+
+Autoridade final permanece no PostgreSQL.
+
+Preservar obrigatoriamente:
+
+SELECT ... FOR UPDATE.
+
+Capacidade atual:
+
+30 totais por barbeiro.
+
+BLACK_STANDARD:
+
+25 compartilhadas entre Black Essencial + Black Navalha.
+
+BLACK_PREMIUM:
+
+5 reservadas ao Black Premium.
+
+## SERVER ACTION ADMINISTRATIVA
+
+Criado:
+
+app/admin/assinantes/novo/actions.ts
+
+A Server Action:
+
+- revalida supabase.auth.getUser();
+- exige profiles.role = admin;
+- recebe somente IDs e modalidade necessários;
+- para preparação PIX recarrega nome/telefone/e-mail do customer no servidor;
+- não confia nesses dados enviados pelo browser.
+
+Pagamento externo:
+
+chama:
+
+admin_confirm_external_subscription_payment.
+
+Preparação PIX:
+
+chama:
+
+create_subscription_checkout.
+
+Foi identificado no primeiro teste que:
+
+create_subscription_checkout
+
+possui EXECUTE reservado ao service_role.
+
+A primeira chamada usando o client authenticated falhou.
+
+Correção implementada:
+
+- autenticação/autorização Admin continua usando createClient() da sessão;
+- somente depois da autorização a chamada privilegiada de create_subscription_checkout utiliza createAdminClient();
+- nenhum novo GRANT foi criado;
+- nenhuma segurança do banco foi relaxada.
+
+Build após a correção:
+
+APROVADO.
+
+## FEEDBACK DE ERRO/SUCESSO
+
+Foi solicitado que erro/confirmação apareça também próximo das ações no fim do formulário.
+
+Implementado:
+
+- feedback continua podendo aparecer no topo;
+- feedback também aparece imediatamente acima das ações inferiores.
+
+Foi corrigido também warning React causado por combinação de:
+
+border
+
+e:
+
+borderColor
+
+nos estilos inline.
+
+## TESTE REAL DA PREPARAÇÃO ADMINISTRATIVA
+
+Foi realizada UMA tentativa controlada usando:
+
+Black Navalha
+R$ 145,00.
+
+Resultado após correção da Server Action:
+
+SUCESSO no pré-checkout interno.
+
+A interface apresentou:
+
+"Pagamento PIX preparado"
+
+e informou:
+
+- charge pending criada;
+- reserva temporária criada;
+- aproximadamente 30 minutos;
+- nenhum pagamento confirmado;
+- nenhum ciclo ativado.
+
+Após o sucesso, o botão foi refinado para:
+
+PIX JÁ PREPARADO
+
+e fica desabilitado para evitar nova tentativa acidental no mesmo estado local.
+
+## CORREÇÃO IMPORTANTE DE TERMINOLOGIA / UX
+
+Apesar do texto atual dizer:
+
+"Pagamento PIX preparado"
+
+o estado criado NÃO é ainda um PIX Mercado Pago.
+
+O que existe nesse ponto é somente:
+
+pré-checkout interno
+→ subscription_charge pending
+→ hold 30 minutos.
+
+A Order Mercado Pago ainda NÃO foi criada.
+
+Portanto NÃO existe ainda:
+
+- QR Code;
+- Pix Copia e Cola;
+- Payment PAY;
+- Order ORD.
+
+A próxima continuidade deve corrigir essa experiência.
+
+Até a Order ser criada, a terminologia mais precisa é:
+
+"Contratação preparada"
+
+ou equivalente.
+
+## PRÓXIMO PASSO EXATO — NOVO CHAT
+
+NÃO criar novo motor PIX.
+
+Reutilizar integralmente a infraestrutura Mercado Pago já consolidada.
+
+Primeiro inspecionar SOMENTE:
+
+app/api/assinaturas/mercado-pago/route.ts
+
+para confirmar o contrato atual de entrada/saída da geração da Order PIX.
+
+Depois conectar o estado preparado da Nova Assinatura Admin ao mesmo motor.
+
+Fluxo desejado:
+
+Admin seleciona cliente/plano/barbeiro
+→ create_subscription_checkout
+→ charge pending
+→ hold 30 minutos
+→ GERAR PIX
+→ /api/assinaturas/mercado-pago
+→ Order PIX existente
+→ QR Code
+→ Pix Copia e Cola
+→ webhook HMAC
+→ GET Order server-side
+→ confirm_mercado_pago_subscription_payment
+→ ciclo/assinatura
+→ polling observacional.
+
+Preservar:
+
+external_reference = subscription_charge.id.
+
+Browser NÃO confirma pagamento.
+
+Não chamar RPC financeira diretamente pelo browser.
+
+Não duplicar motor Mercado Pago.
+
+Não criar migration 048 sem necessidade concreta.
+
+## UX DESEJADA PARA PIX ADMIN
+
+Etapa 1:
+
+PREPARAR CONTRATAÇÃO
+
+Resultado:
+
+- charge pending;
+- hold;
+- ainda sem QR.
+
+Etapa 2:
+
+GERAR PIX
+
+Resultado:
+
+- criar/reutilizar Order Mercado Pago;
+- mostrar QR Code;
+- mostrar Pix Copia e Cola;
+- permitir COPIAR CÓDIGO PIX;
+- manter cronômetro baseado em reservation_expires_at;
+- informar explicitamente que pagamento ainda aguarda confirmação.
+
+Após confirmação real server-side:
+
+- polling via infraestrutura existente pode observar paid + activated;
+- interface pode mostrar Pagamento confirmado;
+- browser continua sem autoridade financeira.
+
+## CONTRATO A INSPECIONAR NO PRÓXIMO CHAT
+
+Arquivo:
+
+app/api/assinaturas/mercado-pago/route.ts
+
+Confirmar os nomes atuais retornados para:
+
+- Order ID;
+- Payment ID, se retornado;
+- qr_code;
+- qr_code_base64;
+- ticket_url;
+- expiration/hold.
+
+Não presumir nomes antigos.
+
+## NÃO REPETIR E2E FINANCEIRO
+
+O motor Mercado Pago Orders/PIX já foi validado anteriormente end-to-end.
+
+Não repetir E2E completo sem necessidade concreta.
+
+Para finalizar a UI Admin, reutilizar contratos existentes e testar somente o necessário.
+
+Não realizar cobrança real.
+
+## MERCADO PAGO — PRESERVAR
+
+Plano mensal/comercial continua pagamento AVULSO.
+
+SEM recorrência automática.
+
+Preservar:
+
+- Orders API;
+- POST /v1/orders;
+- GET /v1/orders/{id};
+- external_reference = subscription_charge.id;
+- Webhook HMAC;
+- data.id ORIGINAL;
+- GET Order server-side;
+- confirm_mercado_pago_subscription_payment;
+- polling observacional;
+- idempotência.
+
+Browser NÃO confirma pagamento.
+
+## SEGURANÇA / ARQUIVOS
+
+Nunca versionar:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt;
+- .env.local.
+
+Nunca usar:
+
+git add .
+
+Não exibir:
+
+- MERCADO_PAGO_ACCESS_TOKEN;
+- MERCADO_PAGO_WEBHOOK_SECRET;
+- SUPABASE_SERVICE_ROLE_KEY.
+
+Commit/push somente com autorização explícita.
+
+## BUILD / VALIDAÇÕES ATUAIS
+
+Último:
+
+npm.cmd run build
+
+APROVADO.
+
+Next.js:
+
+16.3.4.
+
+TypeScript:
+
+APROVADO.
+
+git diff --check:
+
+APROVADO.
+
+Somente avisos conhecidos LF → CRLF.
+
+Validação visual dos planos/barbeiro/modalidades:
+
+APROVADA.
+
+Passo 3 permanece:
+
+EM FINALIZAÇÃO
+
+até existir a experiência administrativa coerente de geração/exibição do PIX ou até decisão explícita de remover essa modalidade.
+
+# FIM DO CHECKPOINT DE CONTINUIDADE — 2026-09-28
+
+---
+
+# CHECKPOINT FINAL — PASSO 3 / NOVA ASSINATURA ADMIN / PIX INTEGRADO — 2026-09-29
+
+## PRIORIDADE
+
+Este checkpoint substitui o checkpoint de continuidade de 2026-09-28 que mantinha o Passo 3 EM FINALIZAÇÃO.
+
+PASSO 3 — MODERNIZAÇÃO DE:
+
+/admin/assinantes/novo
+
+STATUS:
+
+CONCLUÍDO NO WORKING TREE, VALIDADO E AINDA NÃO COMMITADO.
+
+Nenhum commit/push foi realizado sem autorização.
+
+## GIT DE REFERÊNCIA
+
+Branch:
+
+main
+
+HEAD/origin antes do Passo 3:
+
+fa1d1390e1b7301fc4e55ff81aae8489bc020692
+
+Passos anteriores:
+
+8dbe63f Moderniza cadastro e acesso profissional de barbeiros
+fa1d139 Moderniza estado do acesso profissional de barbeiros
+
+Passos 1 e 2 permanecem concluídos e não foram refeitos.
+
+## NOVA ASSINATURA ADMIN
+
+O modelo legado foi removido.
+
+A tela utiliza:
+
+- cliente existente;
+- catálogo real de subscription_plans;
+- preço autoritativo;
+- benefícios de subscription_plan_services;
+- barbeiro;
+- disponibilidade por plano/grupo;
+- modalidade financeira explícita;
+- resumo da operação.
+
+Plano Mensal legado permanece active=false e não aparece para nova contratação.
+
+Benefícios não são escolhidos arbitrariamente pelo Admin.
+
+Snapshots históricos permanecem em subscription_cycle_services.
+
+## PAGAMENTO EXTERNO
+
+Migration:
+
+supabase/sql/047-admin-subscription-creation.sql
+
+APLICADA anteriormente com:
+
+Success. No rows returned
+
+NÃO reaplicar.
+
+Pagamento externo representa receita real já recebida fora do Mercado Pago.
+
+Meios:
+
+- cash;
+- pix_in_person;
+- other.
+
+Para other, observação é obrigatória.
+
+RPC:
+
+admin_confirm_external_subscription_payment
+
+Preserva:
+
+- autenticação Admin;
+- preço autoritativo;
+- SELECT ... FOR UPDATE;
+- capacidade total e por grupo;
+- plano/barbeiro ativos;
+- ciclo paid;
+- snapshot;
+- charge paid;
+- trilha administrativa;
+- comissão histórica somente quando a taxa configurada for maior que zero.
+
+Nenhum pagamento externo fictício foi executado para teste.
+
+## PIX ADMIN — EXPERIÊNCIA FINAL
+
+O fluxo administrativo agora distingue corretamente duas etapas.
+
+ETAPA 1:
+
+PREPARAR CONTRATAÇÃO
+
+Executa o motor interno existente:
+
+create_subscription_checkout
+
+Resultado:
+
+- subscription_charge pending;
+- checkout_token;
+- hold de capacidade;
+- reservation_expires_at;
+- nenhum pagamento confirmado;
+- nenhum ciclo ativado;
+- nenhuma comissão criada.
+
+A Server Action continua revalidando:
+
+auth.getUser()
+→ profiles.role = admin
+
+e utiliza createAdminClient somente depois da autorização para chamar a RPC privilegiada.
+
+Nenhum EXECUTE adicional foi concedido a authenticated.
+
+ETAPA 2:
+
+GERAR PIX
+
+Foi reutilizado integralmente:
+
+POST /api/assinaturas/mercado-pago
+
+Entrada:
+
+- chargeId;
+- checkoutToken.
+
+Não foi criado segundo motor PIX.
+
+A Route Handler existente continua responsável por:
+
+- validar charge pending;
+- validar hold vigente;
+- validar plano/preço/moeda;
+- criar Order PIX;
+- external_reference = subscription_charge.id;
+- idempotência determinística;
+- persistir provider = mercado_pago;
+- persistir provider_charge_id = Order ID;
+- reutilizar GET Order quando a mesma charge já possui Order.
+
+Resposta utilizada pela UI:
+
+- orderId;
+- paymentId;
+- qrCode;
+- qrCodeBase64;
+- ticketUrl;
+- reservationExpiresAt.
+
+## COMPONENTE PIX ADMIN
+
+Criado:
+
+app/admin/assinantes/novo/admin-pix-checkout.tsx
+
+A interface apresenta:
+
+- Contratação preparada;
+- GERAR PIX;
+- QR Code;
+- Pix Copia e Cola;
+- COPIAR CÓDIGO PIX;
+- link do Mercado Pago quando ticket_url existe;
+- valor;
+- reserva até;
+- cronômetro;
+- estado aguardando confirmação;
+- estado de verificação final;
+- estado expirado;
+- Pagamento confirmado somente após backend confirmar paid + activated.
+
+A tentativa preparada fica protegida contra reentrada acidental no submit.
+
+Cliente/plano/barbeiro/modalidade não são trocados silenciosamente enquanto a tentativa preparada está representada na UI.
+
+## CRONÔMETRO
+
+O cronômetro utiliza exclusivamente:
+
+reservation_expires_at
+
+Não foi criado timer financeiro independente.
+
+Ao chegar a 00:00:
+
+- a UI não confirma pagamento;
+- realiza consulta final observacional quando já existe PIX;
+- somente paid + activated gera sucesso;
+- caso contrário apresenta expiração.
+
+## POLLING
+
+Foi reutilizado:
+
+POST /api/assinaturas/status
+
+com:
+
+chargeId
+checkoutToken.
+
+O polling é somente observacional.
+
+Ele NÃO:
+
+- chama RPC financeira;
+- marca charge paid;
+- ativa assinatura;
+- cria ciclo;
+- altera hold;
+- cria comissão;
+- confirma pagamento a partir do QR Code/browser.
+
+A interface mostra:
+
+Pagamento confirmado
+
+somente quando o backend retorna simultaneamente:
+
+paid = true
+activated = true.
+
+## MERCADO PAGO PRESERVADO
+
+Motor financeiro permanece:
+
+Orders API.
+
+POST /v1/orders
+GET /v1/orders/{id}
+
+Preservado:
+
+- external_reference = subscription_charge.id;
+- webhook HMAC;
+- data.id ORIGINAL, inclusive maiúsculas;
+- GET Order server-side;
+- confirm_mercado_pago_subscription_payment;
+- idempotência;
+- polling observacional.
+
+Plano comercial continua sendo pagamento mensal AVULSO.
+
+SEM recorrência automática Mercado Pago.
+
+## VALIDAÇÃO VISUAL
+
+/admin/assinantes/novo foi validada visualmente.
+
+Estado inicial:
+
+APROVADO.
+
+Foi utilizada uma tentativa administrativa controlada para validar a ligação com o motor PIX já existente.
+
+Visualmente confirmado:
+
+- resumo da contratação;
+- Contratação preparada;
+- Order PIX gerada;
+- QR Code;
+- Pix Copia e Cola;
+- COPIAR CÓDIGO PIX;
+- cronômetro baseado no hold;
+- reserva até;
+- estado aguardando confirmação;
+- ausência de falso sucesso financeiro.
+
+A Order existente não foi paga somente para validar a UI.
+
+Nenhuma cobrança real foi realizada.
+
+O E2E financeiro Mercado Pago completo já havia sido validado anteriormente e NÃO foi repetido.
+
+## BUILD
+
+Último:
+
+npm.cmd run build
+
+APROVADO.
+
+Next.js:
+
+16.3.4.
+
+TypeScript:
+
+APROVADO.
+
+## DIFF CHECK
+
+git diff --check:
+
+APROVADO.
+
+Somente avisos conhecidos LF → CRLF.
+
+Nenhum erro de whitespace.
+
+## BANCO
+
+Migrations aplicadas:
+
+007–047.
+
+NÃO reaplicar nenhuma.
+
+Nenhuma migration 048 foi necessária.
+
+## WORKING TREE ESPERADO
+
+M CONTEXTO-PROJETO.md
+M app/admin/assinantes/novo/page.tsx
+M app/admin/assinantes/novo/subscription-form.tsx
+?? app/admin/assinantes/novo/actions.ts
+?? app/admin/assinantes/novo/admin-pix-checkout.tsx
+?? supabase/sql/047-admin-subscription-creation.sql
+?? ASSINATURAS-LOTE.txt
+?? CODIGO-COMPLETO.txt
+
+Nunca versionar:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt;
+- .env.local.
+
+Nunca usar:
+
+git add .
+
+## ESTADO FINAL
+
+Passo 1 — cadastro/acesso profissional de barbeiros:
+
+CONCLUÍDO.
+
+Passo 2 — estado do acesso profissional de barbeiros:
+
+CONCLUÍDO.
+
+Passo 3 — Nova Assinatura Admin:
+
+CONCLUÍDO NO WORKING TREE.
+
+Pagamento externo:
+
+IMPLEMENTADO sem teste financeiro fictício.
+
+PIX administrativo:
+
+IMPLEMENTADO E LIGADO AO MOTOR MERCADO PAGO EXISTENTE.
+
+QR Code:
+
+VALIDADO VISUALMENTE.
+
+Pix Copia e Cola:
+
+VALIDADO VISUALMENTE.
+
+Polling:
+
+OBSERVACIONAL E PRESERVADO.
+
+Confirmação pelo browser:
+
+INEXISTENTE, conforme arquitetura.
+
+Build:
+
+APROVADO.
+
+Banco:
+
+007–047 aplicadas.
+
+## PRÓXIMO PASSO
+
+Antes de iniciar qualquer nova frente:
+
+1. revisar este checkpoint;
+2. confirmar git status;
+3. preparar staging somente com caminhos explícitos;
+4. manter arquivos proibidos fora;
+5. commit/push SOMENTE após autorização explícita.
+
+Não iniciar automaticamente o Passo 4 antes do checkpoint Git do Passo 3.
+
+# FIM DO CHECKPOINT — 2026-09-29

@@ -1,6 +1,6 @@
-﻿"use client";
+"use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, type ReactNode, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -22,8 +22,10 @@ type Customer = {
 
 export default function CustomerEditForm({
   customer,
+  children,
 }: {
   customer: Customer;
+  children?: ReactNode;
 }) {
   const router = useRouter();
 
@@ -185,6 +187,8 @@ export default function CustomerEditForm({
           </p>
         </div>
       </div>
+
+      {children}
 
       <form onSubmit={handleSubmit}>
         <fieldset

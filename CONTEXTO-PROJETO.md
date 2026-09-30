@@ -29195,3 +29195,374 @@ Antes de iniciar qualquer nova frente:
 Não iniciar automaticamente o Passo 4 antes do checkpoint Git do Passo 3.
 
 # FIM DO CHECKPOINT — 2026-09-29
+
+---
+
+# CHECKPOINT — PASSO 4 / CLIENTES ADMIN E ACESSO À CENTRAL — 2026-09-30
+
+## PRIORIDADE
+
+Este checkpoint sucede o encerramento do Passo 3.
+
+PASSO 4 — CLIENTE/ADMIN E ACESSO À CENTRAL:
+
+IMPLEMENTADO NO WORKING TREE E VALIDADO ATÉ O LIMITE DOS DADOS REAIS EXISTENTES.
+
+Não houve envio de convite artificial apenas para teste.
+
+## GIT DE REFERÊNCIA
+
+Branch:
+
+main
+
+HEAD/origin no início desta frente:
+
+a6b584bbd9b3cb999a4b393c04073a801b22be75
+
+Commit anterior:
+
+a6b584b Moderniza nova assinatura administrativa
+
+## OBJETIVO
+
+Modernizar o Admin de Clientes para refletir a identidade segura já existente da Central do Cliente.
+
+Preservado:
+
+Supabase Auth
+→ customers.auth_user_id
+→ identidade privada do cliente.
+
+O Admin NÃO conhece, define ou exibe a senha permanente do cliente.
+
+## LISTAGEM ADMINISTRATIVA
+
+Rota:
+
+/admin/clientes
+
+A leitura agora inclui:
+
+customers.auth_user_id
+
+somente para derivar visualmente o estado:
+
+- ACESSO CONFIGURADO;
+- ACESSO NÃO CONFIGURADO.
+
+O identificador Auth não é apresentado visualmente ao Admin.
+
+Busca, histórico, edição e cadastro existentes foram preservados.
+
+## EDIÇÃO DO CLIENTE
+
+Rota:
+
+/admin/clientes/[id]
+
+Foi adicionado painel:
+
+CENTRAL DO CLIENTE.
+
+Para cliente vinculado:
+
+ACESSO CONFIGURADO.
+
+A interface informa que a identidade já está vinculada e que a senha não é exibida/administrada pelo Admin.
+
+Para cliente sem vínculo, a implementação está preparada para oferecer:
+
+ENVIAR CONVITE DE ACESSO
+
+quando existir e-mail cadastrado.
+
+Sem e-mail, o provisionamento fica indisponível até o cadastro de um e-mail válido.
+
+## PROVISIONAMENTO
+
+Criado:
+
+app/admin/clientes/[id]/actions.ts
+
+Server Action:
+
+provisionCustomerAccess(...)
+
+A action:
+
+- é server-only;
+- recebe apenas customerId;
+- valida UUID;
+- revalida supabase.auth.getUser();
+- exige profiles.role = admin;
+- recarrega customer no servidor;
+- utiliza o e-mail autoritativo salvo no customer;
+- exige e-mail válido;
+- recusa customer que já possui auth_user_id;
+- utiliza APP_URL validada;
+- utiliza createAdminClient somente após autorização;
+- envia convite com inviteUserByEmail;
+- não recebe senha;
+- não cria senha;
+- vincula auth_user_id condicionalmente com .is("auth_user_id", null);
+- em falha de vínculo remove somente a identidade Auth recém-criada;
+- revalida as rotas administrativas necessárias.
+
+Nenhuma role admin é concedida ao cliente.
+
+## UX DO PROVISIONAMENTO
+
+Criado:
+
+app/admin/clientes/[id]/customer-access-panel.tsx
+
+O painel:
+
+- apresenta estado do acesso;
+- apresenta e-mail cadastrado;
+- explica que o próprio cliente define a senha;
+- pede confirmação antes de disparar convite;
+- possui estado de envio;
+- feedback de erro/sucesso;
+- executa router.refresh() após provisionamento bem-sucedido.
+
+Nenhum convite foi enviado para o cliente atual, pois ele já possui acesso.
+
+## CONVITE DO CLIENTE
+
+Criada rota:
+
+/minha-assinatura/auth/convite
+
+Arquivo:
+
+app/minha-assinatura/auth/convite/page.tsx
+
+O fluxo segue o padrão seguro já validado da Área do Barbeiro:
+
+- recebe tokens de convite no hash;
+- estabelece sessão Supabase;
+- remove tokens da URL;
+- exige user válido;
+- exige e-mail confirmado;
+- exige customer vinculado por customers.auth_user_id = auth.uid();
+- exige correspondência entre e-mail confirmado da identidade e e-mail atual do customer;
+- em inconsistência encerra sessão;
+- somente após validação direciona para definição de senha.
+
+## DEFINIÇÃO INICIAL DE SENHA
+
+Criada rota:
+
+/minha-assinatura/definir-senha
+
+Arquivos:
+
+- app/minha-assinatura/definir-senha/page.tsx;
+- app/minha-assinatura/definir-senha/define-customer-password-form.tsx.
+
+A página server-side revalida:
+
+- sessão;
+- e-mail confirmado;
+- customer vinculado por auth_user_id;
+- correspondência de e-mail.
+
+O cliente define a própria senha.
+
+Regra mínima:
+
+6 caracteres.
+
+Confirmação de senha obrigatória.
+
+Após sucesso:
+
+updateUser({ password })
+→ signOut()
+→ /minha-assinatura/entrar.
+
+O Admin nunca conhece a senha.
+
+A recuperação de senha já existente permanece independente e preservada.
+
+## REDIRECT URL
+
+Foi adicionada no Supabase para desenvolvimento:
+
+http://localhost:3000/minha-assinatura/auth/convite
+
+Foram preservadas as URLs existentes de callback e recuperação.
+
+Produção já possui callback e recuperação.
+
+Antes de utilizar convite em produção ainda deverá ser adicionada:
+
+https://black-navalha.vercel.app/minha-assinatura/auth/convite
+
+e APP_URL de produção deve continuar apontando para a origem correta.
+
+## VALIDAÇÃO REAL DISPONÍVEL
+
+O único cliente real atualmente disponível para esta validação já possui customers.auth_user_id configurado.
+
+A tela de edição foi validada visualmente.
+
+Confirmado:
+
+- hierarquia correta;
+- Editar cliente;
+- painel Central do Cliente;
+- ACESSO CONFIGURADO;
+- e-mail;
+- informação de que senha não é administrada;
+- Dados do cliente preservados;
+- nenhum botão de novo convite para cliente já vinculado.
+
+Não foi removido vínculo existente.
+
+Não foi criado cliente artificial.
+
+Não foi enviado convite apenas para fabricar E2E.
+
+O primeiro E2E de provisionamento deve ocorrer naturalmente com cliente legítimo sem acesso.
+
+## NEXT.JS 16
+
+AGENTS.md foi respeitado.
+
+Documentação local consultada:
+
+- layouts/pages;
+- mutating data;
+- data security.
+
+Server Action revalida autenticação/autorização internamente.
+
+## BUILD
+
+npm.cmd run build:
+
+APROVADO.
+
+Next.js:
+
+16.3.4.
+
+TypeScript:
+
+APROVADO.
+
+Novas rotas reconhecidas:
+
+- /minha-assinatura/auth/convite;
+- /minha-assinatura/definir-senha.
+
+## DIFF CHECK
+
+git diff --check:
+
+APROVADO.
+
+Somente avisos conhecidos LF → CRLF.
+
+## BANCO
+
+Nenhuma migration criada.
+
+Migrations 007–047 permanecem aplicadas.
+
+Migration 048 NÃO foi necessária.
+
+Nenhuma alteração estrutural no banco.
+
+## PRESERVADO
+
+Não foi alterado/reconstruído:
+
+- /agendar;
+- create_public_multi_appointment;
+- Central do Cliente existente;
+- recuperação de senha;
+- renovação;
+- cancelamento/remarcação;
+- Mercado Pago Orders/PIX;
+- webhook/HMAC;
+- polling;
+- Admin financeiro;
+- capacidade;
+- Área do Barbeiro.
+
+## WORKING TREE FUNCIONAL ESPERADO
+
+Modificados:
+
+- app/admin/clientes/page.tsx;
+- app/admin/clientes/[id]/page.tsx;
+- app/admin/clientes/[id]/customer-edit-form.tsx.
+
+Novos:
+
+- app/admin/clientes/[id]/actions.ts;
+- app/admin/clientes/[id]/customer-access-panel.tsx;
+- app/minha-assinatura/auth/convite/page.tsx;
+- app/minha-assinatura/definir-senha/page.tsx;
+- app/minha-assinatura/definir-senha/define-customer-password-form.tsx.
+
+Continuam proibidos:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt;
+- .env.local.
+
+Nunca usar:
+
+git add .
+
+## ESTADO
+
+Passo 4:
+
+IMPLEMENTADO NO WORKING TREE.
+
+Estado de acesso no Admin:
+
+IMPLEMENTADO E VALIDADO.
+
+Cliente já vinculado:
+
+VALIDADO VISUALMENTE.
+
+Provisionamento seguro:
+
+IMPLEMENTADO.
+
+Convite/definição de senha:
+
+IMPLEMENTADOS E COMPILADOS.
+
+E2E de novo convite:
+
+PENDENTE conscientemente até existir cliente legítimo sem acesso.
+
+Build:
+
+APROVADO.
+
+Banco:
+
+INALTERADO.
+
+## PRÓXIMO PASSO
+
+Antes de nova frente:
+
+1. revisar Git;
+2. staging somente com caminhos explícitos;
+3. manter arquivos proibidos fora;
+4. commit/push somente com autorização explícita.
+
+Depois do checkpoint Git, a ordem de produto pode seguir para a fundação interna de notificações.
+
+# FIM DO CHECKPOINT — 2026-09-30

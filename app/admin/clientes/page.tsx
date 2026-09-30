@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 
 import {
   CalendarDays,
@@ -9,6 +9,7 @@ import {
   Phone,
   Search,
   Users,
+  ShieldCheck,
 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
@@ -20,6 +21,7 @@ type Customer = {
   email: string | null;
   notes: string | null;
   created_at: string;
+  auth_user_id: string | null;
 };
 
 type ClientesPageProps = {
@@ -48,7 +50,8 @@ export default async function ClientesPage({
       phone,
       email,
       notes,
-      created_at
+      created_at,
+      auth_user_id
     `)
     .order("name", {
       ascending: true,
@@ -347,6 +350,26 @@ export default async function ClientesPage({
                     >
                       {customer.name}
                     </strong>
+
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "5px",
+                        marginTop: "7px",
+                        color: customer.auth_user_id
+                          ? "#8fd49a"
+                          : "#777",
+                        fontSize: "9px",
+                        fontWeight: 800,
+                        letterSpacing: "0.06em",
+                      }}
+                    >
+                      <ShieldCheck size={12} />
+                      {customer.auth_user_id
+                        ? "ACESSO CONFIGURADO"
+                        : "ACESSO NÃO CONFIGURADO"}
+                    </span>
                   </div>
                 </div>
 

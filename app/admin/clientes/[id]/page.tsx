@@ -1,7 +1,8 @@
-﻿import { notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 import CustomerEditForm from "./customer-edit-form";
+import CustomerAccessPanel from "./customer-access-panel";
 
 type Props = {
   params: Promise<{
@@ -23,7 +24,8 @@ export default async function EditarClientePage({
       name,
       phone,
       email,
-      notes
+      notes,
+      auth_user_id
     `)
     .eq("id", id)
     .single();
@@ -41,6 +43,12 @@ export default async function EditarClientePage({
         email: customer.email,
         notes: customer.notes,
       }}
-    />
+    >
+      <CustomerAccessPanel
+        customerId={customer.id}
+        email={customer.email}
+        accessConfigured={Boolean(customer.auth_user_id)}
+      />
+    </CustomerEditForm>
   );
 }

@@ -29566,3 +29566,699 @@ Antes de nova frente:
 Depois do checkpoint Git, a ordem de produto pode seguir para a fundação interna de notificações.
 
 # FIM DO CHECKPOINT — 2026-09-30
+
+---
+
+# CHECKPOINT FINAL — FUNDAÇÃO INTERNA DE NOTIFICAÇÕES / PRÓXIMA ETAPA APÓS TESTE CLOUDFLARE — 2026-10-02
+
+## PRIORIDADE
+
+Este é o checkpoint mais recente e deve prevalecer sobre checkpoints anteriores quando houver divergência.
+
+A modernização administrativa dos Passos 1–4 permanece CONCLUÍDA E VERSIONADA.
+
+A nova frente de FUNDAÇÃO INTERNA DE NOTIFICAÇÕES foi iniciada e sua primeira etapa estrutural de banco está CONCLUÍDA.
+
+A próxima camada de código das notificações será conscientemente retomada SOMENTE DEPOIS da prova de compatibilidade/hospedagem no Cloudflare Workers.
+
+NÃO iniciar WhatsApp/n8n automaticamente.
+
+## GIT DE REFERÊNCIA
+
+Branch:
+
+main
+
+HEAD/origin/main confirmado no início desta frente:
+
+79e0251b0c2797c85da52628cc9e64c025cc028f
+
+Commit:
+
+79e0251 Moderniza acesso de clientes a Central
+
+Working tree antes deste checkpoint:
+
+?? ASSINATURAS-LOTE.txt
+?? CODIGO-COMPLETO.txt
+?? supabase/sql/048-notification-foundation.sql
+
+Após esta atualização documental:
+
+CONTEXTO-PROJETO.md também ficará modificado.
+
+Nunca versionar:
+
+- ASSINATURAS-LOTE.txt;
+- CODIGO-COMPLETO.txt;
+- .env.local.
+
+Nunca usar:
+
+git add .
+
+Commit/push somente com autorização explícita.
+
+## AGENTS.md
+
+AGENTS.md foi lido integralmente.
+
+Regra preservada:
+
+antes de utilizar novas APIs/convenções do Next.js 16, consultar a documentação local relevante existente em:
+
+node_modules/next/dist/docs/
+
+## MIGRATIONS
+
+Migrations 007–047 já estavam aplicadas.
+
+Nesta frente foi criada e APLICADA com autorização explícita:
+
+supabase/sql/048-notification-foundation.sql
+
+Resultado no Supabase:
+
+Success. No rows returned
+
+Portanto:
+
+MIGRATIONS 007–048 ESTÃO APLICADAS.
+
+NÃO reaplicar nenhuma.
+
+Próximo número disponível:
+
+049.
+
+Não criar migration 049 sem necessidade técnica concreta e autorização apropriada.
+
+## OBJETIVO DA FUNDAÇÃO
+
+Arquitetura estabelecida:
+
+evento do Black Navalha
+→ registro interno idempotente
+→ scheduling
+→ delivery por canal
+→ tentativa/resultado/erro.
+
+A fundação é deliberadamente independente de:
+
+- WhatsApp;
+- Meta;
+- n8n;
+- IA;
+- BSP;
+- qualquer fornecedor específico.
+
+Black Navalha continua sendo autoridade das regras.
+
+Nenhuma regra crítica foi movida para automação externa.
+
+## TABELA notification_events
+
+Criada:
+
+public.notification_events
+
+Responsabilidade:
+
+representar a ocorrência/intenção interna de notificação.
+
+Estrutura inclui:
+
+- id uuid;
+- idempotency_key;
+- event_type;
+- entity_type opcional;
+- entity_id opcional;
+- recipient_type;
+- recipient_id;
+- scheduled_for;
+- payload jsonb;
+- status;
+- created_at;
+- updated_at.
+
+Estados definidos:
+
+- pending;
+- processing;
+- completed;
+- cancelled.
+
+idempotency_key possui unicidade no banco.
+
+Retry da mesma ocorrência lógica deve reutilizar a mesma chave.
+
+entity_type/entity_id são referências lógicas polimórficas e não receberam FK artificial.
+
+Isso permite referenciar futuramente entidades diferentes sem acoplar a fundação exclusivamente a appointments.
+
+recipient_type/recipient_id seguem a mesma direção para suportar, por exemplo:
+
+- customer;
+- barber.
+
+## TABELA notification_deliveries
+
+Criada:
+
+public.notification_deliveries
+
+Responsabilidade:
+
+representar a entrega de um evento através de determinado canal.
+
+Estrutura inclui:
+
+- id uuid;
+- event_id;
+- channel;
+- provider opcional;
+- status;
+- attempt_count;
+- max_attempts;
+- next_attempt_at;
+- last_attempt_at;
+- locked_at;
+- last_error;
+- provider_message_id;
+- sent_at;
+- created_at;
+- updated_at.
+
+Estados:
+
+- pending;
+- processing;
+- retry;
+- sent;
+- failed;
+- cancelled.
+
+Existe unicidade:
+
+(event_id, channel)
+
+Portanto retry não deve criar nova delivery para o mesmo evento/canal.
+
+## SEPARAÇÃO EVENTO x ENTREGA
+
+Decisão consolidada:
+
+notification_event:
+"algo aconteceu/deve ser comunicado".
+
+notification_delivery:
+"esse evento precisa ser entregue por determinado canal".
+
+Isso permite adicionar futuramente:
+
+- WhatsApp;
+- e-mail;
+- outro canal;
+
+sem remodelar eventos de negócio.
+
+provider é opcional e pertence à delivery, não ao evento.
+
+A fundação não conhece Meta/n8n.
+
+## SCHEDULING
+
+Evento possui:
+
+scheduled_for.
+
+Delivery possui:
+
+next_attempt_at.
+
+Separação intencional:
+
+scheduled_for:
+momento lógico da comunicação.
+
+next_attempt_at:
+momento em que aquele canal pode tentar/repetir a entrega.
+
+locked_at foi preparado para futura recuperação de processamento concorrente/stale worker.
+
+Nenhum worker foi implementado nesta etapa.
+
+Nenhum cron foi implementado.
+
+Nenhuma Queue externa foi conectada.
+
+## RETRIES
+
+A fundação suporta:
+
+- attempt_count;
+- max_attempts;
+- next_attempt_at;
+- last_attempt_at;
+- last_error;
+- locked_at;
+- failed.
+
+A política concreta de backoff ainda NÃO foi definida.
+
+Não foi criada terceira tabela de tentativas nesta primeira fundação.
+
+O histórico operacional mínimo permanece na própria delivery.
+
+Uma futura notification_delivery_attempts poderá ser adicionada se auditoria de cada tentativa individual se tornar requisito real, sem remodelar events/deliveries.
+
+## PAYLOAD
+
+payload deve ser:
+
+mínimo e sanitizado.
+
+Não persistir desnecessariamente:
+
+- senha;
+- tokens;
+- segredos;
+- payload financeiro bruto;
+- objetos completos de cliente;
+- dados privados sem necessidade.
+
+Referências de entidade/destinatário permanecem nas colunas próprias.
+
+## ÍNDICES VALIDATEDOS
+
+Foram confirmados no Supabase os cinco índices da fundação:
+
+notification_events_due_idx
+notification_events_entity_idx
+notification_events_recipient_idx
+notification_deliveries_due_idx
+notification_deliveries_processing_idx
+
+## RLS
+
+Confirmado no Supabase:
+
+notification_events:
+RLS = true
+policies = 0
+
+notification_deliveries:
+RLS = true
+policies = 0
+
+Não existe API pública direta para a fila.
+
+anon/authenticated não receberam acesso direto.
+
+## PRIVILÉGIO MÍNIMO
+
+Após a primeira aplicação foi observado que service_role possuía privilégios adicionais herdados/disponíveis:
+
+- REFERENCES;
+- TRIGGER;
+- TRUNCATE.
+
+Isso foi corrigido conscientemente no banco.
+
+Estado final validado:
+
+notification_events / service_role:
+
+- INSERT;
+- SELECT;
+- UPDATE.
+
+notification_deliveries / service_role:
+
+- INSERT;
+- SELECT;
+- UPDATE.
+
+Não existem para service_role nessas tabelas:
+
+- DELETE;
+- TRUNCATE;
+- TRIGGER;
+- REFERENCES.
+
+O arquivo local 048 também foi atualizado para reproduzir esse estado através de:
+
+REVOKE ALL FROM service_role
+→ GRANT SELECT, INSERT, UPDATE.
+
+Portanto SQL versionado e banco estão alinhados.
+
+## DIFF CHECK DA 048
+
+git diff --check:
+
+APROVADO.
+
+Nenhum erro de whitespace.
+
+Avisos LF/CRLF conhecidos do Windows permanecem apenas informativos quando aplicáveis.
+
+## EVENTOS DE PRODUTO
+
+Nenhum evento real foi implementado ainda.
+
+Eventos futuros desejados permanecem, por exemplo:
+
+Cliente:
+
+- appointment.reminder_24h;
+- appointment.reminder_2h;
+- appointment.confirmed;
+- appointment.cancelled;
+- appointment.rescheduled;
+- subscription.payment_confirmed;
+- subscription.renewal_available.
+
+Barbeiro:
+
+- barber.daily_agenda;
+- appointment.created;
+- appointment.cancelled;
+- appointment.rescheduled;
+- subscription.assigned.
+
+NÃO implementar todos de uma vez.
+
+## WHATSAPP / N8N
+
+NÃO implementados.
+
+NÃO instalar SDK WhatsApp.
+
+NÃO configurar Meta.
+
+NÃO configurar n8n nesta etapa.
+
+NÃO mover regra crítica para automação.
+
+Uma futura solução wa.me humana continua possível sem alterar a modelagem interna.
+
+## PRÓXIMO PASSO DAS NOTIFICAÇÕES — ADIADO ATÉ APÓS CLOUDFLARE
+
+O próximo passo técnico já planejado é criar uma fronteira server-only, fornecedor-neutra, por exemplo:
+
+lib/notifications/foundation.ts
+
+Ela deverá fornecer inicialmente operações para:
+
+1. registrar/reutilizar notification_event por idempotency_key;
+2. registrar/reutilizar notification_delivery por (event_id, channel);
+3. detectar conflito quando a mesma chave idempotente representar identidade lógica incompatível;
+4. não enviar mensagem;
+5. não implementar WhatsApp/n8n;
+6. não implementar worker/cron inicialmente.
+
+Esse arquivo AINDA NÃO FOI CRIADO.
+
+Não presumir que existe.
+
+Depois dessa camada, a evolução futura poderá estudar claim atômico de deliveries devidas, preferencialmente com semântica PostgreSQL segura como FOR UPDATE SKIP LOCKED, antes de qualquer consumidor real.
+
+POR DECISÃO DESTE CHECKPOINT, ESSA IMPLEMENTAÇÃO DEVE SER RETOMADA SOMENTE DEPOIS DOS TESTES CLOUDFLARE.
+
+## NOVA FRENTE TEMPORÁRIA — PROVA CLOUDFLARE WORKERS
+
+Antes de continuar notificações, será aberta uma frente isolada para testar hospedagem.
+
+Objetivo:
+
+avaliar se o Black Navalha atual pode rodar de forma segura no Cloudflare Workers sem adaptação perigosa/invasiva.
+
+NÃO migrar produção automaticamente.
+
+NÃO remover Vercel.
+
+NÃO comprar VPS ainda.
+
+NÃO alterar DNS/domínio.
+
+Executar prova paralela e reversível.
+
+## MOTIVAÇÃO FINANCEIRA
+
+Objetivo aproximado informado:
+
+manter hospedagem do sistema dentro de R$ 100/mês.
+
+Alternativas discutidas:
+
+- Cloudflare Workers Paid;
+- Hostinger KVM 1;
+- Contabo;
+- Hetzner.
+
+Hostinger KVM 1 observado anteriormente:
+
+- R$ 29,99/mês promocional;
+- R$ 59,99/mês na renovação apresentada;
+- 1 vCPU;
+- 4 GB RAM;
+- 50 GB NVMe;
+- 4 TB de banda.
+
+Hostinger permanece fallback provável caso Cloudflare apresente incompatibilidade relevante.
+
+Não comprar ainda.
+
+## CLOUDFLARE — PREÇOS CONSULTADOS EM 2026-10-02
+
+Documentação/tabela oficial fornecida nesta continuidade.
+
+Workers Paid:
+
+mínimo de US$ 5/mês por conta.
+
+Inclui aproximadamente:
+
+- 10 milhões de requests/mês;
+- 30 milhões de CPU-ms/mês;
+- static assets gratuitos/ilimitados;
+- sem cobrança adicional de bandwidth/egress para Workers.
+
+Excedentes documentados:
+
+- US$ 0,30 por milhão adicional de requests;
+- US$ 0,02 por milhão adicional de CPU-ms.
+
+Workers Free:
+
+- 100.000 requests/dia;
+- 10 ms de CPU por invocação.
+
+Decisão de avaliação:
+
+não assumir Workers Free adequado ao Black Navalha somente pela quantidade de requests.
+
+O projeto possui runtime server-side relevante.
+
+Se Cloudflare for escolhido para hospedagem principal, Workers Paid de US$ 5/mês é a referência econômica mais realista neste momento.
+
+Preços podem mudar futuramente e devem ser revalidados antes da contratação definitiva.
+
+## PROVA CLOUDFLARE — PONTOS OBRIGATÓRIOS
+
+Testar compatibilidade real com:
+
+- Next.js 16.3.4;
+- React 19;
+- App Router;
+- Server Components;
+- Server Actions;
+- Route Handlers;
+- cookies;
+- @supabase/ssr;
+- Supabase Auth;
+- createAdminClient;
+- server-only;
+- secrets server-side;
+- redirects;
+- crypto/HMAC Mercado Pago;
+- fetch Mercado Pago;
+- next/image;
+- páginas dinâmicas;
+- build;
+- runtime.
+
+Não confiar apenas em material comercial dizendo que Next.js é suportado.
+
+Verificar documentação atual do adaptador/ecossistema aplicável antes de instalação.
+
+## ESTRATÉGIA DE HOSPEDAGEM ATUAL
+
+Produção atual no Vercel deve permanecer intacta durante a prova.
+
+Estratégia:
+
+Vercel atual
+→ permanece funcionando.
+
+Cloudflare
+→ prova paralela/reversível.
+
+Se a prova passar sem impacto arquitetural perigoso:
+
+Cloudflare Workers Paid passa a ser forte candidato principal.
+
+Se houver incompatibilidade significativa:
+
+Hostinger KVM 1 permanece fallback.
+
+## CLOUDFLARE — NÃO PRECISAMOS NESTA PROVA
+
+Não migrar Supabase.
+
+Não trocar PostgreSQL por D1.
+
+Não mover dados para KV.
+
+Não usar Durable Objects por conveniência.
+
+Não usar Hyperdrive sem necessidade.
+
+Não mover notification_events para Cloudflare Queues.
+
+Não utilizar Workers AI.
+
+Não reconstruir arquitetura financeira.
+
+Supabase continua backend/PostgreSQL autoritativo.
+
+## APLICATIVO FUTURO
+
+A possibilidade futura de:
+
+- PWA;
+- Capacitor;
+- React Native/Expo;
+
+é uma decisão separada da hospedagem.
+
+Escolher Cloudflare, VPS ou manter Vercel agora não deve acoplar o projeto a uma estratégia específica de app mobile.
+
+## REGRAS CRÍTICAS PRESERVADAS
+
+Não reconstruir:
+
+- /agendar;
+- create_public_multi_appointment;
+- benefícios/preços;
+- Central do Cliente;
+- identidade segura;
+- recuperação de senha;
+- cancelamento/remarcação;
+- Mercado Pago Orders/PIX;
+- webhook/HMAC;
+- polling;
+- renovação voluntária/autenticada;
+- catálogo multiplano;
+- capacidade;
+- snapshots;
+- Área do Barbeiro;
+- comissões;
+- Admin de Planos;
+- Passos 1–4 administrativos;
+- fundação notification_events/notification_deliveries.
+
+Pagamento:
+
+mensal AVULSO via PIX.
+
+SEM recorrência automática Mercado Pago.
+
+Preservar:
+
+POST /v1/orders
+GET /v1/orders/{id}
+external_reference = subscription_charge.id
+Webhook HMAC
+data.id ORIGINAL
+GET Order server-side
+confirm_mercado_pago_subscription_payment
+polling observacional
+idempotência.
+
+Browser NÃO confirma pagamento.
+
+Capacidade:
+
+30 vagas por barbeiro.
+
+BLACK_STANDARD:
+25.
+
+BLACK_PREMIUM:
+5.
+
+Preservar SELECT ... FOR UPDATE.
+
+## PRÓXIMA SEQUÊNCIA
+
+1. Encerrar esta frente com checkpoint documental.
+2. Abrir novo chat dedicado à prova Cloudflare Workers.
+3. Confirmar Git real.
+4. Considerar migrations 007–048 aplicadas.
+5. Preservar 048 local sem reaplicá-la.
+6. Inspecionar package.json e next.config.ts.
+7. Consultar documentação local Next.js conforme AGENTS.md.
+8. Consultar documentação atual Cloudflare/OpenNext.
+9. Planejar prova antes de instalar/deployar.
+10. Não afetar Vercel/produção.
+11. Executar prova local/paralela.
+12. Decidir Cloudflare Workers Paid versus Hostinger KVM 1 com base no projeto real.
+13. APÓS OS TESTES DE HOSPEDAGEM, RETOMAR A FUNDAÇÃO DE NOTIFICAÇÕES exatamente de:
+    lib/notifications/foundation.ts
+14. Depois evoluir processamento interno antes de qualquer WhatsApp/n8n.
+
+## ESTADO FINAL
+
+Migration 048:
+
+APLICADA E VALIDADA.
+
+Fundação de tabelas de notificações:
+
+CONCLUÍDA.
+
+RLS:
+
+VALIDADO.
+
+Privilégio mínimo:
+
+VALIDADO.
+
+Índices:
+
+VALIDADOS.
+
+WhatsApp:
+
+NÃO INICIADO.
+
+n8n:
+
+NÃO INICIADO.
+
+Próxima camada TypeScript das notificações:
+
+ADIADA CONSCIENTEMENTE ATÉ APÓS TESTE CLOUDFLARE.
+
+Próxima frente:
+
+PROVA DE COMPATIBILIDADE CLOUDFLARE WORKERS.
+
+Commit/push:
+
+NÃO AUTORIZADOS AUTOMATICAMENTE.
+
+# FIM DO CHECKPOINT — 2026-10-02

@@ -33045,3 +33045,408 @@ Git checkpoint:
 PENDENTE DE AUTORIZAÇÃO.
 
 # FIM DO CHECKPOINT — 2026-10-09
+
+---
+
+# CHECKPOINT — FUNDAÇÃO TYPESCRIPT DE NOTIFICAÇÕES — 2026-10-09
+
+## PRIORIDADE
+
+Este checkpoint registra a implementação inicial da camada TypeScript da Fundação Interna de Notificações.
+
+A homologação técnica principal Cloudflare Workers permanece CONCLUÍDA E APROVADA.
+
+A compatibilidade Vercel + Cloudflare Workers deve continuar preservada.
+
+Não repetir a homologação Cloudflare sem incompatibilidade nova comprovada.
+
+## GIT DE REFERÊNCIA
+
+Branch:
+
+main
+
+HEAD/origin/main confirmado antes da implementação:
+
+699188c5c7e4f3ab73d8f8b99acdf924d0daf532
+
+Commit:
+
+699188c Conclui homologacao tecnica Cloudflare Workers
+
+Nenhum commit/push foi realizado durante a implementação das notificações.
+
+Arquivos auxiliares que permanecem fora do Git:
+
+ASSINATURAS-LOTE.txt
+CODIGO-COMPLETO.txt
+
+.env.local nunca deve ser versionado.
+
+Nunca usar git add .
+
+## MIGRATIONS
+
+Migrations 007–048:
+
+APLICADAS.
+
+NÃO reaplicar nenhuma.
+
+Migration 048:
+
+supabase/sql/048-notification-foundation.sql
+
+Estrutura já existente:
+
+notification_events
+notification_deliveries
+
+Migration 049:
+
+NÃO criada.
+
+Nenhuma alteração estrutural de banco foi realizada nesta etapa.
+
+## IMPLEMENTAÇÃO
+
+Criado:
+
+lib/notifications/foundation.ts
+
+O arquivo utiliza:
+
+import "server-only"
+
+e:
+
+createAdminClient()
+
+de:
+
+lib/supabase/admin.ts
+
+A implementação permanece independente de:
+
+Cloudflare;
+Vercel;
+WhatsApp;
+Meta;
+n8n;
+IA;
+provedores de mensagens.
+
+Nenhuma dependência adicional foi instalada.
+
+## REGISTER NOTIFICATION EVENT
+
+Função:
+
+registerNotificationEvent()
+
+Responsabilidades:
+
+- validar os dados de entrada;
+- validar identificadores UUID;
+- exigir scheduledFor com timezone explícito;
+- sanitizar payload;
+- registrar notification_event;
+- utilizar idempotency_key;
+- recuperar evento existente em conflito de unicidade;
+- comparar identidade lógica;
+- comparar destinatário;
+- comparar entidade;
+- comparar scheduled_for;
+- comparar payload;
+- rejeitar reutilização incompatível da mesma chave;
+- preservar evento existente.
+
+A unicidade real permanece garantida pelo PostgreSQL.
+
+## REGISTER NOTIFICATION DELIVERY
+
+Função:
+
+registerNotificationDelivery()
+
+Responsabilidades:
+
+- validar eventId;
+- validar channel;
+- validar maxAttempts;
+- confirmar existência do evento;
+- criar delivery inicial;
+- utilizar scheduled_for como next_attempt_at inicial;
+- reutilizar delivery existente por event_id + channel;
+- detectar maxAttempts incompatível;
+- preservar estado e tentativas anteriores.
+
+Nenhuma tentativa de envio é executada.
+
+## SEGURANÇA
+
+A implementação utiliza fronteira server-only.
+
+Não foi criada:
+
+- rota pública;
+- Server Action pública;
+- integração WhatsApp;
+- integração n8n;
+- worker;
+- cron;
+- Queue Cloudflare.
+
+As tabelas continuam protegidas por RLS.
+
+service_role permanece limitado a:
+
+SELECT;
+INSERT;
+UPDATE.
+
+Nenhum DELETE foi concedido.
+
+Payload possui validações iniciais:
+
+- objeto JSON;
+- campos simples;
+- tamanho máximo;
+- rejeição de nomes de campos associados a credenciais e informações sensíveis.
+
+IMPORTANTE:
+
+O filtro inicial não substitui contratos específicos e allowlists dos futuros produtores.
+
+Não armazenar segredos, tokens, senhas, dados financeiros brutos ou objetos privados completos.
+
+## TESTES ISOLADOS
+
+Foi criado um teste temporário fora do repositório:
+
+$env:TEMP\black-navalha-notifications-foundation.test.cjs
+
+Utilizado:
+
+Node.js 24;
+node:test;
+TypeScript transpileModule;
+Supabase simulado em memória.
+
+Nenhuma biblioteca de testes foi instalada.
+
+Cenários:
+
+1. registro inicial de evento;
+2. reutilização idempotente do evento;
+3. conflito de identidade;
+4. conflito de scheduled_for;
+5. rejeição de payload sensível;
+6. registro inicial de delivery;
+7. reutilização idempotente de delivery;
+8. conflito de maxAttempts;
+9. ausência de envios e chamadas externas.
+
+Resultado:
+
+9 testes executados.
+9 aprovados.
+0 falhas.
+
+Tentativas simuladas de INSERT:
+
+9.
+
+INSERTs simulados bem-sucedidos:
+
+2.
+
+Chamadas externas:
+
+0.
+
+Nenhuma conexão real com Supabase foi realizada pelos testes.
+
+## LIMITAÇÃO DOS TESTES
+
+A idempotência foi validada contra respostas simuladas do banco.
+
+Não foi executado teste de concorrência real no PostgreSQL.
+
+A unicidade das tabelas já existe na migration 048.
+
+Não afirmar que concorrência real foi testada nesta etapa.
+
+Nenhum registro artificial foi criado nas tabelas reais de notificações.
+
+## TYPESCRIPT
+
+Executado:
+
+npm.cmd exec -- tsc --noEmit
+
+Resultado:
+
+APROVADO.
+
+Sem erros TypeScript.
+
+## BUILD FINAL
+
+Executado:
+
+npm.cmd run build
+
+Resultado:
+
+APROVADO.
+
+Next.js:
+
+16.3.8.
+
+React:
+
+19.2.8.
+
+Compilação:
+
+APROVADA.
+
+TypeScript:
+
+APROVADO.
+
+Rotas:
+
+45/45.
+
+Nenhuma rota nova foi criada.
+
+## DIFF CHECK
+
+Executado:
+
+git diff --check
+
+E verificação do novo arquivo não rastreado.
+
+Resultado:
+
+APROVADO.
+
+Somente aviso conhecido de futura conversão LF/CRLF.
+
+Nenhum erro de whitespace.
+
+## REGRAS PRESERVADAS
+
+Supabase/PostgreSQL continua backend autoritativo.
+
+Vercel e Cloudflare Workers continuam oficialmente suportados.
+
+Cloudflare permanece principal candidata à hospedagem definitiva.
+
+Vercel permanece alternativa suportada.
+
+Nenhuma migração definitiva de hospedagem foi executada.
+
+Não foi alterado:
+
+/agendar;
+create_public_multi_appointment;
+Mercado Pago Orders;
+PIX;
+webhook;
+HMAC;
+polling;
+renovação;
+Central do Cliente;
+Admin;
+Área do Barbeiro;
+capacidade;
+comissões.
+
+Nenhuma cobrança real foi realizada.
+
+## ESTADO FINAL
+
+Fundação estrutural PostgreSQL:
+
+CONCLUÍDA.
+
+Camada TypeScript server-only:
+
+IMPLEMENTADA.
+
+Registro idempotente de eventos:
+
+VALIDADO EM TESTE ISOLADO.
+
+Registro idempotente de entregas:
+
+VALIDADO EM TESTE ISOLADO.
+
+Detecção de conflitos:
+
+VALIDADA EM TESTE ISOLADO.
+
+Build:
+
+APROVADO.
+
+TypeScript:
+
+APROVADO.
+
+Banco:
+
+INALTERADO.
+
+Envio de mensagens:
+
+NÃO IMPLEMENTADO.
+
+WhatsApp:
+
+NÃO IMPLEMENTADO.
+
+n8n:
+
+NÃO IMPLEMENTADO.
+
+Cron/worker:
+
+NÃO IMPLEMENTADOS.
+
+## PRÓXIMOS PASSOS
+
+1. Confirmar Git após este checkpoint documental.
+2. Commit/push somente mediante autorização explícita.
+3. Não repetir builds/testes aprovados sem necessidade.
+4. Na próxima evolução, definir processamento seguro de notificações pendentes.
+5. Antes de qualquer consumidor real, estudar claim atômico de deliveries devidas.
+6. Considerar PostgreSQL FOR UPDATE SKIP LOCKED para concorrência.
+7. Definir política de retries/backoff.
+8. Não implementar WhatsApp/n8n automaticamente.
+9. Não criar migration 049 sem necessidade comprovada e autorização.
+
+## COMERCIALIZAÇÃO FUTURA
+
+Preservar o Black Navalha como produto comercial reutilizável.
+
+Não implementar multi-tenant automaticamente.
+
+Cada implantação comercial deverá possuir isolamento adequado de:
+
+- banco;
+- autenticação;
+- credenciais;
+- pagamentos;
+- dados pessoais;
+- configurações;
+- ambiente de produção.
+
+Preservar portabilidade Vercel + Cloudflare Workers.
+
+# FIM DO CHECKPOINT — 2026-10-09

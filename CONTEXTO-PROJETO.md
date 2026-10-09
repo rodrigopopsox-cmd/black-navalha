@@ -30262,3 +30262,2786 @@ Commit/push:
 NÃO AUTORIZADOS AUTOMATICAMENTE.
 
 # FIM DO CHECKPOINT — 2026-10-02
+
+---
+
+# CHECKPOINT INTERMEDIÁRIO — PROVA CLOUDFLARE WORKERS / BUILD APROVADO E FALHA ISOLADA DO WORKERD LOCAL — 2026-10-05
+
+## PRIORIDADE
+
+Este é o checkpoint mais recente e deve prevalecer sobre checkpoints anteriores quando houver divergência.
+
+A frente atual é exclusivamente:
+
+PROVA DE COMPATIBILIDADE CLOUDFLARE WORKERS.
+
+Produção Vercel permanece intacta.
+
+NÃO migrar produção.
+
+NÃO remover Vercel.
+
+NÃO alterar domínio/DNS.
+
+NÃO comprar VPS ainda.
+
+NÃO realizar cobrança real.
+
+NÃO retomar notificações até encerrar esta prova.
+
+## GIT OFICIAL NO INÍCIO DA PROVA
+
+Branch:
+
+main
+
+HEAD:
+
+826841e8d73c2d0f810e4423b496d331732aecde
+
+origin/main:
+
+826841e8d73c2d0f810e4423b496d331732aecde
+
+Working tree inicial confirmado:
+
+?? ASSINATURAS-LOTE.txt
+?? CODIGO-COMPLETO.txt
+
+Esses dois arquivos NÃO devem ser versionados.
+
+.env.local nunca deve ser exibido/versionado.
+
+Nunca usar:
+
+git add .
+
+Commit/push somente com autorização explícita.
+
+## MIGRATIONS
+
+Migrations 007–048 permanecem APLICADAS.
+
+NÃO reaplicar nenhuma.
+
+Migration 049 NÃO foi criada.
+
+Nenhuma alteração de banco foi realizada nesta prova Cloudflare.
+
+## NOTIFICAÇÕES
+
+Continuam conscientemente PAUSADAS.
+
+Próximo ponto futuro permanece:
+
+lib/notifications/foundation.ts
+
+Esse arquivo NÃO foi criado nesta prova.
+
+Nenhum WhatsApp foi implementado.
+
+Nenhum n8n foi implementado.
+
+Nenhum worker de notificações foi implementado.
+
+## AGENTS / NEXT.JS LOCAL
+
+AGENTS.md foi lido.
+
+Regra preservada:
+
+antes de novas APIs/convenções Next.js 16, consultar documentação local em:
+
+node_modules/next/dist/docs/
+
+Foram consultadas documentações locais relevantes para:
+
+- Server Components;
+- Route Handlers;
+- deployment;
+- data security;
+- environment variables;
+- Server Actions;
+- runtime;
+- cookies();
+- Runtime Integration / adapters.
+
+Foi confirmado no Next.js 16 que cookies() é assíncrono e o projeto já utiliza:
+
+const cookieStore = await cookies()
+
+corretamente.
+
+## ESTADO INICIAL DO PROJETO
+
+package.json inicialmente utilizava:
+
+next = 16.3.4
+eslint-config-next = 16.3.4
+react = 19.2.8
+react-dom = 19.2.8
+
+next.config.ts:
+
+essencialmente vazio.
+
+Nenhum adaptador Cloudflare estava instalado.
+
+Nenhum runtime Edge explícito foi encontrado.
+
+Varredura do código não encontrou dependências estruturais explícitas relevantes de:
+
+- fs;
+- path;
+- child_process;
+- net;
+- tls;
+- filesystem persistente.
+
+## CÓDIGO SERVER-SIDE INSPECIONADO
+
+Foram inspecionados os pontos críticos reais:
+
+lib/supabase/server.ts
+lib/supabase/admin.ts
+lib/mercado-pago/client.ts
+lib/mercado-pago/webhook-signature.ts
+app/api/mercado-pago/webhook/route.ts
+app/minha-assinatura/auth/callback/route.ts
+app/minha-assinatura/auth/recuperacao/route.ts
+
+Confirmado:
+
+Supabase SSR:
+
+- @supabase/ssr;
+- cookies() do Next;
+- createServerClient;
+- HTTP para Supabase.
+
+Admin Supabase:
+
+- import "server-only";
+- SUPABASE_SERVICE_ROLE_KEY server-side;
+- createClient do supabase-js.
+
+Mercado Pago:
+
+- fetch nativo;
+- Headers;
+- Request/Response;
+- HTTPS externo.
+
+Webhook HMAC:
+
+- import "server-only";
+- node:crypto;
+- createHmac;
+- timingSafeEqual;
+- Buffer.
+
+Portanto nodejs_compat é necessário/recomendado para preservar a implementação HMAC atual sem reescrita prematura.
+
+## DOCUMENTAÇÃO ATUAL OPENNEXT / CLOUDFLARE
+
+Foi consultada documentação atual do OpenNext Cloudflare.
+
+Adaptador atual identificado:
+
+@opennextjs/cloudflare
+
+NÃO utilizar:
+
+@cloudflare/next-on-pages
+
+para esta prova.
+
+Documentação atual confirmou suporte a:
+
+- Next.js 16 minor/patch dentro da faixa suportada pelo pacote;
+- App Router;
+- Route Handlers;
+- Dynamic Routes;
+- SSR;
+- SSG;
+- Image Optimization;
+- PPR;
+- ISR;
+- Node.js runtime do Next sobre Workers.
+
+OpenNext recomenda utilizar o Node.js runtime do Next.
+
+Também documenta que suporte completo em Windows NÃO é garantido e recomenda, quando necessário:
+
+- WSL;
+- Linux VM;
+- CI Linux/macOS.
+
+## VERSÕES ATUAIS CONSULTADAS
+
+@opennextjs/cloudflare:
+
+1.20.8
+
+Peer dependency:
+
+next >=15.5.27 <16 || >=16.3.8
+
+wrangler:
+
+^4.125.0
+
+Wrangler atual consultado:
+
+4.147.0
+
+Node exigido por Wrangler atual:
+
+>=22.0.0
+
+Node local:
+
+v24.20.0
+
+Portanto Node local é compatível.
+
+## NEXT.JS — ATUALIZAÇÃO MÍNIMA NECESSÁRIA
+
+O Black Navalha estava em:
+
+Next.js 16.3.4
+
+OpenNext 1.20.8 exige para Next 16:
+
+>=16.3.8
+
+Não foi utilizado:
+
+--force
+--legacy-peer-deps
+
+Foi primeiro executado baseline:
+
+npm.cmd run build
+
+em Next 16.3.4.
+
+Resultado:
+
+APROVADO.
+
+45/45 rotas geradas.
+
+Depois foi realizada atualização mínima de patch:
+
+next:
+16.3.4 → 16.3.8
+
+eslint-config-next:
+16.3.4 → 16.3.8
+
+Comando utilizado:
+
+npm.cmd install next@16.3.8 eslint-config-next@16.3.8 --save-exact
+
+Após a atualização:
+
+npm.cmd run build
+
+APROVADO.
+
+45/45 rotas preservadas.
+
+TypeScript:
+
+APROVADO.
+
+git diff --check:
+
+sem erro; somente avisos conhecidos LF/CRLF.
+
+Portanto Next 16.3.8 não introduziu regressão de build detectada.
+
+## DEPENDÊNCIAS CLOUDFLARE INSTALADAS LOCALMENTE
+
+Foram instaladas como devDependencies:
+
+@opennextjs/cloudflare@1.20.8
+wrangler@4.147.0
+
+Sem --force e sem --legacy-peer-deps.
+
+Nenhum SDK Mercado Pago adicional foi instalado.
+
+Nenhum D1/KV/Hyperdrive/Queue/Durable Object foi adicionado.
+
+npm exibiu avisos de dependências transitivas e 6 high severity vulnerabilities.
+
+NÃO executar automaticamente:
+
+npm audit fix
+npm audit fix --force
+
+durante esta prova.
+
+## CONFIGURAÇÃO CLOUDFLARE PARA PROVA
+
+Criado localmente:
+
+wrangler.jsonc
+
+Configuração:
+
+- main = .open-next/worker.js;
+- Worker name = black-navalha-cloudflare-proof;
+- compatibility_date = 2026-10-05;
+- compatibility_flags:
+  - nodejs_compat;
+  - global_fetch_strictly_public;
+- assets:
+  - .open-next/assets;
+  - binding ASSETS.
+
+NÃO foi configurado:
+
+- R2;
+- D1;
+- KV;
+- Hyperdrive;
+- Durable Objects;
+- Queues.
+
+Cloudflare Images binding também NÃO foi configurado nesta primeira prova.
+
+Criado localmente:
+
+open-next.config.ts
+
+Configuração mínima:
+
+defineCloudflareConfig({})
+
+O override R2 do template oficial NÃO foi utilizado.
+
+Motivo:
+
+não introduzir cache/serviço Cloudflare externo sem necessidade concreta.
+
+## BUILD OPENNEXT
+
+Executado:
+
+npx.cmd opennextjs-cloudflare build
+
+Resultado:
+
+APROVADO.
+
+OpenNext detectou:
+
+Next.js 16.3.8
+@opennextjs/cloudflare 1.20.8
+@opennextjs/aws 4.1.7
+compatibility_date 2026-10-05
+
+Next build dentro do OpenNext:
+
+APROVADO.
+
+45/45 rotas geradas.
+
+Bundle OpenNext:
+
+APROVADO.
+
+Worker gerado em:
+
+.open-next/worker.js
+
+Mensagem final:
+
+OpenNext build complete.
+
+Nenhum código funcional do Black Navalha precisou ser alterado.
+
+OpenNext exibiu apenas o aviso documentado de que Windows não possui compatibilidade completa garantida.
+
+## PREVIEW OPENNEXT LOCAL
+
+Executado inicialmente:
+
+npx.cmd opennextjs-cloudflare preview
+
+Worker iniciou em:
+
+http://127.0.0.1:8787
+
+Primeiro preview possuía somente:
+
+env.ASSETS
+
+Portanto não possuía as variáveis runtime do projeto.
+
+Smoke HTTP inicial mesmo assim confirmou:
+
+/ → 200
+/agendar → 200
+/assinaturas → 200
+/login → 200
+/minha-assinatura/entrar → 200
+/admin → 307 /login
+/barbeiro → 307 /barbeiro/entrar
+
+Isso confirmou:
+
+- Worker inicializa;
+- routing funciona;
+- redirects básicos funcionam;
+- assets/HTML podem ser servidos.
+
+## ENV VARS NO PREVIEW
+
+.gitignore foi verificado.
+
+Ele contém:
+
+.env*
+
+Portanto .env.local permanece ignorado.
+
+Wrangler 4.147.0 confirmou suporte a:
+
+--env-file
+
+Foi então utilizado:
+
+npx.cmd wrangler dev --env-file .env.local
+
+Wrangler carregou as variáveis sem revelar os valores.
+
+Bindings reconhecidos:
+
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+SUPABASE_SERVICE_ROLE_KEY
+MERCADO_PAGO_ACCESS_TOKEN
+MERCADO_PAGO_WEBHOOK_SECRET
+MERCADO_PAGO_BACK_URL
+MERCADO_PAGO_TEST_MODE
+APP_URL
+
+Todos apareceram como:
+
+(hidden)
+
+Nenhum segredo foi exposto.
+
+## RESULTADO VISUAL DO WORKERD LOCAL
+
+Com env vars carregadas, a aplicação ainda apresentou problemas no preview local Windows:
+
+- comportamento muito lento em algumas requisições;
+- Home apresentando:
+  "Não foi possível carregar os serviços no momento.";
+- /agendar apresentando:
+  "Não foi possível carregar o agendamento.";
+- fluxo de criação de acesso falhando;
+- outras partes estáticas/visuais funcionando.
+
+Logs mostraram comportamento misto.
+
+Exemplos rápidos:
+
+/ em aproximadamente 14–42 ms
+/agendar em aproximadamente 9–43 ms
+/assinaturas em aproximadamente 12–35 ms
+/minha-assinatura em aproximadamente 7–21 ms
+
+Mas algumas renderizações demoraram:
+
+/ aproximadamente 7 segundos
+/agendar aproximadamente 21 segundos
+
+O Worker em si não demonstrou CPU inerentemente lenta em todas as requisições.
+
+## NEXT/IMAGE
+
+Wrangler apresentou aviso:
+
+env.IMAGES binding is not defined
+
+/_next/image continuou retornando HTTP 200 no preview local.
+
+Cloudflare Images NÃO foi configurado ainda.
+
+Esse warning precisa ser avaliado posteriormente, mas não explica sozinho a falha das consultas Supabase.
+
+/next/image e assets foram visualmente renderizados em partes da Home.
+
+## SONDA ISOLADA DE REDE
+
+Para separar:
+
+Black Navalha / Next / OpenNext
+
+de:
+
+Workerd local / rede externa,
+
+foi criada uma sonda DESCARTÁVEL fora do repositório, em diretório temporário do Windows.
+
+Ela não utiliza:
+
+- Next.js;
+- React;
+- OpenNext;
+- Supabase SDK;
+- cookies;
+- código do Black Navalha.
+
+A sonda executa apenas um fetch HTTPS simples dentro do Workerd para:
+
+Supabase REST
+
+utilizando:
+
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+
+Nenhum service role e nenhum segredo Mercado Pago são necessários para a lógica da sonda.
+
+Resultado:
+
+{
+  "ok": false,
+  "elapsedMs": 59,
+  "errorName": "Error",
+  "errorMessage": "internal error; reference = ..."
+}
+
+Portanto:
+
+Workerd local no Windows
+→ fetch HTTPS para Supabase
+
+falhou isoladamente em aproximadamente 59 ms.
+
+Isso é uma evidência forte de que as falhas vistas em /agendar/Home não devem ser atribuídas automaticamente ao Black Navalha.
+
+A própria documentação OpenNext já havia alertado que Windows pode apresentar falhas imprevisíveis no runtime local.
+
+## CONCLUSÃO TÉCNICA ATUAL
+
+Comprovado:
+
+1. Next 16.3.8 compila normalmente.
+2. OpenNext 1.20.8 transforma o projeto com sucesso.
+3. As 45 rotas são preservadas.
+4. Worker bundle é gerado.
+5. Workerd local inicializa.
+6. Routing funciona.
+7. redirects básicos funcionam.
+8. assets funcionam.
+9. nodejs_compat não impede inicialização.
+10. env vars podem ser fornecidas ao Worker sem exposição.
+11. preview dinâmico completo local NÃO está aprovado.
+12. a sonda isolada demonstra falha do próprio fetch externo dentro do Workerd local Windows.
+13. portanto NÃO alterar /agendar, Supabase ou código funcional para tentar corrigir esta falha sem contraprova remota.
+
+Ainda NÃO está comprovado:
+
+- comportamento do Worker na rede REAL da Cloudflare;
+- Supabase Auth/cookies no Worker remoto;
+- Server Actions no Worker remoto;
+- HMAC node:crypto no Worker remoto;
+- fetch Mercado Pago no Worker remoto;
+- next/image com configuração definitiva;
+- tamanho final do Worker para limite Paid;
+- deploy de teste completo do Black Navalha.
+
+## PRÓXIMO PASSO EXATO
+
+NÃO mexer no código funcional do Black Navalha.
+
+NÃO alterar Supabase.
+
+NÃO alterar /agendar.
+
+NÃO criar PIX.
+
+NÃO repetir E2E financeiro.
+
+Próxima contraprova:
+
+executar a mesma sonda mínima no runtime REMOTO real da Cloudflare.
+
+Objetivo:
+
+Cloudflare Workers remoto
+→ fetch Supabase
+
+A sonda remota deve utilizar SOMENTE as duas variáveis públicas:
+
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+
+NÃO enviar para a sonda:
+
+SUPABASE_SERVICE_ROLE_KEY
+MERCADO_PAGO_ACCESS_TOKEN
+MERCADO_PAGO_WEBHOOK_SECRET
+
+Preferir:
+
+wrangler dev --remote
+
+ou mecanismo equivalente atual.
+
+Isso poderá exigir autenticação na conta Cloudflare.
+
+Antes de executar operação remota, confirmar conscientemente essa etapa.
+
+Se a sonda remota retornar HTTP 200 rapidamente:
+
+a falha atual fica caracterizada como problema do runtime local Workerd/Windows, e a prova deve avançar para Worker remoto isolado do Black Navalha.
+
+Se a sonda remota também falhar:
+
+investigar especificamente Cloudflare Worker → Supabase antes de insistir na hospedagem.
+
+## PRODUÇÃO / VERCEL
+
+Permanece INTACTA.
+
+Nenhum deploy Cloudflare do Black Navalha foi realizado.
+
+Nenhum domínio foi alterado.
+
+Nenhum DNS foi alterado.
+
+Nenhum projeto Vercel foi removido.
+
+## HOSTINGER
+
+Ainda NÃO comprar.
+
+Cloudflare continua candidato enquanto a contraprova remota não for realizada.
+
+Hostinger KVM 1 continua fallback se houver incompatibilidade real na infraestrutura Cloudflare.
+
+## WORKING TREE ESPERADO APÓS ESTA PROVA LOCAL
+
+Alterados:
+
+package.json
+package-lock.json
+
+Novos locais:
+
+open-next.config.ts
+wrangler.jsonc
+
+Continuam untracked e proibidos:
+
+ASSINATURAS-LOTE.txt
+CODIGO-COMPLETO.txt
+
+.env.local permanece ignorado.
+
+.open-next é artefato gerado e deve ser tratado como build output, não como código funcional.
+
+Nenhum commit/push autorizado automaticamente.
+
+## APÓS A PROVA CLOUDFLARE
+
+Retomar notificações exatamente de:
+
+lib/notifications/foundation.ts
+
+Somente após decisão de hospedagem.
+
+# FIM DO CHECKPOINT — 2026-10-05
+
+---
+
+# COMPLEMENTO FINAL — PROVA CLOUDFLARE / SONDA REMOTA AINDA NÃO EXECUTADA — 2026-10-05
+
+Após o checkpoint intermediário da prova Cloudflare, foi iniciada a tentativa de contraprova:
+
+Cloudflare Workers remoto
+→ Supabase REST.
+
+A tentativa NÃO chegou ao runtime remoto.
+
+## AUTENTICAÇÃO WRANGLER
+
+Durante:
+
+wrangler dev --remote
+
+o fluxo de autenticação OAuth abriu no navegador.
+
+O callback apresentou:
+
+request_forbidden
+
+e posteriormente:
+
+ERR_CONNECTION_REFUSED
+
+em:
+
+localhost:8976/oauth/callback
+
+Foi executado:
+
+npx.cmd wrangler whoami
+
+Resultado:
+
+You are not authenticated.
+Please run `wrangler login`.
+
+Portanto nenhuma sessão Cloudflare estava autenticada.
+
+## ALTERNATIVA INDICADA PELO PRÓPRIO WRANGLER
+
+Wrangler 4.147.0 informou:
+
+To deploy without logging in, run a command like `wrangler deploy --temporary` to use a temporary preview account.
+
+Essa alternativa AINDA NÃO foi executada.
+
+Antes de utilizá-la, consultar o contrato atual do comando:
+
+npx.cmd wrangler deploy --help
+
+e verificar especificamente:
+
+- --temporary;
+- tratamento de environment variables;
+- comportamento do preview temporário.
+
+## CONCLUSÃO
+
+A sonda remota:
+
+Cloudflare Workers remoto
+→ Supabase
+
+AINDA NÃO FOI EXECUTADA.
+
+Portanto nenhum resultado remoto pode ser inferido.
+
+Permanece comprovado somente:
+
+- build Next 16.3.8 aprovado;
+- build OpenNext aprovado;
+- Worker bundle gerado;
+- Workerd local inicializa;
+- routing/assets/redirects básicos funcionam;
+- preview dinâmico local Windows apresenta falhas;
+- sonda mínima Workerd local Windows → Supabase falhou isoladamente;
+- OpenNext documenta limitações de suporte no Windows.
+
+Não alterar código funcional por causa dessa falha local antes da contraprova remota.
+
+## PRÓXIMO PASSO EXATO
+
+No próximo chat:
+
+1. Ler integralmente CONTEXTO-PROJETO.md.
+2. Ler AGENTS.md.
+3. Confirmar Git real.
+4. NÃO repetir build/preview local já concluído.
+5. NÃO alterar /agendar.
+6. NÃO alterar Supabase.
+7. NÃO criar PIX.
+8. NÃO repetir E2E financeiro.
+9. Consultar:
+   npx.cmd wrangler deploy --help
+10. Verificar primeiro se --temporary é adequado para a sonda descartável.
+11. Se adequado, testar somente:
+    Cloudflare remoto → Supabase REST.
+12. Fornecer à sonda SOMENTE:
+    NEXT_PUBLIC_SUPABASE_URL
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY.
+13. NÃO fornecer:
+    SUPABASE_SERVICE_ROLE_KEY
+    MERCADO_PAGO_ACCESS_TOKEN
+    MERCADO_PAGO_WEBHOOK_SECRET.
+14. Se --temporary não for adequado, resolver somente a autenticação Wrangler.
+15. Somente depois considerar Worker remoto do Black Navalha.
+
+Cloudflare continua candidato.
+
+Hostinger KVM 1 continua fallback.
+
+NÃO comprar VPS ainda.
+
+Produção Vercel permanece intacta.
+
+Nenhum DNS/domínio foi alterado.
+
+Nenhum deploy do Black Navalha na Cloudflare foi realizado.
+
+Nenhum secret foi exposto.
+
+Nenhuma cobrança real foi realizada.
+
+Migrations 007–048 permanecem aplicadas.
+
+NÃO reaplicar.
+
+Migration 049 não existe.
+
+Notificações continuam pausadas antes de:
+
+lib/notifications/foundation.ts
+
+# FIM DO COMPLEMENTO — 2026-10-05
+
+---
+
+# CHECKPOINT FINAL — CLOUDFLARE WORKERS / CONTRAPROVA REMOTA SUPABASE APROVADA — 2026-10-08
+
+## PRIORIDADE ABSOLUTA
+
+Este é o checkpoint mais recente da prova Cloudflare.
+
+Deve prevalecer sobre checkpoints anteriores quando houver divergência.
+
+NÃO reiniciar a análise.
+
+NÃO repetir builds, diagnósticos ou testes já concluídos sem necessidade concreta.
+
+## ESTADO GIT CONFIRMADO
+
+Branch:
+
+main
+
+HEAD:
+
+826841e8d73c2d0f810e4423b496d331732aecde
+
+origin/main:
+
+826841e8d73c2d0f810e4423b496d331732aecde
+
+Working tree confirmado antes deste checkpoint:
+
+M .gitignore
+M CONTEXTO-PROJETO.md
+M package-lock.json
+M package.json
+?? ASSINATURAS-LOTE.txt
+?? CODIGO-COMPLETO.txt
+?? open-next.config.ts
+?? wrangler.jsonc
+
+As alterações Cloudflare são intencionais.
+
+NÃO descartar automaticamente.
+
+Nunca versionar:
+
+ASSINATURAS-LOTE.txt
+CODIGO-COMPLETO.txt
+.env.local
+
+Nunca usar git add .
+
+Commit/push somente com autorização explícita.
+
+## AGENTS.MD
+
+AGENTS.md foi lido integralmente nesta continuidade.
+
+Antes de novas APIs/convenções Next.js 16, consultar a documentação local relevante em:
+
+node_modules/next/dist/docs/
+
+## BUILDS JÁ APROVADOS
+
+Next.js:
+
+16.3.4 → 16.3.8
+
+React:
+
+19.2.8
+
+OpenNext:
+
+@opennextjs/cloudflare 1.20.8
+
+Wrangler:
+
+4.147.0
+
+Node:
+
+24.20.0
+
+Build original:
+
+APROVADO.
+
+Build após atualização Next:
+
+APROVADO.
+
+Build OpenNext:
+
+APROVADO.
+
+45/45 rotas.
+
+TypeScript aprovado.
+
+Worker gerado:
+
+.open-next/worker.js
+
+Mensagem:
+
+OpenNext build complete.
+
+Nenhum código funcional precisou ser alterado.
+
+NÃO repetir esses builds apenas por rotina.
+
+## WORKERD LOCAL WINDOWS
+
+Preview local inicializou.
+
+Routing, assets e redirects básicos funcionaram.
+
+Entretanto, fetch externo do Workerd local Windows falhou isoladamente.
+
+Sonda descartável sem Next.js, OpenNext ou Supabase SDK retornou:
+
+internal error
+
+A documentação OpenNext alerta sobre limitações do Windows.
+
+NÃO alterar código funcional tentando corrigir essa falha local.
+
+## WRANGLER TEMPORARY
+
+Foi confirmado que Wrangler 4.147.0 suporta:
+
+wrangler deploy --temporary
+
+A opção é oculta na ajuda, mas existe na implementação.
+
+Foi criada uma conta temporária Cloudflare sem autenticação permanente.
+
+Nenhuma conta Workers Paid foi contratada.
+
+Nenhum deploy do Black Navalha foi realizado.
+
+## SONDA REMOTA DESCARTÁVEL
+
+Diretório temporário Windows:
+
+$env:TEMP\black-navalha-cf-remote-probe
+
+Arquivos:
+
+worker.mjs
+wrangler.jsonc
+.env.probe
+
+A sonda NÃO utiliza:
+
+Next.js
+React
+OpenNext
+Supabase SDK
+cookies
+código funcional Black Navalha
+
+Foram enviados exclusivamente:
+
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+
+NÃO foram enviados:
+
+SUPABASE_SERVICE_ROLE_KEY
+MERCADO_PAGO_ACCESS_TOKEN
+MERCADO_PAGO_WEBHOOK_SECRET
+
+Foi comprovado que:
+
+--env-file
+
+sozinho NÃO publicou bindings no Worker remoto.
+
+A solução utilizada foi:
+
+--secrets-file
+
+com arquivo temporário contendo somente as duas variáveis públicas.
+
+Os bindings foram confirmados no runtime como hidden.
+
+## PRIMEIRO ERRO REMOTO
+
+Inicialmente Supabase respondeu:
+
+HTTP 530
+
+A investigação identificou:
+
+Cloudflare Error 1016
+
+DNS local não resolveu o hostname Supabase.
+
+Cloudflare DNS-over-HTTPS retornou:
+
+Status 3 — NXDOMAIN.
+
+Foi confirmado que a URL configurada correspondia ao projeto Supabase correto:
+
+elpvjgxixzktgwxdfckb
+
+Nenhuma alteração de DNS foi realizada.
+
+## CAUSA COMPROVADA
+
+O painel Supabase revelou:
+
+Project is paused.
+
+O projeto estava pausado.
+
+Foi iniciada a restauração através do painel Supabase.
+
+Durante a restauração apareceu:
+
+Restoration in progress.
+
+A operação demorou mais que o normal.
+
+Posteriormente o painel apresentou:
+
+Status: Healthy.
+
+Projeto:
+
+black-navalha
+
+Região:
+
+sa-east-1
+
+Banco:
+
+PostgreSQL.
+
+Não foi necessário alterar credenciais ou banco.
+
+Não foram reaplicadas migrations.
+
+## NOVA SONDA REMOTA
+
+Após o Supabase voltar a Healthy, a conta temporária anterior já não estava acessível.
+
+Foi criada nova conta temporária:
+
+Mysterious Log.
+
+Worker:
+
+black-navalha-supabase-remote-probe
+
+URL da sessão:
+
+https://black-navalha-supabase-remote-probe.mysterious-log.workers.dev
+
+IMPORTANTE:
+
+A URL é TEMPORÁRIA.
+
+NÃO presumir que continuará funcionando no próximo chat.
+
+NÃO registrar tokens claim-preview.
+
+## RESULTADO REMOTO FINAL
+
+Cloudflare Worker remoto → Supabase Auth Health:
+
+HTTP 200.
+
+Tempo:
+
+345 ms.
+
+Content-Type:
+
+application/json.
+
+Supabase raiz:
+
+HTTP 404 em 8 ms.
+
+Esse HTTP 404 é compatível com rota raiz sem endpoint público e comprova resposta HTTP do destino.
+
+Cloudflare controle:
+
+HTTP 200 em 1 ms.
+
+example.com:
+
+HTTP 200 em 8 ms.
+
+Portanto:
+
+CLOUDFLARE WORKERS REMOTO → SUPABASE HTTPS:
+
+APROVADO.
+
+A falha HTTP 530/1016 anterior estava associada à indisponibilidade do projeto Supabase pausado.
+
+A falha de fetch do Workerd local Windows NÃO se reproduziu nessa contraprova remota.
+
+Não foi necessário modificar código funcional.
+
+## LIMITES DA APROVAÇÃO
+
+Foi aprovada a conectividade HTTPS básica:
+
+Worker remoto → Supabase Auth Health.
+
+Ainda NÃO foram validados remotamente no Black Navalha completo:
+
+- renderização server-side com dados reais;
+- Supabase SSR;
+- Supabase Auth completo;
+- cookies;
+- Server Actions;
+- Route Handlers completos;
+- createAdminClient;
+- secrets privilegiados;
+- node:crypto/HMAC;
+- fetch Mercado Pago;
+- redirects de autenticação;
+- next/image definitivo;
+- tamanho final do Worker;
+- limites práticos do runtime.
+
+Não confundir aprovação da sonda com aprovação completa da hospedagem.
+
+## CONFIGURAÇÃO CLOUDFLARE EXISTENTE
+
+Arquivos locais:
+
+wrangler.jsonc
+open-next.config.ts
+
+Worker configurado:
+
+black-navalha-cloudflare-proof
+
+Compatibility date:
+
+2026-10-05
+
+Flags:
+
+nodejs_compat
+global_fetch_strictly_public
+
+Assets:
+
+.open-next/assets
+
+Binding:
+
+ASSETS
+
+Não foram configurados:
+
+R2
+D1
+KV
+Hyperdrive
+Durable Objects
+Queues
+
+Cloudflare Images binding ainda não foi configurado.
+
+NÃO adicionar serviços por conveniência.
+
+## PRÓXIMO PASSO EXATO
+
+A próxima etapa é:
+
+PROVA REMOTA ISOLADA DO BLACK NAVALHA COMPLETO.
+
+Antes de qualquer deploy:
+
+1. Ler integralmente CONTEXTO-PROJETO.md.
+2. Ler AGENTS.md.
+3. Priorizar este checkpoint.
+4. Confirmar Git real.
+5. Preservar alterações Cloudflare.
+6. Não repetir baseline/build sem necessidade.
+7. Inspecionar somente:
+   wrangler.jsonc
+   open-next.config.ts
+8. Definir configuração segura dos bindings e secrets.
+9. Não publicar .env.local inteiro.
+10. Não expor credenciais privadas.
+11. Avaliar como manter o deploy totalmente isolado.
+12. Verificar limites e tamanho do Worker.
+13. Publicar somente ambiente de prova, após confirmar segurança.
+14. Validar progressivamente rotas públicas, SSR, Supabase e Auth.
+15. Testar operações privadas sem alterar dados reais desnecessariamente.
+16. Não criar PIX.
+17. Não repetir E2E financeiro já aprovado.
+18. Preservar produção Vercel.
+
+Não realizar migração definitiva nesta etapa.
+
+## PRODUÇÃO
+
+Vercel permanece INTACTA.
+
+Nenhum domínio alterado.
+
+Nenhum DNS alterado.
+
+Nenhum projeto Vercel removido.
+
+Nenhum deploy Cloudflare do Black Navalha completo realizado.
+
+Cloudflare Workers continua candidato principal.
+
+Hostinger KVM 1 continua fallback.
+
+Não comprar VPS ainda.
+
+## BANCO
+
+Migrations 007–048:
+
+APLICADAS.
+
+NÃO reaplicar nenhuma.
+
+Migration 049:
+
+NÃO EXISTE.
+
+Nenhuma alteração de banco durante a prova Cloudflare.
+
+O projeto Supabase foi restaurado e apresentou Healthy.
+
+## REGRAS CRÍTICAS
+
+Não alterar:
+
+/agendar
+create_public_multi_appointment
+benefícios/preços
+Central do Cliente
+identidade segura
+Mercado Pago Orders/PIX
+webhook/HMAC
+polling
+renovação
+catálogo multiplano
+capacidade
+snapshots
+Área do Barbeiro
+comissões
+Admin de Planos
+Passos administrativos 1–4
+notification_events
+notification_deliveries
+
+Pagamento:
+
+mensal AVULSO via PIX.
+
+SEM recorrência automática Mercado Pago.
+
+Preservar:
+
+POST /v1/orders
+GET /v1/orders/{id}
+external_reference = subscription_charge.id
+Webhook HMAC
+data.id ORIGINAL, inclusive maiúsculas
+GET Order server-side
+confirm_mercado_pago_subscription_payment
+polling observacional
+idempotência.
+
+Browser NÃO confirma pagamento.
+
+Capacidade:
+
+30 total por barbeiro.
+
+BLACK_STANDARD:
+25.
+
+BLACK_PREMIUM:
+5.
+
+Preservar obrigatoriamente:
+
+SELECT ... FOR UPDATE.
+
+## NOTIFICAÇÕES
+
+Continuam PAUSADAS.
+
+Migration 048 já criou:
+
+notification_events
+notification_deliveries
+
+Depois da decisão de hospedagem, retomar exatamente de:
+
+lib/notifications/foundation.ts
+
+Não iniciar WhatsApp.
+
+Não iniciar n8n.
+
+## FORMA DE TRABALHO
+
+Trabalhar uma etapa por vez, evitando microdiagnósticos repetidos.
+
+Fornecer comandos PowerShell completos.
+
+Usar npm.cmd.
+
+Não imprimir secrets.
+
+Não executar npm audit fix automaticamente.
+
+Nunca usar git add .
+
+Commit/push somente com autorização explícita.
+
+# FIM DO CHECKPOINT — 2026-10-08
+
+---
+
+# CHECKPOINT FINAL — CLOUDFLARE WORKERS / HOMOLOGACAO PERSISTENTE — 2026-10-08
+
+## PRIORIDADE ABSOLUTA
+
+Este é o checkpoint mais recente e prevalece sobre os anteriores quando houver divergência.
+
+A prova Cloudflare avançou da sonda remota descartável para a publicação do Black Navalha completo em uma conta Cloudflare persistente.
+
+NÃO reiniciar a análise.
+
+NÃO repetir builds e diagnósticos aprovados sem necessidade concreta.
+
+## GIT
+
+Branch:
+
+main
+
+HEAD/origin/main confirmado:
+
+826841e8d73c2d0f810e4423b496d331732aecde
+
+Working tree esperado:
+
+M .gitignore
+M CONTEXTO-PROJETO.md
+M package-lock.json
+M package.json
+?? ASSINATURAS-LOTE.txt
+?? CODIGO-COMPLETO.txt
+?? open-next.config.ts
+?? wrangler.jsonc
+
+As alterações Cloudflare são intencionais.
+
+NÃO descartar automaticamente.
+
+Nenhum commit/push foi realizado durante a prova.
+
+Nunca usar git add .
+
+Nunca versionar:
+
+ASSINATURAS-LOTE.txt
+CODIGO-COMPLETO.txt
+.env.local
+
+Commit/push somente com autorização explícita.
+
+## STACK
+
+Next.js:
+
+16.3.8
+
+React:
+
+19.2.8
+
+Node local:
+
+24.20.0
+
+OpenNext:
+
+@opennextjs/cloudflare 1.20.8
+
+Wrangler:
+
+4.147.0
+
+Build Next.js:
+
+APROVADO.
+
+Build OpenNext:
+
+APROVADO.
+
+TypeScript:
+
+APROVADO.
+
+45/45 rotas.
+
+Nenhum código funcional precisou ser alterado para gerar o Worker.
+
+## CLOUDFLARE — CONTA PERSISTENTE
+
+Wrangler autenticado via OAuth.
+
+Conta Cloudflare permanente configurada.
+
+Subdomínio registrado:
+
+blacknavalha-dev.workers.dev
+
+Worker:
+
+black-navalha-cloudflare-proof
+
+URL de homologação:
+
+https://black-navalha-cloudflare-proof.blacknavalha-dev.workers.dev
+
+Essa URL substitui as URLs temporárias anteriores.
+
+NÃO reutilizar URLs ou claimTokens da conta temporária Mysterious Log.
+
+## DEPLOY REMOTO
+
+Worker publicado na conta persistente.
+
+Versão confirmada:
+
+2732fe9e-3d28-4040-a59f-b526e3b471f2
+
+Assets:
+
+72 enviados.
+
+Worker não comprimido:
+
+aproximadamente 8,05 MiB.
+
+Worker gzip:
+
+aproximadamente 1,60 MiB.
+
+Startup:
+
+20 ms.
+
+DNS:
+
+APROVADO.
+
+HTTPS:
+
+HTTP 200 em aproximadamente 2,05 segundos.
+
+Durante o primeiro registro do subdomínio houve erro posterior ao upload, mas a verificação seguinte confirmou a versão publicada, DNS resolvendo e HTTPS funcionando.
+
+Não repetir esse diagnóstico sem nova evidência.
+
+## CONFIGURACAO
+
+Arquivos locais:
+
+wrangler.jsonc
+open-next.config.ts
+
+Compatibility date:
+
+2026-10-05
+
+Flags:
+
+nodejs_compat
+global_fetch_strictly_public
+
+Assets:
+
+.open-next/assets
+
+Binding:
+
+ASSETS
+
+Não foram configurados:
+
+R2
+D1
+KV
+Hyperdrive
+Durable Objects
+Queues.
+
+Cloudflare Images binding ainda não foi configurado.
+
+Não adicionar serviços por conveniência.
+
+## BINDINGS
+
+O deploy atual recebeu somente:
+
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+
+Não recebeu:
+
+SUPABASE_SERVICE_ROLE_KEY
+MERCADO_PAGO_ACCESS_TOKEN
+MERCADO_PAGO_WEBHOOK_SECRET
+APP_URL
+MERCADO_PAGO_TEST_MODE
+
+Nunca publicar .env.local inteiro.
+
+O arquivo temporário utilizado para os dois bindings públicos foi:
+
+$env:TEMP\black-navalha-cf-full-proof\public-bindings.json
+
+Não presumir que arquivos temporários permanecerão disponíveis indefinidamente.
+
+## PROVA REMOTA SUPABASE
+
+A sonda remota isolada anterior confirmou:
+
+Cloudflare Workers remoto
+→ Supabase Auth Health
+
+HTTP 200 em aproximadamente 345 ms.
+
+O Supabase havia ficado pausado e foi restaurado pelo painel.
+
+Depois apresentou Healthy.
+
+Não houve alteração de credenciais, DNS ou migrations.
+
+Não repetir diagnóstico HTTP 530/1016 sem nova evidência.
+
+## TESTES DO BLACK NAVALHA COMPLETO
+
+Na primeira publicação temporária foram confirmados:
+
+Home:
+HTTP 200.
+
+Agendar:
+HTTP 200.
+
+Assinaturas:
+HTTP 200.
+
+Login:
+HTTP 200.
+
+Minha Assinatura entrar:
+HTTP 200.
+
+Barbeiro entrar:
+HTTP 200.
+
+Admin:
+HTTP 307.
+
+Barbeiro:
+HTTP 307.
+
+Minha Assinatura:
+HTTP 307.
+
+Logo e hero:
+HTTP 200.
+
+SSR apresentou conteúdo real relacionado a serviços e planos.
+
+Na conta persistente:
+
+DNS:
+APROVADO.
+
+HTTPS:
+APROVADO.
+
+Home:
+FUNCIONANDO.
+
+Navegação visual:
+FUNCIONANDO conforme testes realizados.
+
+## AGENDAMENTO REMOTO
+
+Foi apresentada captura visual da tela:
+
+AGENDAMENTO CONFIRMADO
+Horário reservado!
+
+Dados exibidos:
+
+Cliente:
+Teste Black Navalha.
+
+Serviço:
+Barba.
+
+Profissional:
+Rodrigo Alves Correa.
+
+Data:
+31/10/2026.
+
+Horário:
+20:00.
+
+Duração:
+30 minutos.
+
+Valor:
+R$ 40,00.
+
+Portanto o fluxo público remoto chegou à confirmação do agendamento.
+
+IMPORTANTE:
+
+Cloudflare e Vercel utilizam o mesmo Supabase.
+
+Esse agendamento pode estar persistido no banco compartilhado.
+
+Não excluir automaticamente.
+
+Não criar outro agendamento apenas para repetir o teste.
+
+## NEXT/IMAGE
+
+Durante a utilização de uma URL temporária anterior, algumas imagens ampliadas apresentaram falha.
+
+Posteriormente essa URL deixou de resolver DNS.
+
+Portanto não foi comprovado que a falha era causada pelo processamento next/image.
+
+O binding IMAGES ainda não foi configurado.
+
+Na conta persistente, a validação específica de imagens otimizadas permanece pendente.
+
+Não alterar galeria ou código funcional antes de incompatibilidade comprovada.
+
+## ESTADO DA HOMOLOGACAO
+
+APROVADO:
+
+- build Next;
+- build OpenNext;
+- Worker remoto publicado;
+- tamanho inicial;
+- startup;
+- DNS;
+- HTTPS;
+- assets públicos;
+- rotas públicas;
+- redirects básicos;
+- conectividade Supabase;
+- SSR público com dados;
+- agendamento remoto até confirmação.
+
+AINDA PENDENTE:
+
+- next/image definitivo;
+- Supabase Auth com login real;
+- cookies e persistência de sessão;
+- Server Actions autenticadas;
+- createAdminClient;
+- secrets server-side;
+- HMAC no runtime remoto;
+- fetch Mercado Pago sem cobrança;
+- validação funcional completa de Admin;
+- validação funcional completa da Central do Cliente;
+- validação funcional completa da Área do Barbeiro;
+- limites práticos de CPU/memória.
+
+Não declarar migração definitiva aprovada antes dessas verificações.
+
+## PRODUCAO
+
+Vercel permanece INTACTA.
+
+Nenhum domínio próprio alterado.
+
+Nenhum DNS próprio alterado.
+
+Nenhum projeto Vercel removido.
+
+Nenhuma migração definitiva realizada.
+
+Cloudflare continua candidato principal.
+
+Hostinger KVM 1 permanece fallback.
+
+NÃO comprar VPS ainda.
+
+## BANCO
+
+Migrations 007–048:
+
+APLICADAS.
+
+NÃO reaplicar nenhuma.
+
+Migration 049:
+
+NÃO criada.
+
+Nenhuma alteração estrutural de banco foi realizada durante a prova Cloudflare.
+
+## REGRAS CRITICAS
+
+NÃO reconstruir:
+
+/agendar
+create_public_multi_appointment
+benefícios/preços
+Central do Cliente
+identidade segura
+recuperação de senha
+cancelamento/remarcação
+Mercado Pago Orders/PIX
+webhook/HMAC
+polling
+renovação voluntária/autenticada
+catálogo multiplano
+capacidade
+snapshots
+Área do Barbeiro
+comissões
+Admin de Planos
+Passos administrativos 1–4
+notification_events
+notification_deliveries.
+
+Pagamento:
+
+mensal AVULSO via PIX.
+
+SEM recorrência automática Mercado Pago.
+
+Preservar:
+
+POST /v1/orders
+GET /v1/orders/{id}
+external_reference = subscription_charge.id
+Webhook HMAC
+data.id ORIGINAL, inclusive maiúsculas
+GET Order server-side
+confirm_mercado_pago_subscription_payment
+polling observacional
+idempotência.
+
+Browser NÃO confirma pagamento.
+
+Capacidade:
+
+30 total por barbeiro.
+
+BLACK_STANDARD:
+25.
+
+BLACK_PREMIUM:
+5.
+
+Preservar obrigatoriamente:
+
+SELECT ... FOR UPDATE.
+
+## NOTIFICACOES
+
+Continuam PAUSADAS.
+
+Migration 048 aplicada.
+
+notification_events e notification_deliveries já existem.
+
+Depois da decisão de hospedagem, retomar de:
+
+lib/notifications/foundation.ts
+
+Não iniciar WhatsApp.
+
+Não iniciar n8n.
+
+## PROXIMO PASSO EXATO
+
+No próximo chat:
+
+1. Ler integralmente CONTEXTO-PROJETO.md.
+2. Ler AGENTS.md.
+3. Priorizar este checkpoint.
+4. Confirmar Git real.
+5. Preservar alterações Cloudflare.
+6. Não repetir builds aprovados sem necessidade.
+7. Não criar novo agendamento.
+8. Validar next/image na URL persistente.
+9. Planejar testes seguros de Auth/cookies.
+10. Avaliar bindings privilegiados mínimos.
+11. Não publicar .env.local inteiro.
+12. Não criar PIX.
+13. Não repetir E2E financeiro.
+14. Testar Server Actions sem modificar dados reais desnecessariamente.
+15. Testar HMAC e fetch Mercado Pago sem criar cobrança.
+16. Avaliar limites práticos do runtime.
+17. Manter Vercel intacta.
+18. Somente depois decidir hospedagem definitiva.
+
+## META
+
+Concluir homologação técnica Cloudflare.
+
+Estado atual:
+
+BLACK NAVALHA COMPLETO PUBLICADO EM HOMOLOGACAO PERSISTENTE.
+
+ROTAS PUBLICAS E AGENDAMENTO REMOTO FUNCIONANDO.
+
+MIGRACAO DEFINITIVA AINDA NAO AUTORIZADA.
+
+# FIM DO CHECKPOINT — 2026-10-08
+
+---
+
+# CHECKPOINT FINAL — CLOUDFLARE WORKERS / HOMOLOGACAO AUTH E SERVER ACTIONS — 2026-10-09
+
+## PRIORIDADE ABSOLUTA
+
+Este checkpoint prevalece sobre os anteriores quando houver divergencia.
+
+NAO reiniciar a prova Cloudflare.
+
+NAO repetir builds, deploys e testes aprovados sem necessidade concreta.
+
+## GIT CONFIRMADO
+
+Branch: main
+
+HEAD/origin/main:
+826841e8d73c2d0f810e4423b496d331732aecde
+
+Working tree confirmado:
+
+ M .gitignore
+ M CONTEXTO-PROJETO.md
+ M package-lock.json
+ M package.json
+?? ASSINATURAS-LOTE.txt
+?? CODIGO-COMPLETO.txt
+?? open-next.config.ts
+?? wrangler.jsonc
+
+Preservar alteracoes Cloudflare.
+
+Nenhum commit/push realizado nesta continuidade.
+
+Nunca versionar:
+ASSINATURAS-LOTE.txt
+CODIGO-COMPLETO.txt
+.env.local
+
+Nunca usar git add .
+
+Commit/push somente com autorizacao explicita.
+
+## CLOUDFLARE PERSISTENTE
+
+Worker:
+black-navalha-cloudflare-proof
+
+URL:
+https://black-navalha-cloudflare-proof.blacknavalha-dev.workers.dev
+
+Versao publicada anteriormente:
+2732fe9e-3d28-4040-a59f-b526e3b471f2
+
+Next.js: 16.3.8
+React: 19.2.8
+OpenNext: 1.20.8
+Wrangler: 4.147.0
+
+Build Next.js: APROVADO.
+Build OpenNext: APROVADO.
+TypeScript: APROVADO.
+45/45 rotas.
+
+Nao repetir builds sem necessidade concreta.
+
+## NEXT/IMAGE — APROVADO
+
+Cinco imagens originais:
+HTTP 200.
+
+Tres imagens otimizadas por /_next/image:
+HTTP 200.
+Content-Type: image/jpeg.
+
+Galeria/lightbox:
+APROVADA.
+
+Desktop:
+APROVADO.
+
+Mobile:
+APROVADO.
+
+Nao adicionar Cloudflare Images binding sem necessidade comprovada.
+
+## SUPABASE AUTH — APROVADO NOS FLUXOS TESTADOS
+
+Login real:
+FUNCIONANDO.
+
+Cookies:
+FUNCIONANDO.
+
+Persistencia da sessao apos F5:
+FUNCIONANDO.
+
+Central do Cliente:
+FUNCIONANDO.
+
+Admin:
+FUNCIONANDO.
+
+Area do Barbeiro:
+FUNCIONANDO.
+
+Dados privados apresentados conforme a identidade autenticada.
+
+## RECUPERACAO DE SENHA
+
+Foi identificado redirecionamento indevido para Vercel porque a URL Cloudflare nao estava autorizada no Supabase.
+
+Foram adicionadas tres Redirect URLs:
+
+https://black-navalha-cloudflare-proof.blacknavalha-dev.workers.dev/minha-assinatura/auth/callback
+
+https://black-navalha-cloudflare-proof.blacknavalha-dev.workers.dev/minha-assinatura/auth/recuperacao
+
+https://black-navalha-cloudflare-proof.blacknavalha-dev.workers.dev/minha-assinatura/auth/convite
+
+Total atual:
+10 Redirect URLs.
+
+As sete anteriores foram preservadas.
+
+Site URL continua:
+https://black-navalha.vercel.app
+
+Novo teste confirmou abertura correta da pagina de redefinicao no dominio Cloudflare.
+
+A gravacao de uma nova senha nao foi novamente validada nesta prova.
+
+## ADMIN — APROVADO
+
+Login administrativo:
+APROVADO.
+
+Dashboard:
+APROVADO.
+
+SSR autenticado:
+APROVADO.
+
+Consultas Supabase:
+FUNCIONANDO.
+
+Sessao persistente:
+APROVADA.
+
+## AREA DO BARBEIRO — APROVADA
+
+Login profissional:
+APROVADO.
+
+Navegacao:
+APROVADA.
+
+Meus Clientes:
+APROVADO com dados reais.
+
+Sessao persistente:
+APROVADA.
+
+## SERVER ACTION — APROVADA EM LEITURA AUTENTICADA
+
+Foi utilizado o agendamento existente de:
+
+31/10/2026
+20:00
+
+A interface de remarcacao executou a consulta de profissionais.
+
+Profissional retornado:
+Rodrigo Alves Correa.
+
+Server Action autenticada:
+FUNCIONANDO.
+
+RPC protegida:
+FUNCIONANDO.
+
+Nenhum agendamento foi alterado.
+
+Nao repetir esse teste sem necessidade.
+
+## SESSOES COMPARTILHADAS
+
+Foi observado que uma sessao profissional tambem pode ser reconhecida pela Central do Cliente.
+
+A Central apresentou a tela de vinculacao porque nao encontrou customer associado a identidade profissional.
+
+Nenhum dado de outro cliente foi exposto.
+
+Depois do login com a identidade correta, a Central apresentou novamente Teste Black Navalha e seu agendamento.
+
+Nao alterar a arquitetura de identidade sem defeito comprovado.
+
+## BINDINGS ATUAIS
+
+Publicados anteriormente:
+
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+
+Ainda nao publicados nesta continuidade:
+
+SUPABASE_SERVICE_ROLE_KEY
+MERCADO_PAGO_ACCESS_TOKEN
+MERCADO_PAGO_WEBHOOK_SECRET
+
+Ainda pendentes:
+
+APP_URL
+MERCADO_PAGO_TEST_MODE
+
+O usuario decidiu avancar com a configuracao completa das variaveis necessarias para homologacao.
+
+Nenhum novo Secret foi efetivamente publicado nesta sessao.
+
+Wrangler secret put e secret list foram consultados e confirmados.
+
+## PROXIMO PASSO EXATO
+
+CONFIGURAR BINDINGS PRIVILEGIADOS MINIMOS NO WORKER PERSISTENTE.
+
+Ordem:
+
+1. Confirmar estado remoto do Worker.
+2. Preservar bindings publicos existentes.
+3. Configurar SUPABASE_SERVICE_ROLE_KEY como Cloudflare Secret.
+4. Configurar MERCADO_PAGO_ACCESS_TOKEN exclusivamente de TESTE.
+5. Configurar MERCADO_PAGO_WEBHOOK_SECRET correspondente ao ambiente de teste.
+6. Configurar APP_URL com a origem persistente Cloudflare.
+7. Configurar MERCADO_PAGO_TEST_MODE=true.
+8. Confirmar configuracao sem exibir valores secretos.
+9. Validar createAdminClient com leitura segura.
+10. Validar fetch Mercado Pago somente com GET.
+11. Validar HMAC no runtime remoto sem confirmar pagamento.
+12. Validar demais Route Handlers e Server Actions.
+13. Avaliar limites praticos de CPU/memoria.
+14. Emitir parecer tecnico final sobre Cloudflare Workers.
+
+IMPORTANTE:
+
+Cloudflare e Vercel compartilham o mesmo Supabase.
+
+SUPABASE_SERVICE_ROLE_KEY possui acesso privilegiado.
+
+Nao publicar .env.local inteiro.
+
+Nao criar PIX.
+
+Nao criar agendamento.
+
+Nao realizar cobranca.
+
+Nao executar mutacoes reais desnecessarias.
+
+## MIGRATIONS
+
+007–048:
+APLICADAS.
+
+NAO reaplicar.
+
+Migration 049:
+NAO criar nesta prova.
+
+## MERCADO PAGO
+
+Preservar:
+
+Pagamento mensal AVULSO via PIX.
+
+SEM recorrencia automatica.
+
+POST /v1/orders.
+GET /v1/orders/{id}.
+external_reference = subscription_charge.id.
+Webhook HMAC.
+data.id ORIGINAL, inclusive maiusculas.
+GET Order server-side.
+confirm_mercado_pago_subscription_payment.
+Polling observacional.
+Idempotencia.
+
+Browser NAO confirma pagamento.
+
+Nao repetir E2E financeiro ja aprovado.
+
+## CAPACIDADE
+
+30 vagas totais por barbeiro.
+
+BLACK_STANDARD:
+25.
+
+BLACK_PREMIUM:
+5.
+
+Preservar obrigatoriamente SELECT ... FOR UPDATE.
+
+## NOTIFICACOES
+
+Continuam PAUSADAS.
+
+notification_events e notification_deliveries ja existem.
+
+Depois da decisao de hospedagem, retomar exatamente de:
+
+lib/notifications/foundation.ts
+
+Nao iniciar WhatsApp ou n8n.
+
+## PRODUCAO
+
+Vercel permanece INTACTA.
+
+Nenhum dominio alterado.
+
+Nenhum DNS alterado.
+
+Nenhuma migracao definitiva autorizada.
+
+Cloudflare continua ambiente de homologacao.
+
+Hostinger KVM 1 permanece fallback.
+
+Nao comprar VPS ainda.
+
+## ESTADO FINAL
+
+Next/image:
+APROVADO.
+
+Lightbox desktop/mobile:
+APROVADO.
+
+Supabase Auth:
+APROVADO nos fluxos testados.
+
+Cookies:
+APROVADOS.
+
+Persistencia de sessao:
+APROVADA.
+
+Central do Cliente:
+APROVADA nos fluxos testados.
+
+Admin:
+APROVADO nos fluxos testados.
+
+Area do Barbeiro:
+APROVADA nos fluxos testados.
+
+Server Action autenticada de leitura:
+APROVADA.
+
+Secrets privilegiados:
+PENDENTES.
+
+createAdminClient remoto:
+PENDENTE.
+
+Mercado Pago GET remoto:
+PENDENTE.
+
+HMAC remoto:
+PENDENTE.
+
+CPU/memoria:
+PENDENTE.
+
+Migracao definitiva:
+NAO AUTORIZADA.
+
+OBJETIVO:
+
+Concluir a homologacao tecnica Cloudflare Workers sem comprometer a producao Vercel.
+
+# FIM DO CHECKPOINT — 2026-10-09
+
+
+---
+
+# CHECKPOINT FINAL — HOMOLOGAÇÃO TÉCNICA CLOUDFLARE WORKERS — 2026-10-09
+
+## PRIORIDADE ABSOLUTA
+
+Este checkpoint substitui os checkpoints anteriores da prova Cloudflare quando houver divergência.
+
+A homologação técnica principal do Black Navalha na Cloudflare Workers foi CONCLUÍDA COM RESULTADO FAVORÁVEL.
+
+Não reiniciar a prova.
+
+Não repetir testes aprovados sem necessidade concreta.
+
+Produção Vercel permanece intacta.
+
+Nenhuma migração definitiva foi autorizada.
+
+## GIT
+
+Branch:
+
+main
+
+HEAD/origin/main confirmado:
+
+826841e8d73c2d0f810e4423b496d331732aecde
+
+Alterações locais Cloudflare permanecem intencionais:
+
+- .gitignore
+- CONTEXTO-PROJETO.md
+- package.json
+- package-lock.json
+- open-next.config.ts
+- wrangler.jsonc
+
+Não descartar automaticamente.
+
+Nenhum commit/push foi realizado durante a homologação.
+
+Nunca versionar:
+
+- ASSINATURAS-LOTE.txt
+- CODIGO-COMPLETO.txt
+- .env.local
+
+Nunca usar git add .
+
+Commit/push somente com autorização explícita.
+
+## STACK HOMOLOGADA
+
+Next.js: 16.3.8
+React: 19.2.8
+OpenNext: 1.20.8
+Wrangler: 4.147.0
+Node local: 24.20.0
+
+Build Next.js:
+
+APROVADO.
+
+Build OpenNext:
+
+APROVADO.
+
+TypeScript:
+
+APROVADO.
+
+45/45 rotas.
+
+Nenhuma alteração funcional invasiva foi necessária.
+
+## CLOUDFLARE PERSISTENTE
+
+Worker:
+
+black-navalha-cloudflare-proof
+
+URL:
+
+https://black-navalha-cloudflare-proof.blacknavalha-dev.workers.dev
+
+Versão final publicada:
+
+d3a523d6-2eea-4b4f-a374-d36b90fb1482
+
+Worker:
+
+aproximadamente 8,05 MiB.
+
+Gzip:
+
+aproximadamente 1,60 MiB.
+
+Startup:
+
+20 ms.
+
+## SECRETS
+
+Sete Secrets configurados e preservados:
+
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+SUPABASE_SERVICE_ROLE_KEY
+MERCADO_PAGO_ACCESS_TOKEN
+MERCADO_PAGO_WEBHOOK_SECRET
+APP_URL
+MERCADO_PAGO_TEST_MODE
+
+APP_URL aponta para a origem Cloudflare persistente.
+
+MERCADO_PAGO_TEST_MODE foi configurado como true.
+
+Mercado Pago utiliza credencial de TESTE.
+
+Nenhum valor secreto foi registrado neste documento.
+
+## SUPABASE
+
+Conectividade Cloudflare → Supabase:
+
+APROVADA.
+
+SSR público:
+
+APROVADO.
+
+Supabase Auth:
+
+APROVADO.
+
+Cookies:
+
+APROVADOS.
+
+Persistência de sessão:
+
+APROVADA.
+
+Central do Cliente:
+
+APROVADA.
+
+Admin:
+
+APROVADO.
+
+Área do Barbeiro:
+
+APROVADA.
+
+Server Action autenticada de leitura:
+
+APROVADA.
+
+createAdminClient:
+
+APROVADO remotamente.
+
+A página /assinaturas carregou o catálogo privilegiado:
+
+Black Essencial:
+R$ 85 — 4 benefícios.
+
+Black Navalha:
+R$ 145 — 6 benefícios.
+
+Black Premium:
+R$ 200 — 10 benefícios.
+
+Não foi necessário criar assinatura artificial.
+
+## MERCADO PAGO
+
+GET autenticado remoto:
+
+APROVADO.
+
+Endpoint somente leitura utilizado:
+
+GET /preapproval/search?limit=1
+
+Tempo observado:
+
+523 ms.
+
+Nenhuma cobrança criada.
+
+Nenhum PIX criado.
+
+O teste comprovou funcionamento de fetch HTTPS autenticado e Access Token no Worker remoto.
+
+Não representa repetição do E2E financeiro.
+
+## HMAC
+
+node:crypto no Worker remoto:
+
+APROVADO.
+
+createHmac SHA-256:
+
+APROVADO com vetor conhecido.
+
+timingSafeEqual:
+
+APROVADO.
+
+MERCADO_PAGO_WEBHOOK_SECRET:
+
+presença confirmada no runtime.
+
+O HMAC real de Webhook Mercado Pago permanece implementado e anteriormente validado em ambiente de desenvolvimento.
+
+Não foi processado Webhook financeiro real nesta prova Cloudflare.
+
+## SONDA TEMPORÁRIA
+
+Foi criada:
+
+app/api/cloudflare-proof/route.ts
+
+A rota:
+
+- exigia sessão administrativa;
+- exigia profiles.role = admin;
+- executava GET seguro no Mercado Pago;
+- validava HMAC sintético;
+- não retornava Secrets.
+
+Resultado remoto:
+
+mercadoPago.ok = true
+elapsedMs = 523
+
+hmac.ok = true
+secretConfigured = true
+elapsedMs = 0
+
+Após aprovação:
+
+- arquivo removido;
+- diretório removido;
+- OpenNext reconstruído;
+- Worker limpo publicado.
+
+Validação final:
+
+GET /api/cloudflare-proof
+
+HTTP 404.
+
+Portanto a sonda temporária NÃO permanece publicada.
+
+## NEXT/IMAGE
+
+Imagens originais:
+
+APROVADAS.
+
+Imagens otimizadas:
+
+HTTP 200.
+
+Content-Type:
+
+image/jpeg.
+
+Galeria/lightbox:
+
+APROVADA em desktop e mobile.
+
+Nenhum Cloudflare Images binding foi necessário.
+
+## MÉTRICAS REAIS
+
+Janela observada:
+
+últimas 24 horas da homologação.
+
+Invocações:
+
+396.
+
+Erros de execução:
+
+0.
+
+CPU Time:
+
+P50: 65,11 ms.
+P90: 232 ms.
+P99: 294 ms.
+P99,9: 296 ms.
+
+Memória:
+
+P50: 22,47 MB.
+P90: 24,97 MB.
+P99: 25,52 MB.
+P99,9: 25,67 MB.
+
+Duração:
+
+P50: 206 ms.
+P90: 619 ms.
+P99: 951 ms.
+P99,9: 951 ms.
+
+Cache de assets:
+
+84,41%.
+
+Nenhum evento registrado de:
+
+- excesso de memória;
+- excesso de CPU;
+- exceção não tratada;
+- load shedding.
+
+As métricas representam tráfego de homologação, não carga de produção.
+
+Não extrapolar linearmente esses resultados como garantia de desempenho futuro.
+
+## PARECER TÉCNICO
+
+CLOUDFLARE WORKERS:
+
+HOMOLOGAÇÃO TÉCNICA PRINCIPAL APROVADA.
+
+Compatibilidade:
+
+APROVADA nos fluxos testados.
+
+Desempenho inicial:
+
+SATISFATÓRIO.
+
+Memória:
+
+CONFORTÁVEL nas medições observadas.
+
+CPU:
+
+COMPATÍVEL com avaliação de Workers Paid.
+
+Segurança dos Secrets:
+
+CONFIGURAÇÃO APROVADA.
+
+Supabase:
+
+APROVADO.
+
+Mercado Pago GET/HMAC:
+
+APROVADOS remotamente.
+
+Nenhuma incompatibilidade estrutural impeditiva foi identificada.
+
+## LIMITAÇÕES DA APROVAÇÃO
+
+Ainda não foram comprovados:
+
+- estabilidade sob tráfego real prolongado;
+- comportamento financeiro E2E completo especificamente na Cloudflare;
+- operação contínua de produção;
+- custos definitivos com tráfego real;
+- processo operacional de rollback de produção.
+
+Nenhum desses pontos autoriza automaticamente migração definitiva.
+
+## VIABILIDADE ECONÔMICA
+
+Cloudflare Workers Paid permanece forte candidato principal.
+
+Referência consultada anteriormente:
+
+US$ 5/mês de mínimo.
+
+Franquias e excedentes devem ser revalidados antes da contratação definitiva.
+
+Meta do projeto:
+
+hospedagem aproximadamente dentro de R$ 100/mês.
+
+Considerar separadamente custos de Supabase e serviços financeiros.
+
+Hostinger KVM 1 permanece fallback.
+
+NÃO comprar VPS neste momento.
+
+## PRODUÇÃO
+
+Vercel permanece INTACTA.
+
+Nenhum domínio alterado.
+
+Nenhum DNS alterado.
+
+Nenhum projeto Vercel removido.
+
+Nenhuma migração definitiva autorizada.
+
+Cloudflare permanece ambiente de homologação.
+
+## BANCO
+
+Migrations 007–048:
+
+APLICADAS.
+
+NÃO reaplicar nenhuma.
+
+Migration 049:
+
+NÃO criada.
+
+Nenhuma alteração estrutural de banco durante a prova Cloudflare.
+
+## REGRAS FINANCEIRAS
+
+Pagamento mensal AVULSO via PIX.
+
+SEM recorrência automática Mercado Pago.
+
+Preservar:
+
+POST /v1/orders
+GET /v1/orders/{id}
+external_reference = subscription_charge.id
+Webhook HMAC
+data.id ORIGINAL, inclusive maiúsculas
+GET Order server-side
+confirm_mercado_pago_subscription_payment
+polling observacional
+idempotência.
+
+Browser NÃO confirma pagamento.
+
+Não repetir E2E financeiro sem necessidade concreta.
+
+## CAPACIDADE
+
+30 vagas totais por barbeiro.
+
+BLACK_STANDARD:
+
+25.
+
+BLACK_PREMIUM:
+
+5.
+
+Preservar obrigatoriamente:
+
+SELECT ... FOR UPDATE.
+
+## NOTIFICAÇÕES
+
+Continuam PAUSADAS.
+
+Migration 048 já criou:
+
+notification_events
+notification_deliveries.
+
+Próximo arquivo planejado:
+
+lib/notifications/foundation.ts
+
+Não iniciar WhatsApp.
+
+Não iniciar n8n.
+
+## PRÓXIMA FASE
+
+A homologação técnica principal foi concluída.
+
+Antes de produção definitiva:
+
+1. preparar estratégia segura de migração;
+2. separar conscientemente credenciais de teste e produção;
+3. definir monitoramento operacional;
+4. definir rollback;
+5. revalidar custos atuais;
+6. obter autorização explícita para qualquer mudança de produção.
+
+Não migrar automaticamente.
+
+Não comprar VPS.
+
+Não alterar DNS/domínio.
+
+Não remover Vercel.
+
+## ESTADO FINAL
+
+Cloudflare Workers:
+
+APROVADO TECNICAMENTE PARA OS FLUXOS HOMOLOGADOS.
+
+Produção:
+
+AINDA NA VERCEL.
+
+Migração definitiva:
+
+NÃO AUTORIZADA.
+
+Git checkpoint:
+
+PENDENTE DE AUTORIZAÇÃO.
+
+# FIM DO CHECKPOINT — 2026-10-09

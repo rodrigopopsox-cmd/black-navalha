@@ -33450,3 +33450,254 @@ Cada implantação comercial deverá possuir isolamento adequado de:
 Preservar portabilidade Vercel + Cloudflare Workers.
 
 # FIM DO CHECKPOINT — 2026-10-09
+
+---
+
+# CHECKPOINT — PROCESSAMENTO INTERNO DE NOTIFICACOES — 2026-10-09
+
+## GIT DE REFERENCIA
+
+Branch: main
+
+HEAD/origin/main antes desta etapa:
+
+5d8c43bf7e2e81187d532736fc970c0b89e24e23
+
+Commit anterior:
+
+5d8c43b Implementa fundacao interna de notificacoes
+
+## MIGRATION 049
+
+Arquivo:
+
+supabase/sql/049-notification-delivery-processing.sql
+
+Status:
+
+APLICADA NO SUPABASE.
+
+Nao reaplicar.
+
+Migrations aplicadas:
+
+007–049.
+
+A migration adiciona:
+
+notification_deliveries.lock_token
+
+Constraint:
+
+notification_deliveries_lock_consistent
+
+Indice:
+
+notification_deliveries_lock_token_idx
+
+RPCs:
+
+claim_notification_deliveries(integer)
+
+complete_notification_delivery(
+  uuid, uuid, text, text, text, text, timestamptz
+)
+
+recover_stale_notification_deliveries(integer, integer)
+
+## SEGURANCA
+
+As tres RPCs utilizam:
+
+SECURITY DEFINER
+
+search_path vazio.
+
+EXECUTE confirmado:
+
+anon: false
+authenticated: false
+service_role: true
+
+Nenhuma permissao publica adicional foi concedida.
+
+Nenhum canal de mensagens foi implementado.
+
+## PROCESSAMENTO TYPESCRIPT
+
+Criado:
+
+lib/notifications/processing.ts
+
+Funcoes:
+
+claimNotificationDeliveries()
+
+completeNotificationDelivery()
+
+recoverStaleNotificationDeliveries()
+
+Todas utilizam:
+
+import "server-only"
+
+createAdminClient()
+
+Nao existe Route Handler publica para processamento.
+
+Nao existe cron ou worker.
+
+## TESTES
+
+Migration 049 validada anteriormente em transacao com ROLLBACK.
+
+Aplicacao definitiva:
+
+Success. No rows returned.
+
+Objetos PostgreSQL confirmados:
+
+1 coluna;
+1 constraint;
+1 indice;
+3 RPCs.
+
+Teste com filas vazias:
+
+claims = 0
+recuperadas = 0
+conclusao inexistente = false.
+
+Testes funcionais com registros sinteticos e ROLLBACK:
+
+APROVADOS.
+
+Foram exercitados:
+
+- claim;
+- protecao contra claim duplicado;
+- lock_token incorreto;
+- retry;
+- invalidacao do token antigo;
+- recuperacao de tentativa abandonada;
+- limite de tentativas;
+- processamento de dois canais;
+- conclusao do evento apos encerramento das entregas.
+
+## CONCORRENCIA
+
+Foi iniciada tentativa de validar duas sessoes SQL simultaneas.
+
+O resultado foi INCONCLUSIVO.
+
+Nao foi comprovada sobreposicao real das transacoes.
+
+Portanto nao registrar concorrencia real como homologada.
+
+O PostgreSQL utiliza FOR UPDATE SKIP LOCKED nas RPCs, mas ainda falta teste controlado com duas conexoes independentes.
+
+## LIMPEZA QA
+
+Fixture criada para teste de concorrencia:
+
+event_id:
+de6da1b2-d40d-4d13-89f7-3989de84b336
+
+delivery_id:
+ac26c3a3-a13c-4519-b072-e722de510bd9
+
+A fixture foi removida especificamente apos validar seu estado.
+
+Auditoria final:
+
+eventos_qa_restantes = 0
+entregas_qa_restantes = 0
+
+Nenhum dado artificial permaneceu no banco.
+
+## BUILD
+
+Executado:
+
+npm.cmd run build
+
+Resultado:
+
+APROVADO.
+
+Next.js 16.3.8.
+
+TypeScript aprovado.
+
+45/45 rotas preservadas.
+
+## DIFF CHECK
+
+APROVADO.
+
+Somente avisos conhecidos LF/CRLF.
+
+## REGRAS PRESERVADAS
+
+Vercel + Cloudflare Workers.
+
+Supabase/PostgreSQL autoritativo.
+
+Nenhum envio automatico.
+
+Nenhum WhatsApp.
+
+Nenhum n8n.
+
+Nenhum cron.
+
+Nenhum worker.
+
+Nenhuma Queue Cloudflare.
+
+Nenhuma alteracao em Mercado Pago, PIX, agendamento, assinaturas, comissoes ou capacidade.
+
+## LIMITACAO
+
+O mecanismo de lock_token impede que uma tentativa antiga conclua uma delivery depois de perder sua reserva.
+
+Isso nao garante entrega externa exatamente uma vez.
+
+A politica de idempotencia do futuro provedor ainda precisara ser definida.
+
+## ESTADO FINAL
+
+Fundacao PostgreSQL:
+
+CONCLUIDA.
+
+Fundacao TypeScript:
+
+CONCLUIDA.
+
+Processamento transacional:
+
+IMPLEMENTADO.
+
+Testes funcionais sequenciais:
+
+APROVADOS.
+
+Concorrencia real entre conexoes:
+
+PENDENTE.
+
+Envio automatico:
+
+NAO IMPLEMENTADO.
+
+## PROXIMO PASSO
+
+1. Validar concorrencia real com duas conexoes PostgreSQL independentes.
+2. Definir politica de retry/backoff.
+3. Nao ativar processamento automatico antes dessas validacoes.
+4. Nao implementar WhatsApp/n8n automaticamente.
+5. Preservar portabilidade Vercel/Cloudflare.
+6. Commit/push somente com autorizacao explicita.
+
+# FIM DO CHECKPOINT — 2026-10-09

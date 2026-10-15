@@ -33701,3 +33701,1293 @@ NAO IMPLEMENTADO.
 6. Commit/push somente com autorizacao explicita.
 
 # FIM DO CHECKPOINT — 2026-10-09
+
+---
+
+# CHECKPOINT — NOTIFICACOES / PREPARACAO DO TESTE DE CONCORRENCIA — 2026-10-09
+
+## GIT
+
+Branch: main
+
+HEAD/origin/main confirmado:
+
+b764a73edcd7f4aab90fe989d93b0319ec881d74
+
+Working tree inicial:
+
+?? ASSINATURAS-LOTE.txt
+?? CODIGO-COMPLETO.txt
+
+Nao versionar esses arquivos.
+
+Commit/push somente com autorizacao explicita.
+
+## ESTADO DAS NOTIFICACOES
+
+Fundacao interna:
+
+IMPLEMENTADA E VERSIONADA.
+
+Processamento transacional:
+
+IMPLEMENTADO E VERSIONADO.
+
+Migration 049:
+
+APLICADA.
+
+Migrations 007–049:
+
+APLICADAS.
+
+Nao reaplicar nenhuma.
+
+Testes funcionais sequenciais:
+
+APROVADOS anteriormente.
+
+Concorrencia PostgreSQL real:
+
+AINDA PENDENTE.
+
+Nenhum WhatsApp, n8n, cron, worker ou consumidor automatico foi criado.
+
+## GIT E CODIGO
+
+Foram confirmados e lidos:
+
+AGENTS.md
+supabase/sql/049-notification-delivery-processing.sql
+lib/notifications/processing.ts
+
+Git:
+
+main
+HEAD = origin/main = b764a73edcd7f4aab90fe989d93b0319ec881d74
+
+git diff --check:
+
+APROVADO.
+
+Nenhuma alteracao funcional foi realizada.
+
+## CLIENTE POSTGRESQL TEMPORARIO
+
+psql:
+
+NAO INSTALADO.
+
+Driver pg:
+
+instalado somente em:
+
+$env:TEMP\black-navalha-postgres-concurrency
+
+Versao:
+
+pg@8
+
+Nenhuma dependencia foi adicionada ao package.json ou package-lock.json.
+
+Node:
+
+24.20.0.
+
+## SUPABASE SESSION POOLER
+
+Foi localizada a modalidade:
+
+Session pooler.
+
+Host:
+
+aws-0-sa-east-1.pooler.supabase.com
+
+Porta:
+
+5432
+
+Database:
+
+postgres
+
+Usuario:
+
+postgres.elpvjgxixzktgwxdfckb
+
+Nenhuma configuracao do Supabase foi alterada.
+
+## TESTES DE CONEXAO
+
+Primeira tentativa PostgreSQL:
+
+SELF_SIGNED_CERT_IN_CHAIN
+
+A cadeia TLS nao foi validada pelo Node.
+
+Segunda tentativa diagnostica com validacao de certificado desabilitada temporariamente:
+
+28P01
+
+Autenticacao PostgreSQL recusada.
+
+A senha utilizada provavelmente nao corresponde a Database Password.
+
+Nao foi comprovada autenticacao PostgreSQL bem-sucedida.
+
+Nao manter rejectUnauthorized=false como configuracao definitiva.
+
+## CREDENCIAIS
+
+Foi confirmada no painel:
+
+Database
+→ Settings
+→ Database password.
+
+O Supabase informa que a senha original nao pode ser visualizada.
+
+Reset database password pode interromper conexoes existentes.
+
+Nenhuma redefinicao foi executada.
+
+Foram verificadas somente presencas de configuracoes PostgreSQL comuns.
+
+Nao foram encontradas:
+
+DATABASE_URL
+DIRECT_URL
+POSTGRES_URL
+PGPASSWORD
+.pgpass
+pgpass.conf
+.pg_service.conf
+
+.env.local permanece preservado e secreto.
+
+Nenhum segredo foi enviado ao chat.
+
+## CONCORRENCIA
+
+Ainda nao foram criadas conexoes PostgreSQL autenticadas independentes.
+
+Nenhuma fixture de concorrencia foi criada nesta continuidade.
+
+Nenhuma delivery foi reservada.
+
+Nenhum claim foi executado.
+
+Nenhum dado artificial foi inserido.
+
+A homologacao real de FOR UPDATE SKIP LOCKED permanece pendente.
+
+## PROXIMA DIRECAO
+
+Nao redefinir a senha administrativa do banco apenas para executar o teste.
+
+Avaliar alternativa de conexao PostgreSQL com credencial especifica e privilegios minimos.
+
+Antes de criar usuario/role, avaliar necessidade e obter autorizacao.
+
+Enquanto isso, continuar pela definicao tecnica de retry/backoff.
+
+Avaliar:
+
+- erros transitorios;
+- erros permanentes;
+- backoff exponencial;
+- jitter;
+- max_attempts;
+- timeout de lease;
+- recuperacao de tentativas abandonadas;
+- resultado desconhecido do provedor;
+- idempotencia externa.
+
+A infraestrutura atual ja possui campos suficientes para uma politica inicial:
+
+attempt_count
+max_attempts
+next_attempt_at
+last_attempt_at
+locked_at
+lock_token
+last_error
+
+Nao criar migration 050 automaticamente.
+
+Nao alterar codigo funcional sem necessidade concreta.
+
+Nao habilitar consumidor automatico.
+
+## HOSPEDAGEM
+
+Cloudflare Workers:
+
+HOMOLOGACAO TECNICA PRINCIPAL APROVADA.
+
+Vercel:
+
+PRESERVADA.
+
+Nao repetir homologacao Cloudflare.
+
+Nao migrar producao automaticamente.
+
+## PROXIMA ETAPA
+
+DEFINIR POLITICA DE RETRY/BACKOFF.
+
+Depois retomar homologacao de concorrencia com duas conexoes PostgreSQL independentes quando houver credencial adequada.
+
+Nenhum WhatsApp, n8n, cron ou worker nesta etapa.
+
+# FIM DO CHECKPOINT — 2026-10-09
+
+---
+
+# CHECKPOINT FINAL — NOTIFICACOES / CONCORRENCIA E RECONCILIACAO — 2026-10-13
+
+## PRIORIDADE ABSOLUTA
+
+Este checkpoint prevalece sobre checkpoints anteriores quando houver divergencia.
+
+A homologacao Cloudflare Workers permanece CONCLUIDA E APROVADA.
+
+Nao repetir Cloudflare.
+
+Nao reconstruir funcionalidades concluidas.
+
+A frente atual permanece exclusivamente:
+
+NOTIFICACOES INTERNAS — SEGURANCA DE PROCESSAMENTO.
+
+## GIT
+
+Branch:
+
+main
+
+HEAD/origin/main confirmado no inicio desta continuidade:
+
+b764a73edcd7f4aab90fe989d93b0319ec881d74
+
+Working tree esperado:
+
+M CONTEXTO-PROJETO.md
+M lib/notifications/processing.ts
+?? supabase/sql/050-notification-reconciliation-safety.sql
+?? ASSINATURAS-LOTE.txt
+?? CODIGO-COMPLETO.txt
+
+Nao versionar:
+
+ASSINATURAS-LOTE.txt
+CODIGO-COMPLETO.txt
+.env.local
+
+Nunca usar git add .
+
+Commit/push somente com autorizacao explicita.
+
+## MIGRATIONS
+
+007–049:
+
+APLICADAS.
+
+Nao reaplicar nenhuma.
+
+Migration 050:
+
+supabase/sql/050-notification-reconciliation-safety.sql
+
+CRIADA LOCALMENTE.
+
+NAO APLICADA.
+
+Nao executar no Supabase sem validacao e autorizacao especifica.
+
+## CONCORRENCIA POSTGRESQL
+
+Foi abandonada a tentativa de obter a Database Password apenas para QA.
+
+Nao houve redefinicao de senha.
+
+Nao foi criada credencial PostgreSQL.
+
+Foi utilizado Supabase com service_role existente e RPCs temporarias de QA.
+
+Fixture exclusiva:
+
+event_id:
+949a4087-a364-4696-91db-fedf7e10b97e
+
+delivery_id:
+e723da59-e6c2-400d-9920-d3312a98ec14
+
+Foram criadas temporariamente:
+
+qa_hold_notification_event_lock(uuid, integer)
+
+qa_claim_notification_delivery(uuid)
+
+As funcoes foram restritas a service_role e a fixture especifica.
+
+## RESULTADO DA CONCORRENCIA
+
+Primeira tentativa com bloqueio de 8 segundos:
+
+PostgreSQL 57014.
+
+Execucao cancelada por timeout.
+
+Nao demonstrou falha do SKIP LOCKED.
+
+Segunda tentativa:
+
+Bloqueio:
+
+3 segundos.
+
+Backend A:
+
+224764.
+
+Backend B:
+
+224765.
+
+Backends distintos:
+
+true.
+
+Tempo da chamada B:
+
+131 ms.
+
+B claimed:
+
+false.
+
+Tempo total:
+
+3264 ms.
+
+Apos liberar o bloqueio:
+
+C claimed:
+
+true.
+
+Delivery correta:
+
+true.
+
+Resultado:
+
+APROVADO.
+
+Foi comprovado:
+
+- dois backends PostgreSQL diferentes;
+- sobreposicao real;
+- bloqueio do evento;
+- FOR UPDATE SKIP LOCKED;
+- ausencia de reserva concorrente da fixture;
+- disponibilidade apos liberacao.
+
+LIMITACAO:
+
+O teste utilizou RPCs isoladas de QA.
+
+Nao executou diretamente claim_notification_deliveries sob bloqueio.
+
+Portanto a concorrencia integral da RPC de producao permanece sem homologacao direta.
+
+Os testes sequenciais anteriores de attempt_count e lock_token continuam aprovados.
+
+## LIMPEZA QA
+
+A fixture foi removida pelo SQL Editor.
+
+Auditoria final:
+
+eventos_qa_restantes = 0.
+
+entregas_qa_restantes = 0.
+
+As duas funcoes temporarias foram removidas pelo mesmo script de limpeza executado com sucesso.
+
+Nao tentar excluir novamente essa fixture.
+
+Nenhum registro QA permaneceu.
+
+## POLITICA DE SEGURANCA DEFINIDA
+
+Falha transitoria comprovada:
+
+retry com backoff.
+
+Falha permanente:
+
+failed.
+
+Resultado externo desconhecido:
+
+reconciliation_required.
+
+Resultado desconhecido NAO permite retry automatico.
+
+Lease expirado NAO comprova que o fornecedor deixou de receber a mensagem.
+
+Nao declarar exactly-once delivery.
+
+## BACKOFF PROPOSTO
+
+Tentativas maximas:
+
+5.
+
+Espera inicial:
+
+60 segundos.
+
+Multiplicador:
+
+2.
+
+Espera maxima:
+
+30 minutos.
+
+Jitter:
+
+ate 20%.
+
+Lease inicial:
+
+5 minutos.
+
+HTTP 429:
+
+respeitar Retry-After quando valido.
+
+Esses parametros ainda nao foram implementados nem homologados como politica executavel.
+
+Nao implementar consumidor antes da conclusao da politica.
+
+## MIGRATION 050 — ESTADO LOCAL
+
+Foi criada:
+
+supabase/sql/050-notification-reconciliation-safety.sql
+
+A migration:
+
+- acrescenta reconciliation_required a constraint de status;
+- atualiza complete_notification_delivery;
+- atualiza recover_stale_notification_deliveries;
+- preserva SECURITY DEFINER;
+- preserva search_path vazio;
+- preserva ordem evento -> delivery;
+- preserva bloqueios PostgreSQL;
+- preserva lock_token;
+- impede retry imediato na recuperacao;
+- invalida token antigo;
+- preserva attempt_count;
+- impede conclusao prematura do evento;
+- preserva EXECUTE restrito a service_role.
+
+A RPC de conclusao passa a aceitar:
+
+sent
+retry
+failed
+reconciliation_required
+
+Para reconciliation_required:
+
+- exige justificativa;
+- rejeita next_attempt_at informado;
+- exige lock_token valido;
+- nao considera a delivery terminal.
+
+Na recuperacao:
+
+processing com lease expirado
+-> reconciliation_required.
+
+Evento cancelado:
+-> cancelled.
+
+Nao cria retry automatico.
+
+Nenhum consumidor foi criado.
+
+IMPORTANTE:
+
+A migration 050 ainda necessita testes e revisao final antes de aplicacao.
+
+Nao considerar homologada.
+
+## TYPESCRIPT
+
+Alterado:
+
+lib/notifications/processing.ts
+
+NotificationDeliveryResult agora inclui:
+
+reconciliation_required.
+
+completeNotificationDelivery:
+
+- aceita novo resultado;
+- exige justificativa;
+- rejeita nextAttemptAt para reconciliacao;
+- preserva validacoes anteriores;
+- continua utilizando createAdminClient;
+- continua server-only.
+
+Executado:
+
+npm.cmd exec -- tsc --noEmit
+
+Resultado:
+
+APROVADO.
+
+Build Next.js nao foi repetido porque a etapa funcional ainda nao terminou.
+
+## SEGURANCA
+
+notification_events e notification_deliveries continuam com RLS.
+
+Sem policies publicas.
+
+RPCs de processamento permanecem reservadas a service_role.
+
+Nenhuma rota publica de processamento criada.
+
+Nenhum envio realizado.
+
+Nenhum WhatsApp.
+
+Nenhum n8n.
+
+Nenhum cron.
+
+Nenhum worker.
+
+Nenhuma Queue.
+
+Nenhuma alteracao de hospedagem.
+
+## PENDENCIAS EXATAS
+
+1. Revisar definitivamente a migration 050.
+2. Criar testes isolados da reconciliacao.
+3. Validar justificativa obrigatoria.
+4. Validar rejeicao de retry durante reconciliacao.
+5. Validar lock_token antigo.
+6. Validar evento nao concluido prematuramente.
+7. Definir e implementar calculo seguro de backoff TypeScript.
+8. Validar erros transitorios e permanentes.
+9. Definir tratamento de Retry-After.
+10. Tratar resultado desconhecido sem repeticao cega.
+11. Avaliar idempotencia externa antes de qualquer consumidor.
+12. Executar TypeScript/build quando apropriado.
+13. Executar git diff --check.
+14. Aplicar migration 050 somente apos revisao, testes e autorizacao explicita.
+15. Atualizar documentacao apos a conclusao.
+16. Commit/push somente com autorizacao explicita.
+
+## HOSPEDAGEM
+
+Cloudflare Workers:
+
+HOMOLOGACAO TECNICA PRINCIPAL APROVADA.
+
+Vercel:
+
+PRESERVADA.
+
+Supabase/PostgreSQL:
+
+BACKEND AUTORITATIVO.
+
+Nao repetir homologacao Cloudflare.
+
+Nao migrar producao.
+
+## FINANCEIRO
+
+Pagamento mensal avulso via PIX.
+
+Sem recorrencia automatica Mercado Pago.
+
+Preservar:
+
+POST /v1/orders
+GET /v1/orders/{id}
+external_reference = subscription_charge.id
+Webhook HMAC
+data.id ORIGINAL
+confirm_mercado_pago_subscription_payment
+polling observacional
+idempotencia.
+
+Browser nao confirma pagamento.
+
+Nao criar PIX para testar notificacoes.
+
+## PROXIMO PASSO EXATO
+
+No proximo chat:
+
+1. Ler integralmente CONTEXTO-PROJETO.md.
+2. Ler AGENTS.md.
+3. Priorizar este checkpoint.
+4. Confirmar Git real.
+5. Preservar migration 050 local.
+6. Nao aplicar 050 automaticamente.
+7. Nao repetir teste de SKIP LOCKED ja aprovado.
+8. Nao repetir homologacao Cloudflare.
+9. Revisar apenas os contratos necessarios de 050 e processing.ts.
+10. Preparar testes isolados de reconciliacao.
+11. Definir implementacao de retry/backoff.
+12. Validar seguranca e idempotencia.
+13. Nao criar consumidor automatico.
+14. Nao implementar WhatsApp/n8n.
+15. Nao criar cron/worker/Queue.
+16. Trabalhar uma etapa por vez.
+17. Usar comandos PowerShell completos.
+18. Utilizar npm.cmd.
+19. Preferir Set-Content para arquivos completos.
+20. Nunca utilizar git add .
+21. Commit/push somente com autorizacao explicita.
+
+# FIM DO CHECKPOINT — 2026-10-13
+
+---
+
+# REGRA PERMANENTE — EXPLICACAO + COMANDO NA MESMA RESPOSTA
+Data: 2026-10-13
+
+Preferencia operacional explicita do responsavel:
+
+Sempre que a proxima etapa exigir execucao local, apresentar NA MESMA RESPOSTA:
+
+1. Explicacao objetiva da operacao.
+2. Comando PowerShell COMPLETO em um bloco de codigo.
+3. Resultado esperado.
+4. Aviso de risco/autorizacao quando aplicavel.
+
+Nao enviar somente a explicacao para depois oferecer o comando.
+
+O responsavel analisara a explicacao e o comando juntos.
+
+Se discordar, solicitara modificacao antes de executar.
+
+Objetivo:
+
+Reduzir mensagens intermediarias e acelerar o desenvolvimento sem comprometer a seguranca.
+
+Continuam obrigatorios:
+
+- trabalhar uma etapa por vez;
+- comandos PowerShell completos;
+- utilizar npm.cmd;
+- preferir Set-Content para arquivos completos;
+- preservar alteracoes locais;
+- nunca utilizar git add .;
+- nunca exibir Secrets;
+- nao executar operacoes destrutivas sem autorizacao;
+- nao aplicar migrations automaticamente;
+- nao modificar producao;
+- commit/push somente com autorizacao explicita.
+
+Esta regra deve ser respeitada em todos os proximos chats.
+
+---
+
+# CHECKPOINT — NOTIFICACOES / RECONCILIACAO E RETRY-BACKOFF
+Data: 2026-10-13
+
+## ESTADO
+
+Fundacao interna de notificacoes:
+CONCLUIDA E VERSIONADA.
+
+Processamento transacional inicial:
+CONCLUIDO E VERSIONADO.
+
+Migration 049:
+APLICADA.
+
+Migration 050:
+CRIADA LOCALMENTE.
+REVISADA ESTATICAMENTE.
+NAO APLICADA.
+NAO HOMOLOGADA NO POSTGRESQL REAL.
+
+Migrations aplicadas:
+007–049.
+
+NAO reaplicar nenhuma.
+
+## ALTERACOES LOCAIS
+
+lib/notifications/processing.ts:
+- aceita reconciliation_required;
+- exige justificativa;
+- rejeita nextAttemptAt fora de retry;
+- preserva lock_token;
+- preserva contratos anteriores.
+
+lib/notifications/retry-policy.ts:
+CRIADO LOCALMENTE.
+
+Implementa:
+- classificacao transient/permanent/unknown;
+- fase before_send/after_send/unknown;
+- backoff exponencial;
+- intervalo inicial 60 segundos;
+- multiplicador 2;
+- espera maxima normal 30 minutos;
+- jitter ate 20%;
+- maximo padrao 5 tentativas;
+- Retry-After;
+- limite operacional de 24 horas;
+- reconciliacao para Retry-After superior a 24 horas;
+- reconciliacao para valores numericos extremos;
+- protecao contra retry sem garantia externa;
+- precedencia de falha permanente comprovada;
+- resultado desconhecido sem retry automatico.
+
+A politica ainda nao foi conectada a consumidor.
+Nenhum envio foi implementado.
+
+## MIGRATION 050
+
+Arquivo:
+supabase/sql/050-notification-reconciliation-safety.sql
+
+Alteracoes preparadas:
+- novo estado reconciliation_required;
+- conclusao com justificativa obrigatoria;
+- next_attempt_at permitido somente em retry;
+- provider_message_id preservado durante reconciliacao;
+- invalidacao do lock_token;
+- recuperacao de lease para reconciliation_required;
+- preservacao de attempt_count;
+- preservacao de next_attempt_at;
+- ausencia de retry automatico;
+- evento nao concluido durante reconciliacao;
+- SECURITY DEFINER;
+- search_path vazio;
+- EXECUTE restrito a service_role.
+
+NAO aplicar automaticamente.
+
+## TESTES TYPESCRIPT
+
+Testes isolados consolidados:
+62/62 APROVADOS.
+
+Contratos estaticos integrados:
+18/18 APROVADOS.
+
+TypeScript:
+APROVADO.
+
+Build Next.js 16.3.8:
+APROVADO.
+
+45/45 rotas.
+
+Git diff --check:
+APROVADO.
+
+Arquivos novos:
+whitespace verificado.
+
+## AUDITORIA SUPABASE
+
+notification_events:
+0 registros.
+
+notification_deliveries:
+0 registros.
+
+processing:
+0.
+
+reconciliation_required:
+0.
+
+leases expirados:
+0.
+
+Consulta somente leitura.
+
+Nenhum dado foi criado.
+
+## TESTES SQL
+
+14 cenarios preparados em script temporario:
+
+$env:TEMP\black-navalha-050-timeout-protected-test.sql
+
+Script:
+- BEGIN;
+- lock_timeout 2s;
+- statement_timeout 20s;
+- assertions PostgreSQL;
+- ROLLBACK;
+- nenhum COMMIT.
+
+Status:
+PREPARADO.
+NAO EXECUTADO.
+
+Motivo:
+a migration altera constraints e RPCs durante transacao,
+podendo bloquear operacoes concorrentes no Supabase compartilhado.
+
+A presenca de ROLLBACK nao elimina risco operacional de locks.
+
+Nao executar sem revisao e autorizacao especifica.
+
+## GIT
+
+Branch:
+main.
+
+HEAD/origin/main de referencia:
+b764a73edcd7f4aab90fe989d93b0319ec881d74
+
+Arquivos locais esperados:
+M CONTEXTO-PROJETO.md
+M lib/notifications/processing.ts
+?? lib/notifications/retry-policy.ts
+?? supabase/sql/050-notification-reconciliation-safety.sql
+?? ASSINATURAS-LOTE.txt
+?? CODIGO-COMPLETO.txt
+
+Nunca versionar:
+ASSINATURAS-LOTE.txt
+CODIGO-COMPLETO.txt
+.env.local
+
+Nunca usar git add .
+
+Commit/push somente com autorizacao explicita.
+
+## REGRAS PRESERVADAS
+
+Cloudflare Workers:
+HOMOLOGACAO PRINCIPAL APROVADA.
+
+Vercel:
+PRESERVADA.
+
+Supabase/PostgreSQL:
+BACKEND AUTORITATIVO.
+
+Nao repetir homologacao Cloudflare.
+
+Nao criar:
+- WhatsApp;
+- n8n;
+- cron;
+- worker;
+- Cloudflare Queue;
+- consumidor automatico.
+
+Nao criar notificacoes reais.
+
+Nao criar PIX ou cobrancas.
+
+Nao modificar producao.
+
+## PROXIMO PASSO
+
+1. Revisar contrato final de retry-policy.ts.
+2. Garantir justificativa operacional para reconciliation_required.
+3. Avaliar classificacao de falhas contraditorias.
+4. Preservar ausencia de retry cego.
+5. Decidir estrategia isolada para homologacao PostgreSQL.
+6. Executar teste SQL somente com autorizacao especifica.
+7. Aplicar migration 050 somente apos homologacao e autorizacao separada.
+8. Commit/push somente com autorizacao explicita.
+
+## REGRA OPERACIONAL
+
+Sempre apresentar explicacao e comando completo na MESMA resposta.
+
+O responsavel podera pedir ajustes antes de executar.
+
+---
+
+# CHECKPOINT — POSTGRESQL LOCAL QA / RECONCILIACAO — 2026-10-15
+
+## AMBIENTE POSTGRESQL LOCAL
+
+PostgreSQL:
+17.11 Windows x64.
+
+Origem:
+Pacote EnterpriseDB baixado anteriormente.
+
+SHA256 ZIP:
+80379B2C04D51C30225532E0AE04509899141E9957ED096FE749D7FD9DF8F82F
+
+Binarios:
+Verificados por SHA256 contra o ZIP.
+
+Runtime:
+Completo por presenca e tamanho.
+
+Diretorio:
+%TEMP%\black-navalha-postgresql17-qa
+
+Cluster:
+data-qa.
+
+Servidor:
+127.0.0.1:55432.
+
+Autenticacao:
+SCRAM-SHA-256.
+
+Usuario:
+black_navalha_qa.
+
+Banco:
+black_navalha_notification_qa.
+
+Roles locais:
+anon NOLOGIN.
+authenticated NOLOGIN.
+service_role NOLOGIN.
+
+Nenhum servico Windows instalado.
+Nenhuma alteracao no PATH global.
+Nenhuma credencial Supabase utilizada.
+Nenhum dado pessoal real utilizado.
+
+PostgreSQL local permanece separado do Supabase.
+
+## MIGRATIONS
+
+Migration 048:
+APLICADA NO QA LOCAL.
+
+Migration 049:
+APLICADA NO QA LOCAL.
+
+Migration 050:
+APLICADA NO QA LOCAL.
+NAO APLICADA NO SUPABASE.
+
+Migrations remotas:
+007–049 permanecem aplicadas.
+
+Nao reaplicar migrations remotas.
+
+## TESTES SQL
+
+Reconciliacao explicita:
+APROVADA.
+
+Lease expirado:
+processing -> reconciliation_required.
+APROVADO.
+
+Cancelamento:
+processing -> cancelled.
+APROVADO.
+
+Lock_token invalido:
+REJEITADO.
+
+Justificativa ausente:
+REJEITADA.
+
+Retry agendado durante reconciliacao:
+REJEITADO.
+
+Attempt_count:
+PRESERVADO.
+
+Lock_token:
+INVALIDADO APOS TRANSICAO.
+
+Evento:
+Nao concluido prematuramente.
+
+Retry automatico:
+Nao identificado nos cenarios testados.
+
+Fixtures:
+ROLLBACK.
+
+Auditoria final:
+SECURITY DEFINER aprovado.
+search_path vazio aprovado.
+anon sem EXECUTE.
+authenticated sem EXECUTE.
+PUBLIC sem EXECUTE.
+service_role com EXECUTE.
+
+Banco QA:
+Sem fixtures remanescentes na ultima auditoria.
+
+IMPORTANTE:
+Os testes locais nao substituem validacao de compatibilidade
+com a versao PostgreSQL real do Supabase.
+
+## TYPESCRIPT
+
+lib/notifications/processing.ts:
+MODIFICADO LOCALMENTE.
+
+Reconhece:
+reconciliation_required.
+
+lib/notifications/retry-policy.ts:
+CRIADO LOCALMENTE.
+
+Politica:
+Backoff inicial de 60 segundos.
+Multiplicador 2.
+Jitter ate 20%.
+Maximo padrao de 5 tentativas.
+Espera normal maxima de 30 minutos.
+HTTP 429 e Retry-After.
+Resultado desconhecido exige reconciliacao.
+Sem retry cego apos envio.
+
+Testes:
+25/25 APROVADOS.
+
+lib/notifications/failure-processing.ts:
+CRIADO LOCALMENTE.
+
+Integra:
+decideNotificationFailure.
+completeNotificationDelivery.
+
+Protecao:
+Nao presume idempotencia externa.
+Fase desconhecida exige reconciliacao.
+Retry permitido apenas quando seguro.
+Nenhum consumidor automatico criado.
+
+Testes de integracao protegida:
+12/12 APROVADOS.
+
+TypeScript:
+APROVADO.
+
+Build Next.js:
+AINDA NAO REPETIDO APOS AS ALTERACOES DESTA FRENTE.
+
+## SEGURANCA OPERACIONAL
+
+Nenhum WhatsApp conectado.
+Nenhum n8n conectado.
+Nenhum cron criado.
+Nenhum worker de notificacoes criado.
+Nenhuma mensagem enviada.
+Nenhum PIX gerado.
+Nenhuma cobranca executada.
+
+Cloudflare Workers:
+Homologacao principal anterior preservada.
+
+Vercel:
+Producao preservada.
+
+Supabase:
+Nenhuma alteracao remota nesta frente.
+
+Migration 050:
+Aplicacao remota exige autorizacao especifica.
+
+## GIT
+
+Branch:
+main.
+
+HEAD de referencia:
+b764a73edcd7f4aab90fe989d93b0319ec881d74
+
+Alteracoes locais preservadas.
+
+Arquivos que nunca devem ser versionados:
+ASSINATURAS-LOTE.txt
+CODIGO-COMPLETO.txt
+.env.local
+
+Nunca executar git add .
+
+Nenhum commit ou push autorizado nesta etapa.
+
+## PROXIMOS PASSOS
+
+1. Executar build Next.js apos alteracoes funcionais.
+2. Validar git diff --check.
+3. Verificar compatibilidade PostgreSQL do Supabase.
+4. Revisar requisitos finais antes de aplicar migration 050 remotamente.
+5. Solicitar autorizacao especifica para aplicar migration 050.
+6. Commit/push somente com autorizacao explicita.
+7. Nao ativar consumidores automaticos.
+
+---
+
+---
+
+# CHECKPOINT — MIGRATION 050 APLICADA NO SUPABASE — 2026-10-15
+
+## ESTADO OFICIAL
+
+Migration 050:
+APLICADA NO SUPABASE.
+
+Migrations aplicadas:
+007–050.
+
+NAO reaplicar nenhuma.
+
+PostgreSQL Supabase:
+17.6.
+
+PostgreSQL QA local:
+17.11.
+
+## SEGURANCA
+
+Novo estado:
+reconciliation_required.
+
+Objetivo:
+Impedir retry automatico quando o resultado externo
+de uma notificacao for desconhecido.
+
+RPCs:
+claim_notification_deliveries.
+complete_notification_delivery.
+recover_stale_notification_deliveries.
+
+SECURITY DEFINER:
+APROVADO NAS TRES RPCS.
+
+EXECUTE:
+service_role permitido.
+anon negado.
+authenticated negado.
+PUBLIC negado.
+
+Constraint:
+notification_deliveries_status_valid.
+
+Estado reconciliation_required:
+CONFIRMADO NO SUPABASE.
+
+## AUDITORIA REMOTA
+
+notification_events:
+0 registros.
+
+notification_deliveries:
+0 registros.
+
+Nenhuma fixture criada no Supabase durante a aplicacao.
+
+Nenhuma notificacao enviada.
+
+## HOMOLOGACAO LOCAL
+
+PostgreSQL:
+17.11 Windows x64.
+
+Migration 050:
+Aplicada e testada localmente.
+
+Testes:
+Reconciliacao explicita aprovada.
+Lease expirado aprovado.
+Cancelamento aprovado.
+Lock_token invalido rejeitado.
+Justificativa obrigatoria aprovada.
+Retry durante reconciliacao rejeitado.
+Attempt_count preservado.
+Sem retry automatico nos cenarios testados.
+
+Auditoria de seguranca local:
+APROVADA.
+
+## TYPESCRIPT
+
+retry-policy.ts:
+25/25 testes aprovados.
+
+failure-processing.ts:
+12/12 testes protegidos aprovados.
+
+processing.ts:
+Reconhece reconciliation_required.
+
+TypeScript:
+APROVADO.
+
+Nenhum consumidor automatico ativado.
+
+## PRODUCAO
+
+Vercel:
+PRESERVADA.
+
+Cloudflare Workers:
+PRESERVADO.
+
+Supabase:
+Migration 050 aplicada e validada.
+
+Nenhuma cobranca realizada.
+Nenhum PIX criado.
+Nenhum WhatsApp conectado.
+Nenhum n8n conectado.
+Nenhum cron criado.
+
+## GIT
+
+Branch:
+main.
+
+HEAD de referencia:
+b764a73edcd7f4aab90fe989d93b0319ec881d74
+
+Alteracoes locais:
+PRESERVADAS.
+
+Nenhum commit ou push realizado nesta etapa.
+
+Nunca versionar:
+ASSINATURAS-LOTE.txt.
+CODIGO-COMPLETO.txt.
+.env.local.
+
+## PROXIMOS PASSOS
+
+1. Atualizar documentacao oficial.
+2. Executar build Next.js apos alteracoes funcionais.
+3. Validar git diff --check.
+4. Revisar integracao interna de notificacoes.
+5. Nao ativar consumidores sem nova autorizacao.
+6. Commit/push somente com autorizacao explicita.
+
+---

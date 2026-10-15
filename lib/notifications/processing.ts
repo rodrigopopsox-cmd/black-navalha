@@ -1,4 +1,4 @@
-﻿import "server-only";
+import "server-only";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -18,7 +18,11 @@ export interface ClaimedNotificationDelivery {
   payload: Record<string, unknown>;
 }
 
-export type NotificationDeliveryResult = "sent" | "retry" | "failed";
+export type NotificationDeliveryResult =
+  | "sent"
+  | "retry"
+  | "failed"
+  | "reconciliation_required";
 
 export interface CompleteNotificationDeliveryInput {
   deliveryId: string;
@@ -110,7 +114,8 @@ export async function completeNotificationDelivery(
   if (
     input.result !== "sent" &&
     input.result !== "retry" &&
-    input.result !== "failed"
+    input.result !== "failed" &&
+    input.result !== "reconciliation_required"
   ) {
     throw new Error("Resultado de entrega invalido.");
   }
@@ -149,8 +154,25 @@ export async function completeNotificationDelivery(
     nextAttemptAt = new Date(timestamp).toISOString();
   }
 
+  if (input.result !== "retry" && input.nextAttemptAt != null) {
+    throw new Error(
+      "Proxima tentativa permitida somente para retry.",
+    );
+  }
   if (input.result === "sent" && errorMessage !== null) {
     throw new Error("Entrega enviada nao pode conter erro.");
+  }
+
+  if (input.result === "reconciliation_required") {
+    if (errorMessage === null) {
+      throw new Error("Reconciliacao exige justificativa.");
+    }
+
+    if (input.nextAttemptAt != null) {
+      throw new Error(
+        "Reconciliacao nao permite agendamento de retry.",
+      );
+    }
   }
 
   const supabase = createAdminClient();

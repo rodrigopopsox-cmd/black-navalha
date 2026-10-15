@@ -34991,3 +34991,325 @@ CODIGO-COMPLETO.txt.
 6. Commit/push somente com autorizacao explicita.
 
 ---
+---
+
+# CHECKPOINT — CONTRATOS OPERACIONAIS DE NOTIFICACOES — 2026-10-15
+
+## PRIORIDADE
+
+Este checkpoint complementa o checkpoint oficial anterior:
+
+Implementa reconciliacao segura e politica de retry de notificacoes.
+
+A infraestrutura anterior permanece concluida.
+
+Nao reconstruir funcionalidades aprovadas.
+
+## GIT
+
+Branch:
+
+main.
+
+HEAD/origin/main de referencia:
+
+6d21b8f8fd0f6cbe0574559aa3a6f5b23689a333
+
+Nenhum commit ou push foi realizado nesta frente.
+
+## NOVOS ARQUIVOS
+
+Criados localmente:
+
+lib/notifications/consumer-contract.ts
+
+lib/notifications/reconciliation-contract.ts
+
+lib/notifications/observability.ts
+
+Todos utilizam:
+
+import "server-only";
+
+## CONTRATO DO CONSUMIDOR
+
+Arquivo:
+
+consumer-contract.ts
+
+Implementa validacao de configuracao operacional.
+
+Defaults:
+
+batchSize = 10
+concurrency = 2
+leaseSeconds = 300
+operationTimeoutSeconds = 60
+leaseSafetyMarginSeconds = 30
+
+Limites:
+
+batchSize: 1 ate 10
+concurrency: 1 ate 2
+leaseSeconds: 60 ate 86400
+operationTimeoutSeconds: 1 ate 120
+leaseSafetyMarginSeconds: 30 ate 300
+
+Regras:
+
+concorrencia nao pode exceder batchSize.
+
+operationTimeoutSeconds + leaseSafetyMarginSeconds
+deve ser menor que leaseSeconds.
+
+Configuracao validada retorna objeto congelado.
+
+IMPORTANTE:
+
+Esses limites ainda nao controlam um consumidor real.
+
+Nenhum consumidor foi implementado.
+
+Lease de 300 segundos representa referencia operacional
+para recuperacao e nao garantia absoluta de posse.
+
+A posse continua protegida pelo PostgreSQL e lock_token.
+
+## CONTRATO DE RECONCILIACAO
+
+Arquivo:
+
+reconciliation-contract.ts
+
+Evidencias conceituais:
+
+provider_confirmed_sent
+provider_confirmed_rejected
+provider_confirmed_not_sent
+provider_outcome_unknown
+
+Decisoes conceituais:
+
+sent
+failed
+retry
+reconciliation_required
+
+O contrato valida:
+
+deliveryId UUID
+evidence
+evidenceReference
+reason
+
+A decisao retorna:
+
+requiresDatabaseAuthorization = true
+
+IMPORTANTE:
+
+Nenhuma transicao e executada.
+
+Nenhuma evidencia e autenticada automaticamente.
+
+A identidade do operador ainda precisa ser obtida
+de sessao administrativa ou identidade de servico autorizada.
+
+Antes de resolver reconciliation_required no banco:
+
+- verificar estado atual;
+- validar identidade/autorizacao;
+- validar evidencia;
+- respeitar attempt_count/max_attempts;
+- definir transicoes;
+- definir idempotencia;
+- definir auditoria persistente;
+- obter autorizacao para eventual migration.
+
+A RPC atual complete_notification_delivery continua exigindo
+status processing e lock_token valido.
+
+Nao utilizar UPDATE direto amplo para resolver reconciliacao.
+
+## OBSERVABILIDADE
+
+Arquivo:
+
+observability.ts
+
+Funcao:
+
+getNotificationOperationalSnapshot()
+
+Utiliza createAdminClient server-side.
+
+Consultas somente leitura.
+
+Implementado:
+
+- contagem pending;
+- contagem processing;
+- contagem retry;
+- contagem sent;
+- contagem failed;
+- contagem cancelled;
+- contagem reconciliation_required;
+- contagem de processing com locked_at anterior ao limite;
+- contagem de retries futuros.
+
+Consultas utilizam:
+
+count exact
+head true
+
+Nenhum payload ou registro completo e recuperado.
+
+O indicador attemptsAtLimit foi removido porque nao existia
+consulta real correspondente.
+
+Nao apresentar zero ficticio como medicao.
+
+IMPORTANTE:
+
+As consultas sao independentes.
+
+O resultado nao representa snapshot transacional unico.
+
+Os leases identificados sao potencialmente vencidos
+conforme o timeout informado.
+
+Nenhuma recuperacao e executada pela leitura.
+
+## TESTES
+
+Consumer contract:
+
+14/14 testes iniciais aprovados.
+
+Validacao adicional de concorrencia:
+
+3/3 aprovada.
+
+Reconciliation contract:
+
+11/11 testes aprovados.
+
+Observability:
+
+10/10 testes aprovados.
+
+Total:
+
+38 verificacoes isoladas aprovadas.
+
+Testes executados com Node.js e mocks locais.
+
+Nenhuma consulta real ao Supabase foi executada nesses testes.
+
+Nenhum envio externo foi executado.
+
+## TYPESCRIPT
+
+npm.cmd exec -- tsc --noEmit
+
+APROVADO.
+
+## BUILD
+
+npm.cmd run build
+
+APROVADO.
+
+Next.js:
+
+16.3.8.
+
+45/45 rotas preservadas.
+
+## GIT DIFF CHECK
+
+APROVADO.
+
+Arquivos novos verificados individualmente.
+
+Somente avisos conhecidos LF/CRLF.
+
+## BANCO
+
+Migrations 007–050:
+
+APLICADAS ANTERIORMENTE.
+
+Nenhuma migration nova criada nesta frente.
+
+Nenhuma migration reaplicada.
+
+Nenhuma alteracao remota realizada.
+
+## SEGURANCA
+
+Nenhum consumidor automatico.
+
+Nenhum cron.
+
+Nenhum worker de notificacoes.
+
+Nenhuma Cloudflare Queue.
+
+Nenhum WhatsApp.
+
+Nenhum n8n.
+
+Nenhum fornecedor conectado.
+
+Nenhuma mensagem enviada.
+
+Nenhuma cobranca realizada.
+
+Nenhum PIX criado.
+
+Vercel e Cloudflare preservados.
+
+## LIMITACOES
+
+Ainda nao existe:
+
+- consumidor executavel;
+- controle efetivo de concorrencia do consumidor;
+- observabilidade de tentativas no limite;
+- snapshot transacional de metricas;
+- operador autenticado de reconciliacao;
+- validacao externa de evidencias;
+- RPC de resolucao de reconciliation_required;
+- auditoria persistente de reconciliacao;
+- envio automatico.
+
+Nao declarar essas funcionalidades como implementadas.
+
+## PROXIMA FRENTE
+
+Definir contrato de autorizacao e auditoria da reconciliacao.
+
+Avaliar a necessidade concreta de migration 051.
+
+Nao criar migration automaticamente.
+
+Nao ativar processamento.
+
+Nao conectar fornecedor.
+
+Preservar ausencia de retry cego.
+
+Qualquer evolucao de banco exige contrato e autorizacao explicita.
+
+Commit/push somente com autorizacao explicita.
+
+Arquivos que permanecem fora do Git:
+
+ASSINATURAS-LOTE.txt
+CODIGO-COMPLETO.txt
+.env.local
+
+Nunca usar git add .
+
+# FIM DO CHECKPOINT — 2026-10-15

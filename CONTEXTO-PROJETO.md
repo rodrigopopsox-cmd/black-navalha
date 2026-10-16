@@ -36078,3 +36078,200 @@ Nunca utilizar git add .
 Commit/push somente com autorizacao explicita.
 
 # FIM DO CHECKPOINT — 2026-10-16
+
+---
+
+# CHECKPOINT — INTEGRACAO TYPESCRIPT COM RPC 051 — 2026-10-16
+
+## GIT DE REFERENCIA
+
+Branch:
+main
+
+HEAD/origin/main:
+b27ecc6fb63596fa175a5467835bd242622ce9a0
+
+Nenhum commit/push realizado nesta frente.
+
+## IMPLEMENTACAO
+
+Criado:
+
+lib/notifications/reconciliation-unknown-recording.ts
+
+Modulo server-only.
+
+Funcao:
+
+recordUnknownNotificationReconciliation()
+
+Entrada:
+
+- operationId;
+- deliveryId;
+- evidenceReference;
+- reason.
+
+A funcao:
+
+- consulta autorizacao administrativa;
+- utiliza getAuthorizedNotificationReconciliationOperator();
+- prepara contrato auditavel existente;
+- aceita somente provider_outcome_unknown;
+- exige decisao reconciliation_required;
+- utiliza createClient autenticado;
+- chama record_notification_reconciliation_unknown;
+- valida auditId retornado;
+- retorna resultado congelado.
+
+## AUTORIZACAO
+
+A verificacao inicial utiliza:
+
+supabase.auth.getUser()
+profiles.role = admin
+
+A RPC PostgreSQL revalida:
+
+auth.uid()
+profiles.role = admin
+
+operator_user_id nao e fornecido pelo navegador nem enviado como parametro da RPC.
+
+A autorizacao PostgreSQL continua sendo a fronteira autoritativa.
+
+## RPC UTILIZADA
+
+public.record_notification_reconciliation_unknown(
+  uuid,
+  uuid,
+  text,
+  text
+)
+
+A migration 051 ja estava aplicada.
+
+Nenhuma alteracao SQL foi realizada.
+
+A RPC:
+
+- preserva estado reconciliation_required;
+- registra auditoria;
+- protege idempotencia;
+- bloqueia evento antes da delivery;
+- nao agenda retry;
+- nao envia mensagens;
+- nao executa transicoes conclusivas.
+
+## TESTES
+
+Integracao TypeScript com mocks:
+
+10/10 APROVADOS.
+
+Foram verificados:
+
+- resultado inconclusivo;
+- nome da RPC;
+- parametros;
+- ausencia de operator_user_id;
+- rejeicao sem autorizacao;
+- entrada invalida;
+- erro PostgreSQL;
+- auditId invalido;
+- resposta vazia;
+- ausencia de transicoes conclusivas.
+
+Os testes nao acessaram Supabase real.
+
+A idempotencia PostgreSQL nao foi reexecutada nesta frente.
+
+## VALIDACAO
+
+TypeScript:
+APROVADO.
+
+Build Next.js:
+APROVADO.
+
+Diff check:
+APROVADO.
+
+## LIMITACOES
+
+Ainda nao existe:
+
+- chamada administrativa exposta por interface;
+- Server Action administrativa de reconciliacao;
+- endpoint administrativo de reconciliacao;
+- homologacao remota com sessao administrativa real;
+- autenticacao externa de evidencias;
+- verificacao real de fornecedor;
+- resolucao conclusiva de reconciliation_required.
+
+O modulo pode ser chamado por codigo server-side futuro, mas ainda nao possui interface operacional.
+
+Nao declarar homologacao funcional remota completa.
+
+## SEGURANCA
+
+Nenhuma transicao para sent, failed ou retry.
+
+Nenhum consumidor automatico.
+
+Nenhum cron.
+
+Nenhum worker de notificacoes.
+
+Nenhuma Queue.
+
+Nenhum fornecedor conectado.
+
+Nenhuma mensagem enviada.
+
+Nenhum PIX ou cobranca criado.
+
+Nenhuma alteracao de producao.
+
+## BANCO
+
+Migrations 007–051 aplicadas anteriormente.
+
+Nenhuma migration nova.
+
+Migration 052 nao criada.
+
+Nenhuma alteracao remota.
+
+## PROXIMA FRENTE
+
+Avaliar a menor interface administrativa segura para executar verificacoes inconclusivas.
+
+Antes de homologacao remota:
+
+- definir dados administrativos necessarios;
+- preservar identidade autenticada;
+- preservar idempotencia;
+- evitar dados privados desnecessarios;
+- nao criar delivery artificial no Supabase;
+- nao permitir transicoes conclusivas.
+
+A verificacao real de evidencias externas permanece pendente.
+
+## GIT
+
+Novo arquivo funcional ainda nao versionado:
+
+lib/notifications/reconciliation-unknown-recording.ts
+
+Nunca versionar:
+
+ASSINATURAS-LOTE.txt
+CODIGO-COMPLETO.txt
+.env.local
+
+Nunca utilizar git add .
+
+Commit/push somente com autorizacao explicita.
+
+# FIM DO CHECKPOINT — 2026-10-16

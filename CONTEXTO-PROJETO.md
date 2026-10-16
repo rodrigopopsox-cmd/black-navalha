@@ -35782,3 +35782,299 @@ Nunca utilizar git add .
 7. Nao ativar consumidor automatico.
 
 # FIM DO CHECKPOINT — 2026-10-16
+
+---
+
+# CHECKPOINT — CONTRATOS DE EVIDENCIAS EXTERNAS — 2026-10-16
+
+## GIT DE REFERENCIA
+
+Branch:
+main
+
+HEAD/origin/main:
+512c85a2a65f24bed07607455a2993c743793849
+
+Nenhum commit/push realizado nesta frente.
+
+## OBJETIVO
+
+Preparar a validacao confiavel de evidencias externas para futura reconciliacao de notification_deliveries.
+
+Nenhuma transicao conclusiva foi implementada.
+
+## ARQUIVOS CRIADOS
+
+lib/notifications/reconciliation-evidence.ts
+
+lib/notifications/reconciliation-verification-contract.ts
+
+Ambos utilizam:
+
+import "server-only";
+
+## CONTRATO DE EVIDENCIAS
+
+Implementado:
+
+assessUnverifiedNotificationEvidence()
+
+Valida preliminarmente:
+
+- deliveryId;
+- channel;
+- provider;
+- evidence;
+- evidenceReference;
+- observedAt.
+
+Resultado para entrada valida:
+
+status = unverified
+evidenceVerified = false
+conclusiveTransitionAllowed = false
+
+A referencia textual nao comprova autenticidade.
+
+## IDENTIDADE DA TENTATIVA
+
+Implementado:
+
+assessNotificationAttemptEvidence()
+
+Compara:
+
+- deliveryId;
+- attemptCount;
+- channel;
+- provider;
+- providerMessageId.
+
+Divergencias produzem:
+
+status = invalid
+
+Correspondencia produz:
+
+status = unverified
+
+IMPORTANTE:
+
+attemptCount nao constitui identidade externa suficiente.
+
+providerMessageId informado pelo chamador nao e prova de origem.
+
+A funcao nao consulta PostgreSQL.
+
+## CONSISTENCIA
+
+Implementado:
+
+assessNotificationEvidenceConsistency()
+
+Avalia preliminarmente:
+
+- identidade da tentativa;
+- cronologia;
+- janela temporal configuravel;
+- evidencias contraditorias;
+- inconsistencias no historico apresentado.
+
+Contradicoes entre evidencias conclusivas sao detectadas inclusive quando a evidencia atual e inconclusiva.
+
+Contradicao identificada prevalece sobre expiracao preliminar quando o historico examinado e valido.
+
+Resultados possiveis:
+
+unverified
+invalid
+contradictory
+expired
+
+Todos preservam:
+
+evidenceVerified = false
+conclusiveTransitionAllowed = false
+
+LIMITACAO:
+
+O historico recebido nao e autenticado nem comprovadamente completo.
+
+A janela temporal nao representa garantia de validade de fornecedor.
+
+A avaliacao nao substitui verificacao externa nem autorizacao PostgreSQL.
+
+## CONTRATO DE VERIFICACAO
+
+Implementado:
+
+prepareNotificationEvidenceVerification()
+
+Mecanismos conceituais:
+
+authenticated_provider_lookup
+
+signed_provider_webhook
+
+O contrato exige futuramente:
+
+- identidade confiavel do fornecedor;
+- integridade;
+- vinculo com tentativa;
+- validacao temporal;
+- verificacao de contradicoes;
+- auditoria persistente.
+
+Nenhum mecanismo real de autenticacao externa foi conectado.
+
+Nenhuma prova criptografica e verificada por esse contrato.
+
+Nenhum resultado conclusivo e autorizado.
+
+## TESTES
+
+Validacao preliminar:
+9/9.
+
+Identidade:
+9/9.
+
+Contrato de verificacao:
+13/13.
+
+Consistencia:
+10/10.
+
+Regressao de prioridade:
+4/4.
+
+Consistencia historica:
+5/5.
+
+Total de verificacoes executadas nesta frente:
+50.
+
+Testes isolados com Node.js e TypeScript transpileModule.
+
+Alguns cenarios foram exercitados novamente como regressao.
+
+Nao interpretar 50 como quantidade de cenarios independentes.
+
+Nenhuma conexao Supabase foi utilizada nesses testes.
+
+## VALIDACAO FINAL
+
+TypeScript:
+APROVADO.
+
+Build:
+APROVADO.
+
+Next.js:
+16.3.8.
+
+45/45 paginas geradas.
+
+git diff --check:
+APROVADO.
+
+Verificacao dos arquivos novos:
+APROVADA.
+
+Somente avisos conhecidos LF/CRLF.
+
+## BANCO
+
+Migrations Supabase:
+007–051 APLICADAS.
+
+Nenhuma migration criada nesta frente.
+
+Nenhuma migration reaplicada.
+
+Nenhuma alteracao remota.
+
+Migration 052:
+NAO CRIADA.
+
+## LIMITACOES
+
+Ainda nao existe:
+
+- consulta autenticada real a fornecedor;
+- verificacao real de assinatura externa;
+- historico autoritativo individual de tentativas;
+- garantia de completude das evidencias historicas;
+- verificacao externa de autenticidade;
+- autorizacao conclusiva de reconciliacao;
+- RPC de transicao para sent/failed/retry;
+- consumidor automatico;
+- transporte externo.
+
+A migration 051 continua limitada ao registro auditavel de verificacao administrativa inconclusiva.
+
+A integracao administrativa executavel com a RPC 051 continua pendente.
+
+## SEGURANCA
+
+Nenhuma mensagem enviada.
+
+Nenhum WhatsApp conectado.
+
+Nenhum n8n.
+
+Nenhum cron.
+
+Nenhum worker de notificacoes.
+
+Nenhuma Queue.
+
+Nenhum PIX criado.
+
+Nenhuma cobranca realizada.
+
+Nenhuma alteracao de producao.
+
+## PROXIMA FRENTE
+
+Definir a fronteira autoritativa de verificacao externa.
+
+Antes de permitir conclusoes:
+
+- estabelecer origem confiavel;
+- comprovar autenticidade e integridade;
+- vincular evidencia a tentativa real;
+- verificar estado atual da delivery;
+- verificar evento;
+- verificar attempt_count/max_attempts;
+- detectar conflitos;
+- garantir auditoria transacional;
+- revalidar autorizacao no PostgreSQL.
+
+Nao habilitar sent, failed ou retry somente com os contratos atuais.
+
+Nao criar migration 052 automaticamente.
+
+Nao conectar fornecedor automaticamente.
+
+Nao ativar consumidor.
+
+## GIT / ARQUIVOS AUXILIARES
+
+Arquivos funcionais novos ainda nao versionados:
+
+lib/notifications/reconciliation-evidence.ts
+
+lib/notifications/reconciliation-verification-contract.ts
+
+Nunca versionar:
+
+ASSINATURAS-LOTE.txt
+CODIGO-COMPLETO.txt
+.env.local
+
+Nunca utilizar git add .
+
+Commit/push somente com autorizacao explicita.
+
+# FIM DO CHECKPOINT — 2026-10-16

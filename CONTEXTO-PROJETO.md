@@ -35313,3 +35313,472 @@ CODIGO-COMPLETO.txt
 Nunca usar git add .
 
 # FIM DO CHECKPOINT — 2026-10-15
+
+---
+
+# CHECKPOINT — AUTORIZACAO E AUDITORIA DA RECONCILIACAO — 2026-10-15
+
+## GIT
+
+Branch:
+main.
+
+HEAD/origin/main de referencia:
+c66fb2091ddc10824dcaf9c986ffb2267b375bed
+
+Nenhum commit/push realizado nesta frente.
+
+## TYPESCRIPT
+
+Criado:
+lib/notifications/reconciliation-authorization.ts
+
+Implementa identificacao administrativa server-only.
+
+Utiliza:
+auth.getUser()
+profiles.role = admin
+
+Nao aceita operatorId do navegador como identidade autenticada.
+
+Testes isolados:
+8/8 APROVADOS.
+
+Criado:
+lib/notifications/reconciliation-audit-contract.ts
+
+Prepara proposta auditavel com:
+operationId
+deliveryId
+operator
+evidence
+evidenceReference
+reason
+proposedDecision
+
+Retorna obrigatoriamente:
+evidenceVerified = false
+databaseAuthorizationRequired = true
+persistentAuditRequired = true
+
+Testes isolados:
+15/15 APROVADOS.
+
+IMPORTANTE:
+O objeto operator do contrato nao constitui prova de autenticacao por si so.
+A fronteira PostgreSQL deve revalidar a identidade.
+
+## MIGRATION 051
+
+Arquivo:
+supabase/sql/051-notification-reconciliation-audit.sql
+
+Status:
+CRIADA LOCALMENTE.
+NAO APLICADA NO SUPABASE.
+
+Objetivo:
+auditoria persistente de verificacoes inconclusivas.
+
+Cria:
+notification_reconciliation_audit
+
+Cria RPC:
+record_notification_reconciliation_unknown(uuid,uuid,text,text)
+
+A RPC:
+- exige auth.uid();
+- exige profiles.role = admin;
+- usa operation_id unico;
+- utiliza advisory transaction lock;
+- preserva ordem evento -> delivery;
+- exige reconciliation_required;
+- registra auditoria;
+- preserva estado da delivery;
+- nao agenda retry;
+- nao envia mensagens.
+
+A tabela:
+- possui RLS;
+- nao concede escrita direta a anon/authenticated;
+- possui trigger contra UPDATE/DELETE;
+- utiliza timestamp autoritativo PostgreSQL.
+
+A primeira versao aceita somente:
+provider_outcome_unknown.
+
+Nao permite resolver diretamente:
+sent
+failed
+retry.
+
+Evidencias conclusivas continuam sem autenticacao externa.
+
+## POSTGRESQL QA
+
+PostgreSQL:
+17.11.
+
+Banco QA principal:
+black_navalha_notification_qa
+
+PRESERVADO.
+
+Banco QA exclusivo:
+black_navalha_reconciliation_051_qa
+
+CRIADO PARA TESTES CONCORRENTES.
+
+Migrations 048–051 instaladas somente no banco QA exclusivo.
+
+Dependencias Supabase Auth:
+simuladas localmente.
+
+## TESTES SQL
+
+Teste funcional inicial:
+APROVADO.
+
+Idempotencia sequencial:
+APROVADA.
+
+Conflito de operation_id:
+REJEITADO.
+
+Trigger de imutabilidade:
+APROVADO.
+
+Autorizacao administrativa simulada:
+APROVADA.
+
+Usuario comum:
+REJEITADO.
+
+Privilegios minimos:
+APROVADOS.
+
+Delivery fora de reconciliation_required:
+REJEITADA.
+
+Revisao estatica SQL:
+15/15 APROVADA.
+
+## CONCORRENCIA REAL
+
+Dois backends PostgreSQL independentes:
+
+A:
+28656.
+
+B:
+28140.
+
+Espera observada:
+2005 ms.
+
+Mesmo operation_id:
+mesmo audit_id.
+
+Registros de auditoria:
+1.
+
+Delivery:
+reconciliation_required.
+
+Resultado:
+APROVADO para idempotencia concorrente da mesma operacao.
+
+Nao foi homologada concorrencia com operation_ids diferentes.
+
+## AUDITORIA FINAL QA
+
+notification_events:
+1 fixture sintetica.
+
+notification_deliveries:
+1 fixture sintetica.
+
+notification_reconciliation_audit:
+1 registro sintetico.
+
+Esses registros permanecem exclusivamente no banco QA isolado.
+
+Nao apagar automaticamente.
+
+## LIMITACOES
+
+Migration 051 ainda nao foi aplicada nem homologada no Supabase PostgreSQL 17.6.
+
+A homologacao local utilizou autenticacao simulada.
+
+Nenhuma evidencia externa foi autenticada.
+
+Nenhuma transicao conclusiva foi implementada.
+
+Nenhum consumidor automatico foi criado.
+
+Nenhum WhatsApp, n8n, cron, worker ou Queue foi conectado.
+
+## REGRAS PRESERVADAS
+
+Migrations Supabase:
+007–050 APLICADAS.
+
+Migration 051:
+NAO APLICADA.
+
+Vercel:
+PRESERVADA.
+
+Cloudflare Workers:
+HOMOLOGACAO PRINCIPAL ANTERIOR PRESERVADA.
+
+Nenhum PIX.
+Nenhuma cobranca.
+Nenhuma mensagem enviada.
+
+## PROXIMO PASSO
+
+1. Revisar contrato final da migration 051.
+2. Avaliar compatibilidade PostgreSQL Supabase 17.6.
+3. Nao repetir homologacoes locais aprovadas.
+4. Solicitar autorizacao especifica para aplicacao remota.
+5. Validar estrutura/permissoes remotamente apos aplicacao.
+6. Nao ativar consumidor.
+7. Commit/push somente com autorizacao explicita.
+
+## ARQUIVOS NAO VERSIONADOS
+
+ASSINATURAS-LOTE.txt
+CODIGO-COMPLETO.txt
+
+Nunca versionar.
+
+.env.local nunca deve ser versionado.
+
+Nunca utilizar git add .
+
+# FIM DO CHECKPOINT — 2026-10-15
+
+---
+
+# CHECKPOINT FINAL — MIGRATION 051 / AUDITORIA OPERACIONAL — 2026-10-16
+
+## ESTADO OFICIAL
+
+Migration 051:
+APLICADA NO SUPABASE.
+
+Arquivo:
+supabase/sql/051-notification-reconciliation-audit.sql
+
+Migrations aplicadas:
+007–051.
+
+NAO reaplicar nenhuma.
+
+PostgreSQL Supabase:
+17.6.
+
+PostgreSQL QA:
+17.11.
+
+## OBJETIVO
+
+Criar auditoria persistente de verificacoes administrativas inconclusivas.
+
+Nenhuma transicao conclusiva foi habilitada.
+
+## ESTRUTURA
+
+Tabela:
+public.notification_reconciliation_audit
+
+RPC:
+public.record_notification_reconciliation_unknown(uuid,uuid,text,text)
+
+A RPC:
+- deriva identidade de auth.uid();
+- exige profiles.role = admin;
+- utiliza operation_id unico;
+- protege repeticoes por advisory transaction lock;
+- bloqueia evento antes da delivery;
+- exige reconciliation_required;
+- registra evidencia inconclusiva;
+- preserva a delivery;
+- nao agenda retry;
+- nao envia mensagens.
+
+## SEGURANCA REMOTA
+
+SECURITY DEFINER:
+true.
+
+search_path:
+vazio.
+
+EXECUTE:
+authenticated = true.
+anon = false.
+service_role = false.
+PUBLIC = false.
+
+Tabela:
+RLS habilitado.
+
+INSERT/UPDATE/DELETE diretos:
+negados para anon, authenticated e service_role.
+
+Trigger:
+notification_reconciliation_audit_immutable
+
+Habilitado.
+
+## AUDITORIA REMOTA
+
+notification_events:
+0.
+
+notification_deliveries:
+0.
+
+notification_reconciliation_audit:
+0.
+
+Nenhuma fixture criada no Supabase.
+
+## HOMOLOGACAO LOCAL
+
+PostgreSQL QA 17.11.
+
+Testes funcionais:
+APROVADOS.
+
+Autorizacao administrativa simulada:
+APROVADA.
+
+Usuario comum:
+REJEITADO.
+
+Idempotencia sequencial:
+APROVADA.
+
+Idempotencia concorrente:
+APROVADA.
+
+Backends:
+28656 e 28140.
+
+Espera:
+2005 ms.
+
+Mesmo operation_id:
+mesmo audit_id.
+
+Auditoria:
+1 registro sintetico.
+
+Delivery:
+reconciliation_required.
+
+Banco QA exclusivo:
+black_navalha_reconciliation_051_qa
+
+Preservado para diagnosticos futuros.
+
+## TYPESCRIPT
+
+Arquivos criados:
+lib/notifications/reconciliation-authorization.ts
+lib/notifications/reconciliation-audit-contract.ts
+
+Testes:
+8/8 autorizacao.
+15/15 contrato auditavel.
+
+Total:
+23/23.
+
+TypeScript:
+APROVADO.
+
+Build Next.js:
+APROVADO.
+
+45/45 rotas.
+
+## LIMITACOES
+
+A RPC 051 registra somente:
+provider_outcome_unknown.
+
+Nao resolve:
+sent.
+failed.
+retry.
+
+Nenhuma evidencia externa e autenticada.
+
+Autorizacao funcional com sessao administrativa real no Supabase:
+AINDA NAO HOMOLOGADA.
+
+Concorrencia com operation_ids diferentes:
+NAO HOMOLOGADA.
+
+Nenhum consumidor automatico existe.
+
+Nenhum envio foi realizado.
+
+## PRODUCAO
+
+Vercel:
+PRESERVADA QUANTO A ALTERACOES DIRETAS.
+
+Cloudflare Workers:
+HOMOLOGACAO PRINCIPAL ANTERIOR PRESERVADA.
+
+Nenhum deploy autorizado.
+
+Nenhum WhatsApp.
+Nenhum n8n.
+Nenhum cron.
+Nenhuma Queue.
+Nenhum PIX.
+Nenhuma cobranca.
+
+## GIT
+
+Branch:
+main.
+
+HEAD/origin/main de referencia:
+c66fb2091ddc10824dcaf9c986ffb2267b375bed
+
+Arquivos novos ainda nao versionados:
+lib/notifications/reconciliation-authorization.ts
+lib/notifications/reconciliation-audit-contract.ts
+supabase/sql/051-notification-reconciliation-audit.sql
+
+CONTEXTO-PROJETO.md:
+atualizado localmente.
+
+Nenhum commit/push realizado.
+
+Nunca versionar:
+ASSINATURAS-LOTE.txt
+CODIGO-COMPLETO.txt
+.env.local
+
+Nunca utilizar git add .
+
+## PROXIMO PASSO
+
+1. Validar Git real.
+2. Preparar checkpoint com caminhos explicitos.
+3. Commit/push somente com autorizacao explicita.
+4. Nao repetir homologacoes aprovadas.
+5. Definir futura validacao de evidencias externas.
+6. Nao permitir retry cego.
+7. Nao ativar consumidor automatico.
+
+# FIM DO CHECKPOINT — 2026-10-16

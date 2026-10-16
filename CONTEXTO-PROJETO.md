@@ -36275,3 +36275,295 @@ Nunca utilizar git add .
 Commit/push somente com autorizacao explicita.
 
 # FIM DO CHECKPOINT — 2026-10-16
+
+---
+
+# CHECKPOINT — ADMIN DE NOTIFICACOES — 2026-10-16
+
+## GIT DE REFERENCIA
+
+Branch:
+main
+
+HEAD/origin/main:
+b79fda0c6534e15ddbef3a91d3d72fe803d37263
+
+Nenhum commit/push realizado nesta frente ate este checkpoint.
+
+## OBJETIVO
+
+Criar a primeira interface administrativa de observabilidade
+da infraestrutura de notificacoes.
+
+A pagina e exclusivamente de leitura.
+
+Nenhum processamento automatico foi ativado.
+
+## IMPLEMENTACAO
+
+Nova rota:
+
+/admin/notificacoes
+
+Arquivo criado:
+
+app/admin/notificacoes/page.tsx
+
+Arquivo alterado:
+
+app/admin/admin-sidebar.tsx
+
+Foi adicionada a opcao Notificacoes ao menu administrativo.
+
+A navegacao existente foi preservada.
+
+## SEGURANCA
+
+A pagina revalida:
+
+supabase.auth.getUser()
+
+e:
+
+profiles.role = admin
+
+antes de consultar a observabilidade.
+
+A autorizacao nao depende exclusivamente do layout.
+
+Somente depois da verificacao administrativa
+a pagina chama a infraestrutura de observabilidade.
+
+Nenhum dado privado de destinatarios e apresentado.
+
+Nenhum payload e apresentado.
+
+Nenhum token ou segredo e apresentado.
+
+## OBSERVABILIDADE
+
+Foi reutilizada a funcao existente:
+
+getNotificationOperationalSnapshot()
+
+Arquivo:
+
+lib/notifications/observability.ts
+
+Nenhuma consulta foi reconstruida.
+
+Indicadores apresentados:
+
+- pending;
+- processing;
+- retry;
+- sent;
+- failed;
+- cancelled;
+- reconciliation_required;
+- processing potencialmente vencido;
+- retries futuros.
+
+A pagina apresenta tambem:
+
+- horario de referencia da coleta;
+- aviso de que as consultas sao independentes;
+- informacao de que nao existe snapshot transacional unico.
+
+Nenhuma recuperacao de lease e executada.
+
+Nenhum retry e agendado.
+
+## RECONCILIACAO
+
+A pagina informa que entregas com resultado externo
+desconhecido permanecem bloqueadas para reenvio automatico.
+
+Nao existe botao para:
+
+- sent;
+- failed;
+- retry;
+- resolver reconciliacao;
+- enviar mensagens.
+
+A RPC 051 permanece preservada.
+
+O modulo server-only:
+
+lib/notifications/reconciliation-unknown-recording.ts
+
+tambem permanece preservado.
+
+Nenhuma chamada operacional a RPC 051 foi realizada nesta frente.
+
+## TESTES
+
+TypeScript:
+
+APROVADO.
+
+Build Next.js:
+
+APROVADO.
+
+Versao:
+
+16.3.8.
+
+46/46 paginas geradas.
+
+Nova rota reconhecida:
+
+/admin/notificacoes
+
+git diff --check:
+
+APROVADO.
+
+Somente avisos conhecidos LF/CRLF.
+
+## VALIDACAO VISUAL ADMINISTRATIVA
+
+Rota:
+
+http://localhost:3000/admin/notificacoes
+
+Resultado:
+
+APROVADO.
+
+Confirmado visualmente:
+
+- pagina carregada;
+- sidebar preservada;
+- Notificacoes destacada no menu;
+- nove indicadores apresentados;
+- valores exibidos como zero;
+- secao Reconciliacao apresentada;
+- identidade visual administrativa preservada;
+- nenhum erro visivel.
+
+Os valores zero sao compativeis com a ultima
+auditoria remota registrada.
+
+A captura visual isolada nao comprova snapshot
+transacional nem substitui auditoria do banco.
+
+## TESTE DE ACESSO ANONIMO
+
+Foi utilizada janela anonima do Google Chrome.
+
+URL solicitada:
+
+http://localhost:3000/admin/notificacoes
+
+Resultado:
+
+redirecionamento para /login.
+
+APROVADO.
+
+A pagina administrativa nao ficou acessivel
+sem sessao autenticada.
+
+LIMITACAO:
+
+O acesso de usuario autenticado sem role admin
+nao foi testado especificamente nesta frente.
+
+A protecao por profiles.role = admin permanece implementada.
+
+## BANCO
+
+Migrations aplicadas:
+
+007–051.
+
+Nenhuma migration criada.
+
+Nenhuma migration reaplicada.
+
+Migration 052:
+
+NAO CRIADA.
+
+Nenhuma alteracao estrutural no Supabase.
+
+Nenhuma fixture criada.
+
+## LIMITACOES
+
+A observabilidade utiliza consultas independentes.
+
+Nao representa snapshot transacional unico.
+
+Ainda nao existe:
+
+- consumidor automatico;
+- cron;
+- worker de notificacoes;
+- Cloudflare Queue;
+- transporte externo;
+- WhatsApp;
+- n8n;
+- autenticacao externa de evidencias;
+- resolucao conclusiva de reconciliation_required;
+- interface de registro administrativo inconclusivo;
+- homologacao remota funcional da RPC 051 com sessao real.
+
+Nao declarar essas funcionalidades como concluidas.
+
+## REGRAS OPERACIONAIS
+
+Nao permitir retry cego.
+
+Nao marcar sent sem evidencia autenticada.
+
+Nao marcar failed sem evidencia autenticada.
+
+Nao conceder UPDATE amplo em notification_deliveries.
+
+Nao ativar processamento automaticamente.
+
+## PROXIMA FRENTE
+
+Evoluir a interface administrativa somente quando
+existir necessidade operacional concreta.
+
+A prioridade tecnica continua sendo:
+
+- autenticidade das evidencias externas;
+- vinculo confiavel com tentativa;
+- autorizacao PostgreSQL;
+- auditoria;
+- transicoes seguras.
+
+A primeira interface administrativa de notificacoes
+permanece somente leitura.
+
+Nenhuma migration 052 deve ser criada automaticamente.
+
+## GIT / SEGURANCA
+
+Arquivos funcionais desta frente:
+
+app/admin/admin-sidebar.tsx
+
+app/admin/notificacoes/page.tsx
+
+Checkpoint documental:
+
+CONTEXTO-PROJETO.md
+
+Nunca versionar:
+
+ASSINATURAS-LOTE.txt
+CODIGO-COMPLETO.txt
+.env.local
+
+Nunca utilizar git add .
+
+Commit/push somente com autorizacao explicita.
+
+# FIM DO CHECKPOINT — 2026-10-16

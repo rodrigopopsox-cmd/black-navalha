@@ -36930,3 +36930,141 @@ Nao executar registro real sem autorizacao.
 Nao publicar automaticamente.
 
 # FIM DO CHECKPOINT — 2026-10-17
+
+# DIRETRIZES DE COMUNICACAO E PROXIMA FRENTE — 2026-10-17
+
+## COMUNICACAO OBRIGATORIA
+
+O responsavel pelo Black Navalha possui TDAH.
+
+Priorizar respostas curtas, diretas e executaveis.
+
+Regras solicitadas pelo responsavel:
+
+1. Nao iniciar respostas com concordancia automatica.
+2. Comecar pela conclusao ou pelo risco mais importante.
+3. Classificar blocos como [Certo], [Provavel] ou [Chutando].
+4. Nao utilizar elogios automaticos ou concordancia superficial.
+5. Discordar quando houver motivo tecnico comprovado.
+6. Explicar o motivo da discordancia e oferecer alternativa.
+7. Nao mudar recomendacao apenas por insistencia.
+8. Apresentar a conclusao nas primeiras duas linhas.
+9. Fornecer somente o proximo passo, salvo pedido de planejamento.
+10. Encerrar com acao concreta executavel em menos de cinco minutos.
+11. Utilizar no maximo cinco itens por lista.
+12. Evitar textos extensos e formatacao excessiva.
+13. Quando houver mudanca de assunto com tarefa aberta, perguntar:
+    "Voce deixou X aberto. Volta ou abandona?"
+14. Identificar excesso de planejamento que substitui execucao.
+15. Nao iniciar projeto paralelo sem definir prioridade.
+16. Considerar margens realistas de tempo.
+17. Oferecer estrutura operacional, sem sermoes.
+
+Manter as regras superiores de seguranca e as instrucoes
+tecnicas do projeto.
+
+## ESTADO CONFIRMADO
+
+Branch main sincronizada com origin/main.
+
+Commit:
+b833270954e1f8a60b24eaa631501d9ce306a432
+
+Mensagem:
+Adiciona registro administrativo inconclusivo de reconciliacoes.
+
+Deployment Vercel Production:
+Ready.
+
+Commit b833270 identificado no painel oficial da Vercel.
+
+Dominio:
+https://black-navalha.vercel.app
+
+Rota administrativa anonima:
+HTTP 307 para /login.
+
+Testes da ultima frente:
+24/24 aprovados.
+
+Build Next.js 16.3.8:
+46/46 paginas.
+
+Nove indicadores preservados.
+
+Nenhuma RPC 051 executada nesta frente.
+
+Nenhuma migration 052 criada.
+
+Arquivos auxiliares permanecem fora do Git.
+
+## FRENTE ENCERRADA
+
+Implementacao, testes, documentacao, commit,
+push e deployment do registro administrativo
+inconclusivo concluidos.
+
+Limitacoes conhecidas continuam documentadas.
+
+Nao repetir validacoes ja aprovadas sem motivo tecnico.
+
+## PROXIMA FRENTE
+
+Integracao controlada com fornecedor de mensagens WhatsApp.
+
+Prioridade:
+avaliar WhatsApp Business Platform Cloud API oficial da Meta.
+
+Aproveitar a infraestrutura existente:
+
+- notification_events e notification_deliveries;
+- processamento interno e concorrencia;
+- retry/backoff;
+- reconciliacao e auditoria;
+- contratos de evidencias;
+- observabilidade administrativa.
+
+Nao reconstruir essas camadas.
+
+Primeira tarefa:
+identificar os requisitos atuais de acesso a API
+e a situacao da conta Meta Business do responsavel.
+
+Depois:
+implementar adaptador de fornecedor isolado,
+sem envio real inicial.
+
+Nao ativar cron, worker, Queue ou disparos automaticos.
+
+Nao enviar mensagens reais sem autorizacao especifica.
+
+Nao conectar credenciais de producao sem frente controlada.
+
+Nao executar operacoes financeiras.
+
+## METODO DE TRABALHO
+
+Uma etapa por vez.
+
+Quando houver operacao executavel, fornecer
+na mesma resposta:
+
+- explicacao objetiva;
+- um comando PowerShell completo;
+- resultado esperado;
+- risco e autorizacao necessaria.
+
+Nao pedir confirmacoes desnecessarias.
+
+Nao repetir auditorias concluidas.
+
+Nao utilizar git add .
+
+Commit e push apenas com autorizacao explicita.
+
+Nunca versionar:
+ASSINATURAS-LOTE.txt
+CODIGO-COMPLETO.txt
+.env.local
+
+# FIM DAS DIRETRIZES — 2026-10-17

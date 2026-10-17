@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 
+import ReconciliationUnknownForm from "./reconciliation-unknown-form";
+
 import { createClient } from "@/lib/supabase/server";
 
 import {
@@ -92,7 +94,8 @@ export default async function AdminNotificationsPage() {
           </h1>
 
           <p className="admin-subtitle">
-            Acompanhamento operacional somente leitura.
+            Indicadores e entregas em consulta somente leitura.
+            Registro administrativo limitado a verificacoes inconclusivas.
           </p>
         </div>
       </div>
@@ -254,6 +257,39 @@ export default async function AdminNotificationsPage() {
           </div>
         )}
 
+        {reconciliationItems.length > 0 && (
+          <div style={{ marginTop: 24 }}>
+            <h3
+              style={{
+                color: "#d29d4f",
+                fontSize: 15,
+                marginBottom: 12,
+              }}
+            >
+              Registro administrativo inconclusivo
+            </h3>
+
+            <p
+              style={{
+                color: "#aaa",
+                fontSize: 12,
+                lineHeight: 1.7,
+              }}
+            >
+              Cada formulario registra exclusivamente uma verificacao
+              inconclusiva na auditoria. O registro nao comprova envio,
+              nao libera retry e nao modifica o estado da entrega.
+            </p>
+
+            {reconciliationItems.map((item) => (
+              <ReconciliationUnknownForm
+                key={item.id}
+                deliveryId={item.id}
+              />
+            ))}
+          </div>
+        )}
+
         <p
           style={{
             color: "#777",
@@ -294,9 +330,12 @@ export default async function AdminNotificationsPage() {
           }}
         >
           Entregas com resultado externo desconhecido
-          permanecem bloqueadas para reenvio automático.
-          Esta página não executa reconciliação,
-          envio ou alteração de status.
+          permanecem bloqueadas para reenvio automatico.
+          Administradores podem registrar apenas verificacoes
+          inconclusivas na auditoria. Isso nao comprova envio,
+          nao libera retry e nao altera o estado da entrega.
+          Transicoes conclusivas exigem evidencia externa
+          autenticada e revalidacao no PostgreSQL.
         </p>
 
         <p

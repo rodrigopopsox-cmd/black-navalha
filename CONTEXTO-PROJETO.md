@@ -36627,3 +36627,306 @@ Proxima frente:
 - Consolidar a listagem somente leitura no Git mediante autorizacao explicita.
 - Posteriormente avaliar interface segura para registro administrativo inconclusivo.
 - Nenhum retry cego ou transicao conclusiva sem evidencias externas autenticadas.
+
+# CHECKPOINT — REGISTRO ADMINISTRATIVO INCONCLUSIVO — 2026-10-17
+
+## ESTADO GIT
+
+Repositorio oficial:
+https://github.com/rodrigopopsox-cmd/black-navalha
+
+Branch: main.
+
+Ultimo commit confirmado e sincronizado:
+dbb4c66677e18dd30886e10ad113cbc35cfdf056
+
+Mensagem:
+Adiciona listagem administrativa segura de reconciliacoes.
+
+A listagem administrativa somente leitura ja esta versionada.
+
+A nova interface de registro inconclusivo permanece LOCAL,
+sem commit e sem push.
+
+## OBJETIVO
+
+Permitir que administradores autenticados registrem
+verificacoes inconclusivas de entregas com resultado
+externo desconhecido.
+
+O registro nao comprova envio.
+
+Nao libera retry.
+
+Nao altera o estado da entrega.
+
+Nao realiza transicao conclusiva.
+
+## IMPLEMENTACAO LOCAL
+
+Arquivos novos:
+
+- app/admin/notificacoes/actions.ts
+- app/admin/notificacoes/reconciliation-unknown-form.tsx
+- reconciliation-admin-action.test.cjs
+- reconciliation-unknown-form.test.cjs
+
+Arquivo modificado:
+
+- app/admin/notificacoes/page.tsx
+
+A listagem administrativa aprovada foi preservada.
+
+Os nove indicadores operacionais foram preservados.
+
+O formulario aparece somente quando existem entregas
+na listagem de reconciliacoes pendentes.
+
+Cada formulario recebe o identificador da entrega
+correspondente.
+
+## SERVER ACTION
+
+Funcao:
+
+recordUnknownReconciliationAction()
+
+Executa autorizacao administrativa propria.
+
+Nao confia em identidade administrativa enviada
+pelo navegador.
+
+Valida UUID da operacao e UUID da entrega.
+
+Exige referencia da verificacao e justificativa validas.
+
+Exige confirmacao administrativa explicita.
+
+Reutiliza:
+
+recordUnknownNotificationReconciliation()
+
+Nao implementa nova RPC.
+
+A RPC PostgreSQL 051 permanece responsavel
+pela autorizacao e pela idempotencia no banco.
+
+A evidencia registrada permanece exclusivamente:
+
+provider_outcome_unknown
+
+Estado resultante esperado:
+
+reconciliation_required
+
+evidenceVerified = false
+
+conclusiveTransitionAllowed = false
+
+Nenhuma transicao sent, failed ou retry foi adicionada.
+
+Nenhuma mensagem e enviada ou reenviada.
+
+## IDEMPOTENCIA DO FORMULARIO
+
+O primeiro envio gera um operationId UUID.
+
+A intencao preserva:
+
+- operationId
+- deliveryId
+- evidenceReference
+- reason
+
+Repeticoes durante a vida do formulario reutilizam
+exatamente os mesmos dados.
+
+O formulario bloqueia:
+
+- envios simultaneos;
+- alteracao da intencao original;
+- nova submissao apos sucesso;
+- envio sem confirmacao explicita.
+
+O identificador da operacao e exibido ao administrador
+apos a primeira tentativa.
+
+Respostas inconsistentes nao sao apresentadas
+como sucesso.
+
+O formulario exige:
+
+- success = true;
+- resultingStatus = reconciliation_required;
+- auditId com formato UUID valido.
+
+Falhas de comunicacao sao tratadas como resultado
+desconhecido.
+
+Uma falha de rede nao e interpretada como prova
+de ausencia de escrita.
+
+## TESTES
+
+reconciliation-unknown-form.test.cjs:
+
+12/12 testes aprovados.
+
+Coberturas incluem:
+
+- confirmacao obrigatoria;
+- criacao de UUID;
+- preservacao do UUID;
+- bloqueio de concorrencia;
+- vinculo com a entrega;
+- imutabilidade da intencao;
+- bloqueio apos sucesso;
+- exibicao do identificador;
+- rejeicao de status conclusivo inesperado;
+- rejeicao de auditoria ausente;
+- rejeicao de UUID de auditoria invalido;
+- preservacao da intencao apos excecao simulada de rede.
+
+reconciliation-admin-action.test.cjs:
+
+12/12 testes aprovados.
+
+Coberturas incluem autorizacao, validacao,
+confirmacao, idempotencia e rejeicao
+de resultados inesperados.
+
+Total:
+
+24/24 testes isolados aprovados.
+
+Os testes utilizam mocks.
+
+Nao executam a RPC 051 real.
+
+Os testes do formulario simulam hooks React.
+
+Nao constituem homologacao DOM real.
+
+## BUILD
+
+Next.js 16.3.8.
+
+Build aprovado em 2026-10-17.
+
+Compilacao aprovada.
+
+TypeScript aprovado.
+
+46/46 paginas geradas.
+
+Rota /admin/notificacoes preservada.
+
+Nove indicadores operacionais confirmados
+na pagina.
+
+git diff --check aprovado.
+
+Aviso LF/CRLF sem falha de integridade.
+
+## VALIDACAO VISUAL
+
+A integracao inicial foi validada visualmente
+com sessao administrativa.
+
+Cenario observado:
+
+zero reconciliacoes pendentes.
+
+A pagina apresentou os indicadores,
+a secao de reconciliacoes e os avisos
+operacionais atualizados.
+
+O formulario nao aparece quando a lista esta vazia.
+
+Nenhum botao de registro foi acionado.
+
+## LIMITACOES
+
+A tabela preenchida com entregas reais
+ainda nao foi homologada visualmente.
+
+O formulario com uma entrega real
+ainda nao foi homologado visualmente.
+
+O acesso de usuario autenticado nao-admin
+nao foi homologado especificamente.
+
+Nao houve submissao real do formulario.
+
+Nao houve chamada real a RPC 051 nesta frente.
+
+Nao houve autenticacao externa de evidencias.
+
+Nao houve resolucao conclusiva de reconciliacao.
+
+O operationId permanece somente em memoria
+durante a vida da instancia React.
+
+Atualizar ou fechar a pagina perde
+a identificacao local da tentativa.
+
+Nenhum armazenamento persistente no navegador
+foi introduzido automaticamente.
+
+Nenhuma migration 052 foi criada.
+
+Nenhum worker, cron, consumidor ou Queue foi criado.
+
+Nenhum fornecedor externo foi conectado.
+
+Nenhuma operacao financeira foi modificada.
+
+Nenhuma alteracao em producao foi realizada.
+
+## SEGURANCA OPERACIONAL
+
+Nao permitir retry cego.
+
+Nao marcar sent ou failed sem evidencia
+externa autenticada.
+
+Nao declarar exactly-once delivery.
+
+Nao conceder UPDATE amplo em notification_deliveries.
+
+Nao conceder SELECT amplo a authenticated.
+
+Nao abrir policies publicas.
+
+Nao executar RPC 051 durante testes com mocks.
+
+Nao executar o formulario contra banco real
+sem autorizacao operacional especifica.
+
+## GIT
+
+Arquivos auxiliares preservados e proibidos
+de versionamento:
+
+- ASSINATURAS-LOTE.txt
+- CODIGO-COMPLETO.txt
+- .env.local
+
+Nunca utilizar git add .
+
+Staging somente com caminhos explicitos.
+
+Commit e push desta implementacao exigem
+autorizacao explicita, nova e especifica.
+
+## PROXIMA ETAPA
+
+Revisar o conjunto exato de arquivos para staging.
+
+Manter as limitacoes de homologacao registradas.
+
+Nao executar registro real sem autorizacao.
+
+Nao publicar automaticamente.
+
+# FIM DO CHECKPOINT — 2026-10-17

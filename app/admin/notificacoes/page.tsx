@@ -6,6 +6,10 @@ import {
   getNotificationOperationalSnapshot,
 } from "@/lib/notifications/observability";
 
+import {
+  getNotificationReconciliationAdminItems,
+} from "@/lib/notifications/reconciliation-admin-read";
+
 export default async function AdminNotificationsPage() {
   const supabase = await createClient();
 
@@ -33,6 +37,8 @@ export default async function AdminNotificationsPage() {
   }
 
   const snapshot = await getNotificationOperationalSnapshot();
+  const reconciliationItems =
+    await getNotificationReconciliationAdminItems(20);
 
   const indicators = [
     {
@@ -130,6 +136,138 @@ export default async function AdminNotificationsPage() {
           </section>
         ))}
       </div>
+
+      <section
+        aria-labelledby="reconciliation-items-title"
+        style={{
+          marginTop: 24,
+          background: "#0e0e0e",
+          border: "1px solid #222",
+          borderRadius: 8,
+          padding: 22,
+        }}
+      >
+        <h2
+          id="reconciliation-items-title"
+          style={{
+            fontSize: 17,
+            marginBottom: 12,
+          }}
+        >
+          Reconciliações pendentes
+        </h2>
+
+        <p
+          style={{
+            color: "#aaa",
+            lineHeight: 1.7,
+            marginBottom: 16,
+          }}
+        >
+          Até 20 entregas com resultado externo desconhecido,
+          ordenadas da mais antiga para a mais recente.
+          Consulta somente leitura, sem autorização para reenvio
+          ou alteração de status.
+        </p>
+
+        {reconciliationItems.length === 0 ? (
+          <p style={{ color: "#999" }}>
+            Nenhuma reconciliação pendente encontrada nesta consulta.
+          </p>
+        ) : (
+          <div style={{ overflowX: "auto" }}>
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                minWidth: 850,
+                textAlign: "left",
+                fontSize: 12,
+              }}
+            >
+              <thead>
+                <tr>
+                  {[
+                    "Entrega",
+                    "Evento",
+                    "Canal",
+                    "Fornecedor",
+                    "Status",
+                    "Tentativas",
+                    "Última tentativa",
+                    "Criada em",
+                  ].map((label) => (
+                    <th
+                      key={label}
+                      scope="col"
+                      style={{
+                        padding: "10px 12px",
+                        borderBottom: "1px solid #333",
+                        color: "#d29d4f",
+                      }}
+                    >
+                      {label}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+
+              <tbody>
+                {reconciliationItems.map((item) => (
+                  <tr key={item.id}>
+                    <td style={{ padding: 12, borderBottom: "1px solid #222" }}>
+                      <code>{item.id}</code>
+                    </td>
+                    <td style={{ padding: 12, borderBottom: "1px solid #222" }}>
+                      <code>{item.eventId}</code>
+                    </td>
+                    <td style={{ padding: 12, borderBottom: "1px solid #222" }}>
+                      {item.channel}
+                    </td>
+                    <td style={{ padding: 12, borderBottom: "1px solid #222" }}>
+                      {item.provider ?? "—"}
+                    </td>
+                    <td style={{ padding: 12, borderBottom: "1px solid #222" }}>
+                      {item.status}
+                    </td>
+                    <td style={{ padding: 12, borderBottom: "1px solid #222" }}>
+                      {item.attemptCount} / {item.maxAttempts}
+                    </td>
+                    <td style={{ padding: 12, borderBottom: "1px solid #222" }}>
+                      {item.lastAttemptAt
+                        ? new Date(item.lastAttemptAt).toLocaleString(
+                            "pt-BR",
+                            { timeZone: "America/Sao_Paulo" },
+                          )
+                        : "—"}
+                    </td>
+                    <td style={{ padding: 12, borderBottom: "1px solid #222" }}>
+                      {new Date(item.createdAt).toLocaleString(
+                        "pt-BR",
+                        { timeZone: "America/Sao_Paulo" },
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        <p
+          style={{
+            color: "#777",
+            fontSize: 12,
+            marginTop: 16,
+            lineHeight: 1.6,
+          }}
+        >
+          A listagem e os indicadores são consultas independentes.
+          Não representam um snapshot transacional. Qualquer decisão
+          operacional futura exige revalidação no PostgreSQL e
+          evidência externa autenticada.
+        </p>
+      </section>
 
       <section
         style={{

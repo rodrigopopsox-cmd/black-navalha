@@ -36567,3 +36567,63 @@ Nunca utilizar git add .
 Commit/push somente com autorizacao explicita.
 
 # FIM DO CHECKPOINT — 2026-10-16
+## Checkpoint - listagem administrativa de reconciliacoes - 2026-10-17
+
+Frente: seguranca operacional de notificacoes.
+
+Implementacao local:
+- Criado `lib/notifications/reconciliation-admin-read.ts`.
+- Funcao `getNotificationReconciliationAdminItems(limit = 20)`.
+- Modulo server-only.
+- Revalidacao administrativa antes da consulta privilegiada.
+- Supabase service role utilizado exclusivamente no servidor.
+- SELECT explicito com nove campos operacionais.
+- Filtro obrigatorio `reconciliation_required`.
+- Ordenacao por `created_at ASC` e `id ASC`.
+- Limite validado entre 1 e 20.
+- Registros inconsistentes e status inesperados rejeitados.
+- Erros de consulta propagados.
+- Resultados e itens congelados.
+- Nenhuma escrita, transicao ou reenvio.
+
+Testes:
+- `reconciliation-admin-read.test.cjs`.
+- 12/12 testes isolados com mocks aprovados.
+- Nenhum acesso real ao Supabase durante os testes.
+- TypeScript aprovado.
+- Build Next.js 16.3.8 aprovado.
+- 46/46 paginas geradas.
+- `git diff --check` aprovado.
+
+Interface:
+- Integracao local em `app/admin/notificacoes/page.tsx`.
+- Nove indicadores anteriores preservados.
+- Nova secao observacional de reconciliacoes pendentes.
+- Exibicao de ate 20 entregas.
+- Nenhuma acao de `sent`, `failed`, `retry` ou reenvio.
+- Validacao visual local em 2026-10-17 aprovada para lista vazia.
+- Indicador de reconciliacoes pendentes exibiu zero.
+- Acesso com sessao administrativa confirmado visualmente.
+
+Limitacoes:
+- Tabela com registros reais ainda nao validada visualmente.
+- Acesso de usuario autenticado nao-admin ainda nao testado especificamente.
+- Listagem e indicadores nao formam snapshot transacional.
+- Listagem nao comprova autenticidade de evidencias externas.
+- Decisoes futuras exigem revalidacao PostgreSQL.
+- Nenhuma transicao conclusiva implementada.
+- Nenhuma RPC 051 executada nesta frente.
+- Nenhum consumidor automatico criado.
+- Nenhuma migration nova aplicada.
+- Nenhuma alteracao em producao.
+
+Estado Git no momento do checkpoint:
+- Branch `main`.
+- HEAD `a107f9ca7ed04639d992735794b995d7a9e8e23f`.
+- Alteracoes locais ainda sem commit ou push.
+- Arquivos auxiliares `ASSINATURAS-LOTE.txt` e `CODIGO-COMPLETO.txt` preservados e excluidos do versionamento.
+
+Proxima frente:
+- Consolidar a listagem somente leitura no Git mediante autorizacao explicita.
+- Posteriormente avaliar interface segura para registro administrativo inconclusivo.
+- Nenhum retry cego ou transicao conclusiva sem evidencias externas autenticadas.
